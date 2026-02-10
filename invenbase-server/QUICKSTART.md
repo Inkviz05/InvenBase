@@ -14,6 +14,7 @@ CREATE DATABASE kvantoriym;
 
 Создайте файл `.env` в корне проекта `kvantoriym-server`:
 
+
 ```env
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/kvantoriym
 HOST=127.0.0.1

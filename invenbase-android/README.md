@@ -54,6 +54,7 @@ app/
 ./gradlew assembleDebug
 ```
 
+
 ## Зависимости
 
 Все зависимости указаны в `app/build.gradle`. Основные:
