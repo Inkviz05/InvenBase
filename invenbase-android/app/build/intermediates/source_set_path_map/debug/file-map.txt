@@ -1,0 +1,58 @@
+com.invenbase.app-zxing-android-embedded-4.3.0-0 C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\res
+com.invenbase.app-navigation-runtime-2.7.5-1 C:\Users\Inkvi\.gradle\caches\transforms-3\062ed1df8c987880a3a8786d9e2a1153\transformed\navigation-runtime-2.7.5\res
+com.invenbase.app-lifecycle-runtime-ktx-2.6.2-2 C:\Users\Inkvi\.gradle\caches\transforms-3\070a3fdf0ac34b4e3b01b1e06ac8f60b\transformed\lifecycle-runtime-ktx-2.6.2\res
+com.invenbase.app-navigation-common-2.7.5-3 C:\Users\Inkvi\.gradle\caches\transforms-3\10e61ac554b4e50dfc1afe2013a0a40e\transformed\navigation-common-2.7.5\res
+com.invenbase.app-window-1.0.0-4 C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\res
+com.invenbase.app-play-services-measurement-api-21.5.0-5 C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\res
+com.invenbase.app-coordinatorlayout-1.1.0-6 C:\Users\Inkvi\.gradle\caches\transforms-3\1b5ad85f91a7737ebae4d4c62b826958\transformed\coordinatorlayout-1.1.0\res
+com.invenbase.app-savedstate-ktx-1.2.1-7 C:\Users\Inkvi\.gradle\caches\transforms-3\1cb35d9956c327b600da3addeb88691b\transformed\savedstate-ktx-1.2.1\res
+com.invenbase.app-play-services-basement-18.1.0-8 C:\Users\Inkvi\.gradle\caches\transforms-3\21a109c9cf6b9d3a4604b08ed35de1c9\transformed\play-services-basement-18.1.0\res
+com.invenbase.app-core-ktx-1.9.0-9 C:\Users\Inkvi\.gradle\caches\transforms-3\288472e5174fbef03be05ef6a8dfc6ab\transformed\core-ktx-1.9.0\res
+com.invenbase.app-appcompat-1.6.1-10 C:\Users\Inkvi\.gradle\caches\transforms-3\2979508f7f877259679ac127d8d7a7a7\transformed\appcompat-1.6.1\res
+com.invenbase.app-constraintlayout-2.1.4-11 C:\Users\Inkvi\.gradle\caches\transforms-3\3a54afbdf4069b39ffb67d1dcd87f47d\transformed\constraintlayout-2.1.4\res
+com.invenbase.app-lifecycle-runtime-2.6.2-12 C:\Users\Inkvi\.gradle\caches\transforms-3\3b087e0edd98db0e4f4e6bcc213afc22\transformed\lifecycle-runtime-2.6.2\res
+com.invenbase.app-annotation-experimental-1.3.0-13 C:\Users\Inkvi\.gradle\caches\transforms-3\48af11203c4eaed282c1237a524f4ea5\transformed\annotation-experimental-1.3.0\res
+com.invenbase.app-emoji2-views-helper-1.2.0-14 C:\Users\Inkvi\.gradle\caches\transforms-3\4f12b7c5b08e321b902931f469209768\transformed\emoji2-views-helper-1.2.0\res
+com.invenbase.app-cardview-1.0.0-15 C:\Users\Inkvi\.gradle\caches\transforms-3\59228d3767b7bdf7c7fcbdd0ec30a998\transformed\cardview-1.0.0\res
+com.invenbase.app-firebase-messaging-23.4.0-16 C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\res
+com.invenbase.app-recyclerview-1.3.2-17 C:\Users\Inkvi\.gradle\caches\transforms-3\5fbb9544dfc454976c4a084860c12352\transformed\recyclerview-1.3.2\res
+com.invenbase.app-activity-1.8.0-18 C:\Users\Inkvi\.gradle\caches\transforms-3\63709003c92416dd32dfd39c5aea76da\transformed\activity-1.8.0\res
+com.invenbase.app-firebase-common-20.4.2-19 C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\res
+com.invenbase.app-glide-4.16.0-20 C:\Users\Inkvi\.gradle\caches\transforms-3\66aa00ae6e4adf6d4bffaf73cd27dca9\transformed\glide-4.16.0\res
+com.invenbase.app-fragment-1.6.2-21 C:\Users\Inkvi\.gradle\caches\transforms-3\6ae51a59d181d1d1862d0ce8dd96a663\transformed\fragment-1.6.2\res
+com.invenbase.app-appcompat-resources-1.6.1-22 C:\Users\Inkvi\.gradle\caches\transforms-3\703b72904f1419b1740e0ac06fc46e95\transformed\appcompat-resources-1.6.1\res
+com.invenbase.app-customview-poolingcontainer-1.0.0-23 C:\Users\Inkvi\.gradle\caches\transforms-3\75fc9a01302e58d4ee76f422820792c5\transformed\customview-poolingcontainer-1.0.0\res
+com.invenbase.app-ads-adservices-java-1.0.0-beta05-24 C:\Users\Inkvi\.gradle\caches\transforms-3\7a1c4baf4689386aa588a9316e4d49b3\transformed\ads-adservices-java-1.0.0-beta05\res
+com.invenbase.app-lifecycle-process-2.6.2-25 C:\Users\Inkvi\.gradle\caches\transforms-3\7b1dd634148a4d9cc882b23f536678e0\transformed\lifecycle-process-2.6.2\res
+com.invenbase.app-preference-1.2.1-26 C:\Users\Inkvi\.gradle\caches\transforms-3\8c9fb22c04340d794b7073e22e6aa040\transformed\preference-1.2.1\res
+com.invenbase.app-savedstate-1.2.1-27 C:\Users\Inkvi\.gradle\caches\transforms-3\8da27569a58f8921b883bffa1f16c84a\transformed\savedstate-1.2.1\res
+com.invenbase.app-lifecycle-livedata-2.6.2-28 C:\Users\Inkvi\.gradle\caches\transforms-3\95c2c38fd4ee63decaa9b05e0eb08d17\transformed\lifecycle-livedata-2.6.2\res
+com.invenbase.app-lifecycle-viewmodel-savedstate-2.6.2-29 C:\Users\Inkvi\.gradle\caches\transforms-3\997206f6592e04f6cd2836d6fa21d5c6\transformed\lifecycle-viewmodel-savedstate-2.6.2\res
+com.invenbase.app-lifecycle-livedata-core-2.6.2-30 C:\Users\Inkvi\.gradle\caches\transforms-3\99ffa2bd2e8344a3ae315e9b4f2c0daf\transformed\lifecycle-livedata-core-2.6.2\res
+com.invenbase.app-drawerlayout-1.1.1-31 C:\Users\Inkvi\.gradle\caches\transforms-3\9dac6dc76cd6449df8a730a75db0a9b8\transformed\drawerlayout-1.1.1\res
+com.invenbase.app-ads-adservices-1.0.0-beta05-32 C:\Users\Inkvi\.gradle\caches\transforms-3\a1a3c61fd3df8c61dc695399da070f0b\transformed\ads-adservices-1.0.0-beta05\res
+com.invenbase.app-play-services-base-18.0.1-33 C:\Users\Inkvi\.gradle\caches\transforms-3\a1c2586f4b2a642564bc877b7ac8eeb2\transformed\play-services-base-18.0.1\res
+com.invenbase.app-slidingpanelayout-1.2.0-34 C:\Users\Inkvi\.gradle\caches\transforms-3\a28342bf6e1f7dab9711297371124462\transformed\slidingpanelayout-1.2.0\res
+com.invenbase.app-activity-ktx-1.8.0-35 C:\Users\Inkvi\.gradle\caches\transforms-3\b1871eea20635a075ddfcc9c115a353e\transformed\activity-ktx-1.8.0\res
+com.invenbase.app-lifecycle-viewmodel-ktx-2.6.2-36 C:\Users\Inkvi\.gradle\caches\transforms-3\b564556522d8874ebebe17b510f4869b\transformed\lifecycle-viewmodel-ktx-2.6.2\res
+com.invenbase.app-material-1.10.0-37 C:\Users\Inkvi\.gradle\caches\transforms-3\bf71e49cb4534e34fe8d212656f8e696\transformed\material-1.10.0\res
+com.invenbase.app-fragment-ktx-1.6.2-38 C:\Users\Inkvi\.gradle\caches\transforms-3\c51e234119863be492fee3ee27d7791f\transformed\fragment-ktx-1.6.2\res
+com.invenbase.app-navigation-fragment-2.7.5-39 C:\Users\Inkvi\.gradle\caches\transforms-3\c57dcba63047c08eb02042559e2ea463\transformed\navigation-fragment-2.7.5\res
+com.invenbase.app-lifecycle-viewmodel-2.6.2-40 C:\Users\Inkvi\.gradle\caches\transforms-3\c6f981ba0a1d84670b43f7cd7717b536\transformed\lifecycle-viewmodel-2.6.2\res
+com.invenbase.app-transition-1.4.1-41 C:\Users\Inkvi\.gradle\caches\transforms-3\cd00e623715ebcde52f0b380858d39bb\transformed\transition-1.4.1\res
+com.invenbase.app-startup-runtime-1.1.1-42 C:\Users\Inkvi\.gradle\caches\transforms-3\d78077c21310247d6f450de991731f0a\transformed\startup-runtime-1.1.1\res
+com.invenbase.app-core-1.9.0-43 C:\Users\Inkvi\.gradle\caches\transforms-3\ea3cc7f95b387edecfcb39d9c15e2a6f\transformed\core-1.9.0\res
+com.invenbase.app-viewpager2-1.1.0-beta02-44 C:\Users\Inkvi\.gradle\caches\transforms-3\eb5d7b085376d527c7ab4bc3e06eaf04\transformed\viewpager2-1.1.0-beta02\res
+com.invenbase.app-core-runtime-2.2.0-45 C:\Users\Inkvi\.gradle\caches\transforms-3\ecf4b6c6a079dbb023d8c5e7826f566b\transformed\core-runtime-2.2.0\res
+com.invenbase.app-emoji2-1.2.0-46 C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\res
+com.invenbase.app-lifecycle-livedata-core-ktx-2.6.2-47 C:\Users\Inkvi\.gradle\caches\transforms-3\f042634b62eb405cb7562f923c4f7065\transformed\lifecycle-livedata-core-ktx-2.6.2\res
+com.invenbase.app-profileinstaller-1.3.0-48 C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\res
+com.invenbase.app-navigation-ui-2.7.5-49 C:\Users\Inkvi\.gradle\caches\transforms-3\f2338cd3243ed007c99102b62413d6ba\transformed\navigation-ui-2.7.5\res
+com.invenbase.app-pngs-50 C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\build\generated\res\pngs\debug
+com.invenbase.app-res-51 C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\build\generated\res\processDebugGoogleServices
+com.invenbase.app-resValues-52 C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\build\generated\res\resValues\debug
+com.invenbase.app-packageDebugResources-53 C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.invenbase.app-packageDebugResources-54 C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.invenbase.app-merged_res-55 C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\build\intermediates\merged_res\debug
+com.invenbase.app-debug-56 C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\debug\res
+com.invenbase.app-main-57 C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\res

@@ -1,0 +1,66 @@
+# Быстрый старт
+
+## Шаг 1: Настройка базы данных
+
+Создайте базу данных PostgreSQL:
+
+```bash
+psql -U postgres
+CREATE DATABASE kvantoriym;
+\q
+```
+
+## Шаг 2: Настройка переменных окружения
+
+Создайте файл `.env` в корне проекта `kvantoriym-server`:
+
+```env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/kvantoriym
+HOST=127.0.0.1
+PORT=8080
+JWT_SECRET=your-secret-key-change-in-production-minimum-32-characters-long
+JWT_EXPIRATION=86400
+```
+
+Замените `postgres:postgres` на ваши данные для подключения к PostgreSQL.
+
+## Шаг 3: Установка зависимостей и запуск
+
+```bash
+cd kvantoriym-server
+cargo build
+cargo run
+```
+
+## Шаг 4: Доступ к системе
+
+1. Откройте браузер и перейдите на `http://localhost:8080`
+2. Войдите с учетными данными по умолчанию:
+   - **Логин**: `admin`
+   - **Пароль**: `admin123`
+
+⚠️ **Важно**: После первого входа измените пароль администратора!
+
+## Возможные проблемы
+
+### Ошибка подключения к базе данных
+
+Убедитесь, что:
+- PostgreSQL запущен
+- База данных `kvantoriym` создана
+- Данные в `.env` правильные
+
+### Порт занят
+
+Измените порт в `.env`:
+```env
+PORT=8081
+```
+
+### Ошибки компиляции
+
+Убедитесь, что у вас установлена последняя версия Rust:
+```bash
+rustup update
+```
+

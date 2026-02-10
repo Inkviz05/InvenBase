@@ -1,0 +1,4 @@
+com.kvantoriym.client.test.app-androidTest-0 C:\Users\Inkvi\OneDrive\Desktop\DIplomka\kvantoriym-client\android\app\build\generated\res\resValues\androidTest\debug
+com.kvantoriym.client.test.app-mergeDebugAndroidTestResources-1 C:\Users\Inkvi\OneDrive\Desktop\DIplomka\kvantoriym-client\android\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
+com.kvantoriym.client.test.app-mergeDebugAndroidTestResources-2 C:\Users\Inkvi\OneDrive\Desktop\DIplomka\kvantoriym-client\android\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
+com.kvantoriym.client.test.app-merged_res-3 C:\Users\Inkvi\OneDrive\Desktop\DIplomka\kvantoriym-client\android\app\build\intermediates\merged_res\debugAndroidTest

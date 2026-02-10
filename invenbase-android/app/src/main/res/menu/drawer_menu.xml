@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:id="@+id/group_main">
+        <item
+            android:id="@+id/drawer_dashboard"
+            android:icon="@android:drawable/ic_menu_view"
+            android:title="@string/dashboard" />
+        <item
+            android:id="@+id/drawer_equipment"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:title="@string/equipment" />
+        <item
+            android:id="@+id/drawer_bookings"
+            android:icon="@android:drawable/ic_menu_my_calendar"
+            android:title="@string/bookings" />
+        <item
+            android:id="@+id/drawer_scanner"
+            android:icon="@android:drawable/ic_menu_camera"
+            android:title="@string/scanner" />
+    </group>
+
+    <group android:id="@+id/group_admin" android:checkableBehavior="single">
+        <item
+            android:id="@+id/drawer_admin_panel"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:title="@string/admin_panel" />
+        <item
+            android:id="@+id/drawer_categories"
+            android:icon="@android:drawable/ic_menu_sort_by_size"
+            android:title="@string/categories" />
+        <item
+            android:id="@+id/drawer_reports"
+            android:icon="@android:drawable/ic_menu_info_details"
+            android:title="@string/reports" />
+        <item
+            android:id="@+id/drawer_logs"
+            android:icon="@android:drawable/ic_menu_agenda"
+            android:title="@string/logs" />
+        <item
+            android:id="@+id/drawer_users"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:title="@string/users" />
+    </group>
+
+    <group android:id="@+id/group_other">
+        <item
+            android:id="@+id/drawer_notifications"
+            android:icon="@android:drawable/ic_menu_view"
+            android:title="@string/notifications" />
+        <item
+            android:id="@+id/drawer_cart"
+            android:icon="@android:drawable/ic_menu_agenda"
+            android:title="@string/cart_title" />
+        <item
+            android:id="@+id/drawer_logout"
+            android:icon="@android:drawable/ic_lock_power_off"
+            android:title="@string/logout" />
+    </group>
+
+</menu>
+

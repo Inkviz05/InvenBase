@@ -1,0 +1,110 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+const Login = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      console.log('Login: Attempting to login with username:', username);
+      const response = await login(username, password);
+      console.log('Login: Login successful, navigating to home');
+      navigate('/');
+    } catch (err) {
+      console.error('Login: Login failed:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Ошибка входа. Проверьте логин и пароль.';
+      setError(errorMessage);
+      console.error('Login error details:', {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, var(--background) 0%, #1A1523 100%)',
+      padding: '16px'
+    }}>
+      <div className="card" style={{ maxWidth: '400px', width: '100%', boxShadow: '0 8px 24px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <img 
+            src="/logo.png" 
+            alt="InvenBase Logo" 
+            style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '12px',
+              margin: '0 auto 16px',
+              objectFit: 'contain',
+              background: 'rgba(255,255,255,0.05)',
+              padding: '8px',
+              boxShadow: '0 4px 12px rgba(168, 85, 247, 0.4)'
+            }}
+          />
+          <h1 style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '28px', fontWeight: 700 }}>InvenBase</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Inventory Management System</p>
+        </div>
+
+        {error && <div className="error-message">{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <label className="label">Имя пользователя</label>
+          <input
+            type="text"
+            className="input"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            autoFocus
+          />
+
+          <label className="label">Пароль</label>
+          <input
+            type="password"
+            className="input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ width: '100%' }}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }}></div>
+                Вход...
+              </>
+            ) : (
+              'Войти'
+            )}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
+

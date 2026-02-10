@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="permission_types">
+        <item>Внутреннее использование</item>
+        <item>Вынос за пределы учреждения</item>
+    </string-array>
+    <string-array name="user_roles">
+        <item>Пользователь</item>
+        <item>Ответственный</item>
+        <item>Администратор</item>
+    </string-array>
+    <string-array name="equipment_statuses">
+        <item>Доступно</item>
+        <item>На обслуживании</item>
+        <item>Недоступно</item>
+    </string-array>
+</resources>

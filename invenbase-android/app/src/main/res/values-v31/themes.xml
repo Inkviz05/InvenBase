@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+: фон сплэш-экрана как у приложения (убирает белый квадрат при запуске) -->
+    <style name="Theme.InvenBase" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowSplashScreenBackground">@color/background</item>
+        <item name="toolbarStyle">@style/InvenBaseActionBar</item>
+        <item name="actionBarStyle">@style/InvenBaseActionBarStyle</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/secondary</item>
+        <item name="android:statusBarColor">@color/surface</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="colorSecondaryContainer">@color/secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/text_primary</item>
+        <item name="colorOutline">@color/outline</item>
+    </style>
+</resources>

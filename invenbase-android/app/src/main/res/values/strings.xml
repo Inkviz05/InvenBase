@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">InvenBase</string>
+    
+    <!-- Auth -->
+    <string name="login">Вход</string>
+    <string name="username">Имя пользователя</string>
+    <string name="password">Пароль</string>
+    <string name="login_error">Ошибка входа. Проверьте логин и пароль.</string>
+    <string name="logout">Выйти</string>
+    
+    <!-- Navigation -->
+    <string name="dashboard">Главная</string>
+    <string name="equipment">Оборудование</string>
+    <string name="bookings">Бронирования</string>
+    <string name="scanner">Сканер QR</string>
+    <string name="notifications">Уведомления</string>
+    <string name="categories">Категории</string>
+    <string name="users">Пользователи</string>
+    <string name="reports">Отчёты</string>
+    <string name="logs">Журнал</string>
+    <string name="admin_panel">Управление</string>
+    <string name="admin_panel_subtitle">Отчёты, категории и пользователи</string>
+    <string name="admin_categories_desc">Добавление и редактирование категорий</string>
+    <string name="admin_users_desc">Управление учётными записями и ролями</string>
+    <string name="admin_logs_desc">Журнал действий в системе</string>
+    
+    <!-- Equipment -->
+    <string name="equipment_list">Список оборудования</string>
+    <string name="equipment_detail">Детали оборудования</string>
+    <string name="add_equipment">Добавить оборудование</string>
+    <string name="edit_equipment">Редактировать оборудование</string>
+    <string name="available">Доступно</string>
+    <string name="booked">Забронировано</string>
+    <string name="total">Всего</string>
+    
+    <!-- Bookings -->
+    <string name="booking_list">Список бронирований</string>
+    <string name="create_booking">Создать бронирование</string>
+    <string name="pending">Ожидает одобрения</string>
+    <string name="approved">Одобрено</string>
+    <string name="rejected">Отклонено</string>
+    <string name="cancelled">Отменено</string>
+    <string name="approve">Одобрить</string>
+    <string name="reject">Отклонить</string>
+    <string name="booking_approved">Бронирование одобрено</string>
+    <string name="booking_rejected">Бронирование отклонено</string>
+    <string name="booking_deleted">Бронирование удалено</string>
+    <string name="confirm_delete_booking">Вы уверены, что хотите удалить это бронирование?</string>
+    
+    <!-- Common -->
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="delete">Удалить</string>
+    <string name="edit">Редактировать</string>
+    <string name="add">Добавить</string>
+    <string name="loading">Загрузка...</string>
+    <string name="error">Ошибка</string>
+    <string name="success">Успешно</string>
+    <string name="no_data">Нет данных</string>
+    <string name="access_denied">У вас нет прав для доступа к этой функции</string>
+    <!-- Categories -->
+    <string name="no_categories">Нет категорий</string>
+    <string name="add_category">Добавить категорию</string>
+    <string name="edit_category">Редактировать категорию</string>
+    <string name="confirm_delete_category">Вы уверены, что хотите удалить категорию?\nЕсли в ней есть оборудование, удаление может быть невозможно.</string>
+    <string name="category_name">Название категории</string>
+    
+    <!-- QR Scanner -->
+    <string name="scan_qr_code">Сканировать QR-код</string>
+    <string name="camera_permission_required">Для работы сканера необходим доступ к камере</string>
+    <string name="scan_qr_hint">Наведите камеру на QR-код оборудования или введите код вручную</string>
+    <string name="manual_input">Ввести код вручную</string>
+    <string name="manual_input_hint">Введите код оборудования</string>
+    <string name="find_equipment">Найти оборудование</string>
+    <string name="enter_code">Введите код</string>
+    <string name="equipment_not_found">Оборудование не найдено</string>
+    <string name="open_cart">Открыть корзину</string>
+    <string name="restart_scanner">Перезапустить сканер</string>
+    <string name="start_scanning">Начать сканирование</string>
+    <string name="stop_scanning">Остановить сканирование</string>
+    <string name="scanning_in_progress">Сканирование...</string>
+    <string name="processing_qr">Обработка QR-кода...</string>
+    <string name="qr_detected">QR-код обнаружен</string>
+    <string name="searching_equipment">Поиск оборудования...</string>
+    <string name="equipment_found">Оборудование найдено</string>
+    <string name="error_occurred">Произошла ошибка</string>
+
+    <!-- Access -->
+    <string name="equipment_access_limited">Оборудование доступно только администратору и ответственному</string>
+    <string name="equipment_access_hint">Для выбора оборудования используйте сканер QR-кодов или ручной ввод</string>
+    <string name="open_scanner">Открыть сканер</string>
+
+    <!-- Equipment details -->
+    <string name="description">Описание</string>
+    <string name="category">Категория</string>
+    <string name="location">Местоположение</string>
+    <string name="status">Статус</string>
+    <string name="qr_code">QR-код</string>
+    <string name="qr_code_saved">QR-код сохранён в галерею</string>
+    <string name="download">Скачать</string>
+    <string name="add_to_cart">Добавить в корзину</string>
+    <string name="in_cart">В корзине</string>
+    <string name="book_one">Забронировать 1 единицу</string>
+    <string name="added_to_cart">Добавлено в корзину</string>
+    <string name="not_available">Нет доступных единиц</string>
+
+    <!-- Cart -->
+    <string name="cart_title">Корзина бронирований</string>
+    <string name="cart_empty">Корзина пуста</string>
+    <string name="create_bulk_booking">Создать бронирования</string>
+    <string name="cart_quantity">Количество: %1$d</string>
+    <string name="remove">Удалить</string>
+    <string name="booking_created">Бронирование создано</string>
+
+    <!-- Booking form -->
+    <string name="quantity">Количество</string>
+    <string name="start_date">Дата начала</string>
+    <string name="end_date">Дата окончания</string>
+    <string name="permission_type">Тип разрешения</string>
+    <string name="purpose">Цель использования</string>
+    <string name="fill_required_fields">Заполните обязательные поля</string>
+    <string name="invalid_quantity">Некорректное количество</string>
+    <string name="invalid_dates">Дата окончания должна быть позже даты начала</string>
+    
+    <!-- Notifications -->
+    <string name="no_notifications">Нет уведомлений</string>
+    <string name="unread_notifications">Непрочитанных уведомлений: %1$d</string>
+    <string name="mark_as_read">Отметить прочитанным</string>
+    
+    <!-- Users -->
+    <string name="no_users">Нет пользователей</string>
+    <string name="add_user">Добавить пользователя</string>
+    <string name="edit_user">Редактировать пользователя</string>
+    <string name="user_created">Пользователь создан</string>
+    <string name="user_updated">Пользователь обновлён</string>
+    <string name="user_deleted">Пользователь удалён</string>
+    <string name="confirm_delete_user">Вы уверены, что хотите удалить этого пользователя? Это действие нельзя отменить.</string>
+    <string name="cannot_delete_self">Вы не можете удалить свой собственный аккаунт</string>
+    <string name="full_name">ФИО</string>
+    <string name="email">Email</string>
+    <string name="role">Роль</string>
+    <string name="you">Вы</string>
+    
+    <!-- Reports -->
+    <string name="equipment_report">Отчёт по оборудованию</string>
+    <string name="equipment_report_subtitle">Сводная информация по наличию и использованию оборудования.</string>
+    <string name="booking_report">Отчёт по бронированиям</string>
+    <string name="expired">Истекли</string>
+    <string name="report_total_positions">Всего позиций</string>
+    <string name="report_available_now">Доступно сейчас</string>
+    <string name="report_in_booking">В бронировании</string>
+    <string name="report_stats_by_category">Статистика по категориям</string>
+    <string name="report_booking_total">Всего бронирований</string>
+    <string name="report_pending_approval">Ожидают одобрения</string>
+    <string name="report_approved">Одобрены</string>
+    <string name="report_rejected">Отклонены</string>
+    <string name="report_cancelled">Отменены</string>
+    <string name="report_completed">Завершены</string>
+    <string name="report_category_total">Всего: %1$d</string>
+    
+    <!-- Logs -->
+    <string name="no_logs">Нет записей в журнале</string>
+    
+    <!-- Equipment form -->
+    <string name="name">Название</string>
+    <string name="no_category">Без категории</string>
+    <string name="confirm_delete_equipment">Вы уверены, что хотите удалить это оборудование?</string>
+    <string name="equipment_deleted">Оборудование удалено</string>
+    
+    <!-- Quick actions -->
+    <string name="book_from_cart">Забронировать из корзины</string>
+    <string name="select_equipment">Выбрать оборудование</string>
+    <string name="quick_booking">Быстрое бронирование</string>
+    <string name="view_notifications">Просмотреть уведомления</string>
+</resources>
