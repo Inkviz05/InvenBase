@@ -3,16 +3,19 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { equipmentAPI } from '../api/equipment';
 import { categoriesAPI } from '../api/categories';
+import { squadsAPI } from '../api/squads';
 
 const EquipmentEdit = () => {
   const { id } = useParams();
   const { isAdmin, isResponsible } = useAuth();
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
+  const [squads, setSquads] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     category_id: '',
+    squad_id: '',
     quantity: 1,
     available_quantity: 1,
     is_unique: false,
@@ -30,17 +33,23 @@ const EquipmentEdit = () => {
     fetchData();
   }, [id, isAdmin, isResponsible, navigate]);
 
+  useEffect(() => {
+    if (!formData.squad_id && !loading) return;
+    fetchCategories();
+  }, [formData.squad_id, loading]);
+
   const fetchData = async () => {
     try {
-      const [equipment, categoriesData] = await Promise.all([
+      const [equipment, squadsData] = await Promise.all([
         equipmentAPI.getById(id),
-        categoriesAPI.getAll(),
+        squadsAPI.getAll(),
       ]);
-      setCategories(categoriesData);
+      setSquads(squadsData);
       setFormData({
         name: equipment.name || '',
         description: equipment.description || '',
         category_id: equipment.category_id || '',
+        squad_id: equipment.squad_id || '',
         quantity: equipment.quantity || 1,
         available_quantity: equipment.available_quantity ?? 0,
         is_unique: !!equipment.is_unique,
@@ -56,15 +65,24 @@ const EquipmentEdit = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const params = formData.squad_id ? { squad_id: formData.squad_id } : {};
+      const data = await categoriesAPI.getAll(params);
+      setCategories(data);
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
 
     try {
       const dataToSend = { ...formData };
-      if (!dataToSend.category_id) {
-        delete dataToSend.category_id;
-      }
+      if (!dataToSend.category_id) delete dataToSend.category_id;
+      if (!dataToSend.squad_id) delete dataToSend.squad_id;
       if (dataToSend.is_unique) {
         dataToSend.quantity = 1;
         dataToSend.available_quantity = 1;
@@ -123,6 +141,20 @@ const EquipmentEdit = () => {
             </div>
 
             <div>
+              <label className="label">Сквад</label>
+              <select
+                className="input"
+                value={formData.squad_id}
+                onChange={(e) => setFormData({ ...formData, squad_id: e.target.value })}
+              >
+                <option value="">Без сквада</option>
+                {squads.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
               <label className="label">Категория</label>
               <select
                 className="input"
@@ -132,7 +164,7 @@ const EquipmentEdit = () => {
                 <option value="">Выберите категорию</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
-                    {cat.name}
+                    {cat.name}{cat.squad_name ? ` (${cat.squad_name})` : ' (общая)'}
                   </option>
                 ))}
               </select>

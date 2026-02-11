@@ -77,6 +77,7 @@ pub struct Equipment {
     pub name: String,
     pub description: Option<String>,
     pub category_id: Option<Uuid>,
+    pub squad_id: Option<Uuid>,
     pub quantity: i32,
     pub available_quantity: i32,
     #[serde(default)]
@@ -96,6 +97,8 @@ pub struct EquipmentWithDetails {
     pub description: Option<String>,
     pub category_id: Option<Uuid>,
     pub category_name: Option<String>,
+    pub squad_id: Option<Uuid>,
+    pub squad_name: Option<String>,
     pub quantity: i32,
     pub available_quantity: i32,
     #[serde(default)]
@@ -114,6 +117,7 @@ pub struct CreateEquipmentRequest {
     pub name: String,
     pub description: Option<String>,
     pub category_id: Option<Uuid>,
+    pub squad_id: Option<Uuid>,
     pub quantity: Option<i32>,
     pub location: Option<String>,
     pub responsible_user_id: Option<Uuid>,
@@ -126,6 +130,7 @@ pub struct UpdateEquipmentRequest {
     pub name: Option<String>,
     pub description: Option<String>,
     pub category_id: Option<Uuid>,
+    pub squad_id: Option<Uuid>,
     pub quantity: Option<i32>,
     pub available_quantity: Option<i32>,
     pub location: Option<String>,
@@ -141,6 +146,17 @@ pub struct EquipmentCategory {
     pub id: Uuid,
     pub name: String,
     pub description: Option<String>,
+    pub squad_id: Option<Uuid>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, FromRow)]
+pub struct EquipmentCategoryWithSquad {
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub squad_id: Option<Uuid>,
+    pub squad_name: Option<String>,
     pub created_at: DateTime<Utc>,
 }
 
@@ -148,6 +164,7 @@ pub struct EquipmentCategory {
 pub struct CreateCategoryRequest {
     pub name: String,
     pub description: Option<String>,
+    pub squad_id: Option<Uuid>,
 }
 
 // ========== Equipment Group Models ==========
@@ -171,6 +188,47 @@ pub struct CreateEquipmentGroupRequest {
 pub struct EquipmentGroupItemRequest {
     pub equipment_id: Uuid,
     pub quantity: i32,
+}
+
+// ========== Squad Models ==========
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+pub struct Squad {
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub location: Option<String>,
+    pub responsible_user_id: Option<Uuid>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, FromRow)]
+pub struct SquadWithDetails {
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub location: Option<String>,
+    pub responsible_user_id: Option<Uuid>,
+    pub responsible_name: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateSquadRequest {
+    pub name: String,
+    pub description: Option<String>,
+    pub location: Option<String>,
+    pub responsible_user_id: Option<Uuid>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateSquadRequest {
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub location: Option<String>,
+    pub responsible_user_id: Option<Uuid>,
 }
 
 // ========== Booking Models ==========

@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { equipmentAPI } from '../api/equipment';
 import { categoriesAPI } from '../api/categories';
+import { squadsAPI } from '../api/squads';
 
 const EquipmentCreate = () => {
+  const [searchParams] = useSearchParams();
+  const squadIdFromUrl = searchParams.get('squad_id') || '';
   const { isAdmin, isResponsible } = useAuth();
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
+  const [squads, setSquads] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     category_id: '',
+    squad_id: squadIdFromUrl,
     quantity: 1,
     available_quantity: 1,
     is_unique: false,
@@ -26,17 +31,32 @@ const EquipmentCreate = () => {
       navigate('/equipment');
       return;
     }
-    fetchCategories();
+    fetchSquads();
   }, [isAdmin, isResponsible, navigate]);
+
+  useEffect(() => {
+    if (!isAdmin() && !isResponsible()) return;
+    fetchCategories();
+  }, [formData.squad_id]);
+
+  const fetchSquads = async () => {
+    try {
+      const data = await squadsAPI.getAll();
+      setSquads(data);
+    } catch (error) {
+      console.error('Failed to fetch squads:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
-      const data = await categoriesAPI.getAll();
+      const params = formData.squad_id ? { squad_id: formData.squad_id } : {};
+      const data = await categoriesAPI.getAll(params);
       setCategories(data);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -46,9 +66,8 @@ const EquipmentCreate = () => {
 
     try {
       const dataToSend = { ...formData };
-      if (!dataToSend.category_id) {
-        delete dataToSend.category_id;
-      }
+      if (!dataToSend.category_id) delete dataToSend.category_id;
+      if (!dataToSend.squad_id) delete dataToSend.squad_id;
       if (dataToSend.is_unique) {
         dataToSend.quantity = 1;
         dataToSend.available_quantity = 1;
@@ -107,6 +126,20 @@ const EquipmentCreate = () => {
             </div>
 
             <div>
+              <label className="label">Сквад</label>
+              <select
+                className="input"
+                value={formData.squad_id}
+                onChange={(e) => setFormData({ ...formData, squad_id: e.target.value })}
+              >
+                <option value="">Без сквада</option>
+                {squads.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
               <label className="label">Категория</label>
               <select
                 className="input"
@@ -116,7 +149,7 @@ const EquipmentCreate = () => {
                 <option value="">Выберите категорию</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
-                    {cat.name}
+                    {cat.name}{cat.squad_name ? ` (${cat.squad_name})` : ' (общая)'}
                   </option>
                 ))}
               </select>

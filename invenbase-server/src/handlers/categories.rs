@@ -1,7 +1,8 @@
 use actix_web::{web, HttpResponse};
+use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::models::{EquipmentCategory, CreateCategoryRequest};
+use crate::models::{EquipmentCategory, EquipmentCategoryWithSquad, CreateCategoryRequest};
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
 use crate::app_state::AppState;
@@ -16,17 +17,18 @@ pub async fn create_category(
     let category_id = uuid::Uuid::new_v4();
 
     sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO equipment_categories (id, name, description)
-         VALUES ($1, $2, $3)"
+        "INSERT INTO equipment_categories (id, name, description, squad_id)
+         VALUES ($1, $2, $3, $4)"
     )
     .bind(category_id)
     .bind(&req.name)
     .bind(&req.description)
+    .bind(&req.squad_id)
     .execute(&state.db.pool)
     .await?;
 
     let category: EquipmentCategory = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, name, description, created_at FROM equipment_categories WHERE id = $1"
+        "SELECT id, name, description, squad_id, created_at FROM equipment_categories WHERE id = $1"
     )
     .bind(category_id)
     .fetch_one(&state.db.pool)
@@ -35,15 +37,38 @@ pub async fn create_category(
     Ok(HttpResponse::Created().json(category))
 }
 
+#[derive(Debug, Deserialize)]
+pub struct CategoriesQuery {
+    /// Если задан — вернуть общие (squad_id IS NULL) + категории этого сквада
+    pub squad_id: Option<Uuid>,
+}
+
 pub async fn get_categories(
     state: web::Data<AppState>,
     _claims: Claims,
+    query: web::Query<CategoriesQuery>,
 ) -> Result<HttpResponse, AppError> {
-    let categories: Vec<EquipmentCategory> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, name, description, created_at FROM equipment_categories ORDER BY name"
-    )
-    .fetch_all(&state.db.pool)
-    .await?;
+    let categories: Vec<EquipmentCategoryWithSquad> = if let Some(squad_id) = query.squad_id {
+        sqlx::query_as::<sqlx::Postgres, _>(
+            "SELECT c.id, c.name, c.description, c.squad_id, s.name as squad_name, c.created_at 
+             FROM equipment_categories c
+             LEFT JOIN squads s ON c.squad_id = s.id
+             WHERE c.squad_id IS NULL OR c.squad_id = $1
+             ORDER BY c.name"
+        )
+        .bind(squad_id)
+        .fetch_all(&state.db.pool)
+        .await?
+    } else {
+        sqlx::query_as::<sqlx::Postgres, _>(
+            "SELECT c.id, c.name, c.description, c.squad_id, s.name as squad_name, c.created_at 
+             FROM equipment_categories c
+             LEFT JOIN squads s ON c.squad_id = s.id
+             ORDER BY c.name"
+        )
+        .fetch_all(&state.db.pool)
+        .await?
+    };
 
     Ok(HttpResponse::Ok().json(categories))
 }
@@ -56,7 +81,7 @@ pub async fn get_category(
     let category_id = path.into_inner();
 
     let category: Option<EquipmentCategory> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, name, description, created_at FROM equipment_categories WHERE id = $1"
+        "SELECT id, name, description, squad_id, created_at FROM equipment_categories WHERE id = $1"
     )
     .bind(category_id)
     .fetch_optional(&state.db.pool)
@@ -78,16 +103,17 @@ pub async fn update_category(
     let category_id = path.into_inner();
 
     sqlx::query::<sqlx::Postgres>(
-        "UPDATE equipment_categories SET name = $1, description = $2 WHERE id = $3"
+        "UPDATE equipment_categories SET name = $1, description = $2, squad_id = $3 WHERE id = $4"
     )
     .bind(&req.name)
     .bind(&req.description)
+    .bind(&req.squad_id)
     .bind(category_id)
     .execute(&state.db.pool)
     .await?;
 
     let category: Option<EquipmentCategory> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, name, description, created_at FROM equipment_categories WHERE id = $1"
+        "SELECT id, name, description, squad_id, created_at FROM equipment_categories WHERE id = $1"
     )
     .bind(category_id)
     .fetch_optional(&state.db.pool)

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { equipmentAPI } from '../api/equipment';
+import { squadsAPI } from '../api/squads';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
@@ -9,6 +10,8 @@ const EquipmentList = () => {
   const { addToCart, isInCart } = useCart();
   const navigate = useNavigate();
   const [equipment, setEquipment] = useState([]);
+  const [squads, setSquads] = useState([]);
+  const [squadFilter, setSquadFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [scanning, setScanning] = useState(false);
@@ -20,21 +23,37 @@ const EquipmentList = () => {
 
   useEffect(() => {
     if (!isRegularUser) {
+      fetchSquads();
+    }
+  }, [isRegularUser]);
+
+  useEffect(() => {
+    if (!isRegularUser) {
       fetchEquipment();
     } else {
       setLoading(false);
     }
-    
     return () => {
       if (scannerRef.current) {
         stopScanning();
       }
     };
-  }, [isRegularUser]);
+  }, [isRegularUser, squadFilter]);
+
+  const fetchSquads = async () => {
+    try {
+      const data = await squadsAPI.getAll();
+      setSquads(data);
+    } catch (error) {
+      console.error('Failed to fetch squads:', error);
+    }
+  };
 
   const fetchEquipment = async () => {
+    setLoading(true);
     try {
-      const data = await equipmentAPI.getAll();
+      const params = squadFilter ? { squad_id: squadFilter } : {};
+      const data = await equipmentAPI.getAll(params);
       setEquipment(data);
     } catch (error) {
       console.error('Failed to fetch equipment:', error);
@@ -296,14 +315,27 @@ const EquipmentList = () => {
         </Link>
       </div>
 
-      <input
-        type="text"
-        className="input"
-        placeholder="Поиск оборудования..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ marginBottom: '24px' }}
-      />
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px', alignItems: 'center' }}>
+        <input
+          type="text"
+          className="input"
+          placeholder="Поиск оборудования..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ flex: '1', minWidth: '200px' }}
+        />
+        <select
+          className="input"
+          value={squadFilter}
+          onChange={(e) => setSquadFilter(e.target.value)}
+          style={{ minWidth: '200px' }}
+        >
+          <option value="">Все сквады</option>
+          {squads.map((s) => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </select>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
         {filteredEquipment.map((eq) => (
@@ -340,6 +372,15 @@ const EquipmentList = () => {
                 <div style={{ marginTop: '8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
                   <span className="material-icons" style={{ fontSize: '18px', verticalAlign: 'middle' }}>location_on</span>
                   {' '}{eq.location}
+                </div>
+              )}
+              {eq.squad_name && (
+                <div style={{ marginTop: '8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                  <span className="material-icons" style={{ fontSize: '18px', verticalAlign: 'middle' }}>groups</span>
+                  {' '}
+                  <Link to={`/squads/${eq.squad_id}`} onClick={(e) => e.stopPropagation()} style={{ color: 'var(--primary-color)' }}>
+                    {eq.squad_name}
+                  </Link>
                 </div>
               )}
             </Link>

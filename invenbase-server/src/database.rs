@@ -101,6 +101,37 @@ impl Database {
         .execute(&self.pool)
         .await?;
 
+        // Создание таблицы сквадов (для разделения кабинетов и зон ответственности)
+        sqlx::query(
+            r#"
+            CREATE TABLE IF NOT EXISTS squads (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                location VARCHAR(255),
+                responsible_user_id UUID REFERENCES users(id),
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+            "#,
+        )
+        .execute(&self.pool)
+        .await?;
+
+        // Добавление поля squad_id в equipment (если колонки ещё нет)
+        let _ = sqlx::query(
+            "DO $$ BEGIN ALTER TABLE equipment ADD COLUMN squad_id UUID REFERENCES squads(id); EXCEPTION WHEN duplicate_column THEN NULL; END $$"
+        )
+        .execute(&self.pool)
+        .await;
+
+        // Добавление поля squad_id в equipment_categories (NULL = общая категория)
+        let _ = sqlx::query(
+            "DO $$ BEGIN ALTER TABLE equipment_categories ADD COLUMN squad_id UUID REFERENCES squads(id); EXCEPTION WHEN duplicate_column THEN NULL; END $$"
+        )
+        .execute(&self.pool)
+        .await;
+
         // Создание таблицы бронирований
         sqlx::query(
             r#"
@@ -232,6 +263,18 @@ impl Database {
             .await?;
 
         sqlx::query("CREATE INDEX IF NOT EXISTS idx_user_devices_user ON user_devices(user_id)")
+            .execute(&self.pool)
+            .await?;
+
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_squads_responsible ON squads(responsible_user_id)")
+            .execute(&self.pool)
+            .await?;
+
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_equipment_squad ON equipment(squad_id)")
+            .execute(&self.pool)
+            .await?;
+
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_equipment_categories_squad ON equipment_categories(squad_id)")
             .execute(&self.pool)
             .await?;
 

@@ -14,6 +14,8 @@ import BookingBulkCreate from './pages/BookingBulkCreate';
 import QRScanner from './pages/QRScanner';
 import Notifications from './pages/Notifications';
 import Categories from './pages/Categories';
+import Squads from './pages/Squads';
+import SquadDetail from './pages/SquadDetail';
 import Users from './pages/Users';
 import Reports from './pages/Reports';
 import Logs from './pages/Logs';
@@ -53,6 +55,8 @@ const AppRoutes = () => {
         <Route path="scanner" element={<QRScanner />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="categories" element={<Categories />} />
+        <Route path="squads" element={<Squads />} />
+        <Route path="squads/:id" element={<SquadDetail />} />
         <Route path="users" element={<Users />} />
         <Route path="reports" element={<Reports />} />
         <Route path="logs" element={<Logs />} />

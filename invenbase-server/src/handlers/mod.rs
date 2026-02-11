@@ -3,6 +3,7 @@ pub mod users;
 pub mod equipment;
 pub mod categories;
 pub mod groups;
+pub mod squads;
 pub mod bookings;
 pub mod permissions;
 pub mod notifications;

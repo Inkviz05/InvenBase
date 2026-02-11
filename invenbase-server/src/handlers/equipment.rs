@@ -1,4 +1,5 @@
 use actix_web::{web, HttpResponse};
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::models::{
@@ -25,13 +26,14 @@ pub async fn create_equipment(
     };
 
     sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO equipment (id, name, description, category_id, quantity, available_quantity, is_unique, location, qr_code, responsible_user_id, status)
-         VALUES ($1, $2, $3, $4, $5, $5, $6, $7, $8, $9, 'available')"
+        "INSERT INTO equipment (id, name, description, category_id, squad_id, quantity, available_quantity, is_unique, location, qr_code, responsible_user_id, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $6, $7, $8, $9, $10, 'available')"
     )
     .bind(equipment_id)
     .bind(&req.name)
     .bind(&req.description)
     .bind(&req.category_id)
+    .bind(&req.squad_id)
     .bind(quantity)
     .bind(is_unique)
     .bind(&req.location)
@@ -52,7 +54,7 @@ pub async fn create_equipment(
     .await;
 
     let equipment: Equipment = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, name, description, category_id, quantity, available_quantity, COALESCE(is_unique, false) as is_unique, location, qr_code, responsible_user_id, status, created_at, updated_at 
+        "SELECT id, name, description, category_id, squad_id, quantity, available_quantity, COALESCE(is_unique, false) as is_unique, location, qr_code, responsible_user_id, status, created_at, updated_at 
          FROM equipment WHERE id = $1"
     )
     .bind(equipment_id)
@@ -62,26 +64,41 @@ pub async fn create_equipment(
     Ok(HttpResponse::Created().json(equipment))
 }
 
+#[derive(Debug, Deserialize)]
+pub struct EquipmentListQuery {
+    pub squad_id: Option<Uuid>,
+}
+
 pub async fn get_equipment_list(
     state: web::Data<AppState>,
     _claims: Claims,
+    query: web::Query<EquipmentListQuery>,
 ) -> Result<HttpResponse, AppError> {
-    let equipment: Vec<EquipmentWithDetails> = sqlx::query_as::<sqlx::Postgres, _>(
-        r#"
+    let sql = r#"
         SELECT 
             e.id, e.name, e.description, e.category_id, 
             c.name as category_name,
+            e.squad_id, s.name as squad_name,
             e.quantity, e.available_quantity, COALESCE(e.is_unique, false) as is_unique, e.location, e.qr_code, 
             e.responsible_user_id, u.full_name as responsible_name,
             e.status, e.created_at, e.updated_at
         FROM equipment e
         LEFT JOIN equipment_categories c ON e.category_id = c.id
+        LEFT JOIN squads s ON e.squad_id = s.id
         LEFT JOIN users u ON e.responsible_user_id = u.id
-        ORDER BY e.created_at DESC
-        "#
-    )
-    .fetch_all(&state.db.pool)
-    .await?;
+        "#;
+    let order = " ORDER BY e.created_at DESC";
+
+    let equipment: Vec<EquipmentWithDetails> = if let Some(squad_id) = query.squad_id {
+        sqlx::query_as::<sqlx::Postgres, _>(&format!("{} WHERE e.squad_id = $1{}", sql, order))
+            .bind(squad_id)
+            .fetch_all(&state.db.pool)
+            .await?
+    } else {
+        sqlx::query_as::<sqlx::Postgres, _>(&format!("{}{}", sql, order))
+            .fetch_all(&state.db.pool)
+            .await?
+    };
 
     Ok(HttpResponse::Ok().json(equipment))
 }
@@ -98,11 +115,13 @@ pub async fn get_equipment(
         SELECT 
             e.id, e.name, e.description, e.category_id, 
             c.name as category_name,
+            e.squad_id, s.name as squad_name,
             e.quantity, e.available_quantity, COALESCE(e.is_unique, false) as is_unique, e.location, e.qr_code, 
             e.responsible_user_id, u.full_name as responsible_name,
             e.status, e.created_at, e.updated_at
         FROM equipment e
         LEFT JOIN equipment_categories c ON e.category_id = c.id
+        LEFT JOIN squads s ON e.squad_id = s.id
         LEFT JOIN users u ON e.responsible_user_id = u.id
         WHERE e.id = $1
         "#
@@ -128,11 +147,13 @@ pub async fn get_equipment_by_qr(
         SELECT 
             e.id, e.name, e.description, e.category_id, 
             c.name as category_name,
+            e.squad_id, s.name as squad_name,
             e.quantity, e.available_quantity, COALESCE(e.is_unique, false) as is_unique, e.location, e.qr_code, 
             e.responsible_user_id, u.full_name as responsible_name,
             e.status, e.created_at, e.updated_at
         FROM equipment e
         LEFT JOIN equipment_categories c ON e.category_id = c.id
+        LEFT JOIN squads s ON e.squad_id = s.id
         LEFT JOIN users u ON e.responsible_user_id = u.id
         WHERE e.qr_code = $1
         "#
@@ -238,6 +259,14 @@ pub async fn update_equipment(
             .await?;
     }
 
+    if req.squad_id.is_some() {
+        sqlx::query::<sqlx::Postgres>("UPDATE equipment SET squad_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2")
+            .bind(&req.squad_id)
+            .bind(equipment_id)
+            .execute(&state.db.pool)
+            .await?;
+    }
+
     if let Some(status) = &req.status {
         sqlx::query::<sqlx::Postgres>("UPDATE equipment SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2")
             .bind(status)
@@ -248,7 +277,7 @@ pub async fn update_equipment(
 
     // Получаем обновлённое оборудование из БД
     let equipment: Equipment = sqlx::query_as::<sqlx::Postgres, Equipment>(
-        "SELECT id, name, description, category_id, quantity, available_quantity, COALESCE(is_unique, false) as is_unique, location, qr_code, responsible_user_id, status, created_at, updated_at 
+        "SELECT id, name, description, category_id, squad_id, quantity, available_quantity, COALESCE(is_unique, false) as is_unique, location, qr_code, responsible_user_id, status, created_at, updated_at 
          FROM equipment WHERE id = $1"
     )
     .bind(equipment_id)

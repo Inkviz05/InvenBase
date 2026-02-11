@@ -502,6 +502,28 @@ const Layout = () => {
                 Категории
               </Link>
               <Link
+                to="/squads"
+                onClick={() => setShowMobileMenu(false)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '12px 24px',
+                  color: isActive('/squads') ? 'white' : 'rgba(255,255,255,0.8)',
+                  textDecoration: 'none',
+                  fontWeight: isActive('/squads') ? 600 : 400,
+                  background: isActive('/squads') ? 'var(--sidebar-hover)' : 'transparent',
+                  borderLeft: isActive('/squads') ? '3px solid var(--primary-color)' : '3px solid transparent',
+                  transition: 'all 0.2s ease',
+                  textTransform: 'uppercase',
+                  fontSize: '13px',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                <span className="material-icons" style={{ fontSize: '20px' }}>groups</span>
+                Сквады
+              </Link>
+              <Link
                 to="/reports"
                 onClick={() => setShowMobileMenu(false)}
                 style={{

@@ -34,8 +34,8 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
         // Оборудование
         .service(
             web::scope("/equipment")
-                .route("", web::get().to(|state: web::Data<AppState>, auth: Authenticated| async move {
-                    equipment::get_equipment_list(state, auth.claims()).await
+                .route("", web::get().to(|state: web::Data<AppState>, auth: Authenticated, query: web::Query<equipment::EquipmentListQuery>| async move {
+                    equipment::get_equipment_list(state, auth.claims(), query).await
                 }))
                 .route("", web::post().to(|state: web::Data<AppState>, auth: AdminOrResponsible, req: web::Json<_>| async move {
                     equipment::create_equipment(state, auth.claims(), req).await
@@ -57,8 +57,8 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
         // Категории
         .service(
             web::scope("/categories")
-                .route("", web::get().to(|state: web::Data<AppState>, auth: Authenticated| async move {
-                    categories::get_categories(state, auth.claims()).await
+                .route("", web::get().to(|state: web::Data<AppState>, auth: Authenticated, query: web::Query<categories::CategoriesQuery>| async move {
+                    categories::get_categories(state, auth.claims(), query).await
                 }))
                 .route("", web::post().to(|state: web::Data<AppState>, auth: AdminOrResponsible, req: web::Json<_>| async move {
                     categories::create_category(state, auth.claims(), req).await
@@ -91,6 +91,29 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                 }))
                 .route("/{id}", web::delete().to(|state: web::Data<AppState>, auth: AdminOrResponsible, path: web::Path<_>| async move {
                     groups::delete_group(state, auth.claims(), path).await
+                }))
+        )
+        
+        // Сквады (для разделения кабинетов и зон ответственности)
+        .service(
+            web::scope("/squads")
+                .route("", web::get().to(|state: web::Data<AppState>, auth: Authenticated| async move {
+                    squads::get_squads(state, auth.claims()).await
+                }))
+                .route("", web::post().to(|state: web::Data<AppState>, auth: AdminOrResponsible, req: web::Json<_>| async move {
+                    squads::create_squad(state, auth.claims(), req).await
+                }))
+                .route("/{id}/equipment", web::get().to(|state: web::Data<AppState>, auth: Authenticated, path: web::Path<_>| async move {
+                    squads::get_squad_equipment(state, auth.claims(), path).await
+                }))
+                .route("/{id}", web::get().to(|state: web::Data<AppState>, auth: Authenticated, path: web::Path<_>| async move {
+                    squads::get_squad(state, auth.claims(), path).await
+                }))
+                .route("/{id}", web::put().to(|state: web::Data<AppState>, auth: AdminOrResponsible, path: web::Path<_>, req: web::Json<_>| async move {
+                    squads::update_squad(state, auth.claims(), path, req).await
+                }))
+                .route("/{id}", web::delete().to(|state: web::Data<AppState>, auth: AdminOrResponsible, path: web::Path<_>| async move {
+                    squads::delete_squad(state, auth.claims(), path).await
                 }))
         )
         
