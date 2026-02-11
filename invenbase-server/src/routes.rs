@@ -43,6 +43,12 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                 .route("/qr/{qr_code}", web::get().to(|state: web::Data<AppState>, auth: Authenticated, path: web::Path<_>| async move {
                     equipment::get_equipment_by_qr(state, auth.claims(), path).await
                 }))
+                .route("/{id}/movements", web::get().to(|state: web::Data<AppState>, auth: Authenticated, path: web::Path<_>| async move {
+                    equipment::get_equipment_movements(state, auth.claims(), path).await
+                }))
+                .route("/{id}/move", web::post().to(|state: web::Data<AppState>, auth: AdminOrResponsible, path: web::Path<_>, req: web::Json<_>| async move {
+                    equipment::move_equipment(state, auth.claims(), path, req).await
+                }))
                 .route("/{id}", web::get().to(|state: web::Data<AppState>, auth: Authenticated, path: web::Path<_>| async move {
                     equipment::get_equipment(state, auth.claims(), path).await
                 }))

@@ -29,5 +29,15 @@ export const equipmentAPI = {
   delete: async (id) => {
     await apiClient.delete(`/equipment/${id}`);
   },
+
+  getMovements: async (id) => {
+    const response = await apiClient.get(`/equipment/${id}/movements`);
+    return response.data;
+  },
+
+  move: async (id, data) => {
+    const response = await apiClient.post(`/equipment/${id}/move`, data);
+    return response.data;
+  },
 };
 

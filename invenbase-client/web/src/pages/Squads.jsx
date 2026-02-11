@@ -21,9 +21,12 @@ const Squads = () => {
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
 
   useEffect(() => {
-    if (isAdmin() || isResponsible()) {
+    if (isAdmin()) {
       fetchSquads();
       fetchUsers();
+    } else if (isResponsible()) {
+      // Ответственный видит список сквадов, но не может управлять пользователями
+      fetchSquads();
     } else {
       setLoading(false);
     }
@@ -142,10 +145,12 @@ const Squads = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1>Сквады</h1>
-        <button onClick={() => handleOpenModal()} className="btn btn-primary">
-          <span className="material-icons">add</span>
-          Добавить сквад
-        </button>
+        {isAdmin() && (
+          <button onClick={() => handleOpenModal()} className="btn btn-primary">
+            <span className="material-icons">add</span>
+            Добавить сквад
+          </button>
+        )}
       </div>
 
       <div className="card">
@@ -179,15 +184,17 @@ const Squads = () => {
                 </td>
                 <td style={{ padding: '12px', textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                    <button
-                      onClick={() => handleOpenModal(squad)}
-                      className="btn btn-secondary"
-                      style={{ fontSize: '12px', padding: '6px 12px' }}
-                    >
-                      <span className="material-icons" style={{ fontSize: '18px' }}>edit</span>
-                      Редактировать
-                    </button>
-                    {(isAdmin() || isResponsible()) && (
+                    {isAdmin() && (
+                      <button
+                        onClick={() => handleOpenModal(squad)}
+                        className="btn btn-secondary"
+                        style={{ fontSize: '12px', padding: '6px 12px' }}
+                      >
+                        <span className="material-icons" style={{ fontSize: '18px' }}>edit</span>
+                        Редактировать
+                      </button>
+                    )}
+                    {isAdmin() && (
                       <button
                         onClick={() => openDeleteModal(squad)}
                         className="btn btn-danger"

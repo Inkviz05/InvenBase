@@ -327,6 +327,29 @@ pub struct ActivityLog {
     pub created_at: DateTime<Utc>,
 }
 
+// ========== Equipment Movement Models ==========
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+pub struct EquipmentMovement {
+    pub id: Uuid,
+    pub equipment_id: Uuid,
+    pub from_squad_id: Option<Uuid>,
+    pub to_squad_id: Option<Uuid>,
+    pub from_location: Option<String>,
+    pub to_location: Option<String>,
+    pub moved_by: Option<Uuid>,
+    pub moved_by_name: Option<String>,
+    pub comment: Option<String>,
+    pub moved_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateEquipmentMovementRequest {
+    pub to_squad_id: Option<Uuid>,
+    pub to_location: Option<String>,
+    pub comment: Option<String>,
+}
+
 // ========== Notification Models ==========
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]

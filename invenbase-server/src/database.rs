@@ -206,6 +206,25 @@ impl Database {
         .execute(&self.pool)
         .await?;
 
+        // Создание таблицы перемещений оборудования
+        sqlx::query(
+            r#"
+            CREATE TABLE IF NOT EXISTS equipment_movements (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                equipment_id UUID NOT NULL REFERENCES equipment(id) ON DELETE CASCADE,
+                from_squad_id UUID,
+                to_squad_id UUID,
+                from_location VARCHAR(255),
+                to_location VARCHAR(255),
+                moved_by UUID REFERENCES users(id),
+                comment TEXT,
+                moved_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+            "#
+        )
+        .execute(&self.pool)
+        .await?;
+
         // Создание таблицы устройств для push-уведомлений
         sqlx::query(
             r#"
@@ -275,6 +294,14 @@ impl Database {
             .await?;
 
         sqlx::query("CREATE INDEX IF NOT EXISTS idx_equipment_categories_squad ON equipment_categories(squad_id)")
+            .execute(&self.pool)
+            .await?;
+
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_equipment_movements_equipment ON equipment_movements(equipment_id)")
+            .execute(&self.pool)
+            .await?;
+
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_equipment_movements_moved_at ON equipment_movements(moved_at)")
             .execute(&self.pool)
             .await?;
 

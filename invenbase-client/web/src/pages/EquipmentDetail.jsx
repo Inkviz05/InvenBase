@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { equipmentAPI } from '../api/equipment';
+import { squadsAPI } from '../api/squads';
 import { qrAPI } from '../api/qr';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -19,9 +20,20 @@ const EquipmentDetail = () => {
   const [qrData, setQrData] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
+  const [movements, setMovements] = useState([]);
+  const [movementsLoading, setMovementsLoading] = useState(false);
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [moveForm, setMoveForm] = useState({
+    to_squad_id: '',
+    to_location: '',
+    comment: '',
+  });
+  const [squads, setSquads] = useState([]);
 
   useEffect(() => {
     fetchEquipment();
+    fetchSquads();
+    fetchMovements();
   }, [id]);
 
   const fetchEquipment = async () => {
@@ -32,6 +44,27 @@ const EquipmentDetail = () => {
       setError('Оборудование не найдено');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSquads = async () => {
+    try {
+      const data = await squadsAPI.getAll();
+      setSquads(data);
+    } catch (err) {
+      console.error('Failed to fetch squads:', err);
+    }
+  };
+
+  const fetchMovements = async () => {
+    setMovementsLoading(true);
+    try {
+      const data = await equipmentAPI.getMovements(id);
+      setMovements(data);
+    } catch (err) {
+      console.error('Failed to fetch movements:', err);
+    } finally {
+      setMovementsLoading(false);
     }
   };
 
@@ -54,6 +87,33 @@ const EquipmentDetail = () => {
       navigate('/equipment');
     } catch (err) {
       setError('Ошибка при удалении оборудования');
+    }
+  };
+
+  const openMoveModal = () => {
+    if (!equipment) return;
+    setMoveForm({
+      to_squad_id: equipment.squad_id || '',
+      to_location: equipment.location || '',
+      comment: '',
+    });
+    setShowMoveModal(true);
+  };
+
+  const handleMoveSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        to_squad_id: moveForm.to_squad_id || null,
+        to_location: moveForm.to_location || null,
+        comment: moveForm.comment || null,
+      };
+      await equipmentAPI.move(id, payload);
+      setShowMoveModal(false);
+      await Promise.all([fetchEquipment(), fetchMovements()]);
+    } catch (err) {
+      console.error('Failed to move equipment:', err);
+      alert(err.response?.data?.message || 'Ошибка переноса оборудования');
     }
   };
 
@@ -273,6 +333,63 @@ const EquipmentDetail = () => {
         </div>
       </div>
 
+      {(isAdmin() || isResponsible()) && (
+        <div className="card" style={{ marginTop: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2 style={{ margin: 0, fontSize: '18px' }}>Перемещение оборудования</h2>
+            <button onClick={openMoveModal} className="btn btn-secondary">
+              <span className="material-icons">sync_alt</span>
+              Перенести
+            </button>
+          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+            Можно изменить сквад (кабинет) и/или местоположение. Все изменения сохраняются в истории перемещений.
+          </p>
+        </div>
+      )}
+
+      <div className="card" style={{ marginTop: '24px' }}>
+        <h2 style={{ marginTop: 0, marginBottom: '16px', fontSize: '18px' }}>История перемещений</h2>
+        {movementsLoading ? (
+          <div className="loading"><div className="spinner"></div></div>
+        ) : movements.length === 0 ? (
+          <p style={{ color: 'var(--text-secondary)' }}>Перемещения ещё не зарегистрированы.</p>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--divider)', color: 'var(--text-secondary)' }}>
+                <th style={{ padding: '8px', textAlign: 'left' }}>Когда</th>
+                <th style={{ padding: '8px', textAlign: 'left' }}>Откуда</th>
+                <th style={{ padding: '8px', textAlign: 'left' }}>Куда</th>
+                <th style={{ padding: '8px', textAlign: 'left' }}>Кто</th>
+                <th style={{ padding: '8px', textAlign: 'left' }}>Комментарий</th>
+              </tr>
+            </thead>
+            <tbody>
+              {movements.map((m) => (
+                <tr key={m.id} style={{ borderBottom: '1px solid var(--divider)' }}>
+                  <td style={{ padding: '8px', whiteSpace: 'nowrap' }}>
+                    {m.moved_at ? format(new Date(m.moved_at), 'dd.MM.yyyy HH:mm') : '-'}
+                  </td>
+                  <td style={{ padding: '8px' }}>
+                    {m.from_location || '—'}
+                  </td>
+                  <td style={{ padding: '8px' }}>
+                    {m.to_location || '—'}
+                  </td>
+                  <td style={{ padding: '8px' }}>
+                    {m.moved_by_name || '—'}
+                  </td>
+                  <td style={{ padding: '8px' }}>
+                    {m.comment || '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
       <div style={{ display: 'flex', gap: '12px', marginTop: '16px', flexWrap: 'wrap' }}>
         {equipment.available_quantity > 0 && (
           <>
@@ -460,6 +577,85 @@ const EquipmentDetail = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно переноса оборудования */}
+      {showMoveModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setShowMoveModal(false)}
+        >
+          <div
+            className="card"
+            style={{
+              maxWidth: '500px',
+              width: '90%',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Перенос оборудования</h3>
+            <form onSubmit={handleMoveSubmit}>
+              <div style={{ marginBottom: '12px' }}>
+                <label className="label">Сквад</label>
+                <select
+                  className="input"
+                  value={moveForm.to_squad_id}
+                  onChange={(e) => setMoveForm({ ...moveForm, to_squad_id: e.target.value })}
+                >
+                  <option value="">Без сквада</option>
+                  {squads.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div style={{ marginBottom: '12px' }}>
+                <label className="label">Местоположение</label>
+                <input
+                  type="text"
+                  className="input"
+                  value={moveForm.to_location}
+                  onChange={(e) => setMoveForm({ ...moveForm, to_location: e.target.value })}
+                  placeholder="Например: Кабинет 227"
+                />
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                <label className="label">Комментарий</label>
+                <textarea
+                  className="input"
+                  rows={3}
+                  value={moveForm.comment}
+                  onChange={(e) => setMoveForm({ ...moveForm, comment: e.target.value })}
+                  placeholder="Причина или детали перемещения (необязательно)"
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowMoveModal(false)}
+                >
+                  Отмена
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Сохранить
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

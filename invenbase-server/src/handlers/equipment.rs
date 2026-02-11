@@ -3,7 +3,12 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::models::{
-    Equipment, EquipmentWithDetails, CreateEquipmentRequest, UpdateEquipmentRequest,
+    Equipment,
+    EquipmentWithDetails,
+    CreateEquipmentRequest,
+    UpdateEquipmentRequest,
+    EquipmentMovement,
+    CreateEquipmentMovementRequest,
 };
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
@@ -327,5 +332,158 @@ pub async fn delete_equipment(
     .await;
 
     Ok(HttpResponse::NoContent().finish())
+}
+
+/// Перенос оборудования в другой сквад / кабинет с записью истории перемещений.
+pub async fn move_equipment(
+    state: web::Data<AppState>,
+    claims: Claims,
+    path: web::Path<Uuid>,
+    req: web::Json<CreateEquipmentMovementRequest>,
+) -> Result<HttpResponse, AppError> {
+    // Только админ или ответственный
+    AuthService::require_any_role(&claims, &["admin", "responsible"])?;
+
+    let equipment_id = path.into_inner();
+    let user_id = Uuid::parse_str(&claims.sub)
+        .map_err(|_| AppError::Unauthorized("Invalid user id in token".to_string()))?;
+
+    // Получаем текущее состояние оборудования и ответственного сквада
+    let row = sqlx::query!(
+        r#"
+        SELECT e.squad_id, e.location, s.responsible_user_id
+        FROM equipment e
+        LEFT JOIN squads s ON e.squad_id = s.id
+        WHERE e.id = $1
+        "#,
+        equipment_id
+    )
+    .fetch_optional(&state.db.pool)
+    .await?;
+
+    let row = match row {
+        Some(r) => r,
+        None => return Err(AppError::NotFound("Equipment not found".to_string())),
+    };
+
+    // Ответственный может перемещать только оборудование своего сквада
+    if claims.role == "responsible" {
+        if let Some(responsible_id) = row.responsible_user_id {
+            if responsible_id != user_id {
+                return Err(AppError::BadRequest(
+                    "Вы можете перемещать только оборудование своего сквада".to_string(),
+                ));
+            }
+        } else {
+            return Err(AppError::BadRequest(
+                "У оборудования не указан ответственный сквада".to_string(),
+            ));
+        }
+    }
+
+    let from_squad_id = row.squad_id;
+    let from_location = row.location;
+
+    // Обновляем оборудование
+    sqlx::query::<sqlx::Postgres>(
+        r#"
+        UPDATE equipment
+        SET squad_id = $1,
+            location = COALESCE($2, location),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $3
+        "#,
+    )
+    .bind(&req.to_squad_id)
+    .bind(&req.to_location)
+    .bind(equipment_id)
+    .execute(&state.db.pool)
+    .await?;
+
+    // Записываем движение
+    let movement_id = Uuid::new_v4();
+    sqlx::query::<sqlx::Postgres>(
+        r#"
+        INSERT INTO equipment_movements (
+            id,
+            equipment_id,
+            from_squad_id,
+            to_squad_id,
+            from_location,
+            to_location,
+            moved_by,
+            comment
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        "#
+    )
+    .bind(movement_id)
+    .bind(equipment_id)
+    .bind(from_squad_id)
+    .bind(&req.to_squad_id)
+    .bind(from_location)
+    .bind(&req.to_location)
+    .bind(user_id)
+    .bind(&req.comment)
+    .execute(&state.db.pool)
+    .await?;
+
+    let movement: EquipmentMovement = sqlx::query_as::<sqlx::Postgres, _>(
+        r#"
+        SELECT
+            m.id,
+            m.equipment_id,
+            m.from_squad_id,
+            m.to_squad_id,
+            m.from_location,
+            m.to_location,
+            m.moved_by,
+            u.full_name as moved_by_name,
+            m.comment,
+            m.moved_at
+        FROM equipment_movements m
+        LEFT JOIN users u ON m.moved_by = u.id
+        WHERE m.id = $1
+        "#
+    )
+    .bind(movement_id)
+    .fetch_one(&state.db.pool)
+    .await?;
+
+    Ok(HttpResponse::Created().json(movement))
+}
+
+/// История перемещений оборудования.
+pub async fn get_equipment_movements(
+    state: web::Data<AppState>,
+    _claims: Claims,
+    path: web::Path<Uuid>,
+) -> Result<HttpResponse, AppError> {
+    let equipment_id = path.into_inner();
+
+    let movements: Vec<EquipmentMovement> = sqlx::query_as::<sqlx::Postgres, _>(
+        r#"
+        SELECT
+            m.id,
+            m.equipment_id,
+            m.from_squad_id,
+            m.to_squad_id,
+            m.from_location,
+            m.to_location,
+            m.moved_by,
+            u.full_name as moved_by_name,
+            m.comment,
+            m.moved_at
+        FROM equipment_movements m
+        LEFT JOIN users u ON m.moved_by = u.id
+        WHERE m.equipment_id = $1
+        ORDER BY m.moved_at DESC
+        "#,
+    )
+    .bind(equipment_id)
+    .fetch_all(&state.db.pool)
+    .await?;
+
+    Ok(HttpResponse::Ok().json(movements))
 }
 
