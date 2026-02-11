@@ -79,6 +79,8 @@ pub struct Equipment {
     pub category_id: Option<Uuid>,
     pub quantity: i32,
     pub available_quantity: i32,
+    #[serde(default)]
+    pub is_unique: bool,
     pub location: Option<String>,
     pub qr_code: Option<String>,
     pub responsible_user_id: Option<Uuid>,
@@ -96,6 +98,8 @@ pub struct EquipmentWithDetails {
     pub category_name: Option<String>,
     pub quantity: i32,
     pub available_quantity: i32,
+    #[serde(default)]
+    pub is_unique: bool,
     pub location: Option<String>,
     pub qr_code: Option<String>,
     pub responsible_user_id: Option<Uuid>,
@@ -110,9 +114,11 @@ pub struct CreateEquipmentRequest {
     pub name: String,
     pub description: Option<String>,
     pub category_id: Option<Uuid>,
-    pub quantity: i32,
+    pub quantity: Option<i32>,
     pub location: Option<String>,
     pub responsible_user_id: Option<Uuid>,
+    #[serde(default)]
+    pub is_unique: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -125,6 +131,7 @@ pub struct UpdateEquipmentRequest {
     pub location: Option<String>,
     pub responsible_user_id: Option<Uuid>,
     pub status: Option<String>,
+    pub is_unique: Option<bool>,
 }
 
 // ========== Category Models ==========
@@ -212,6 +219,12 @@ pub struct CreateBookingRequest {
     pub end_date: DateTime<Utc>,
     pub purpose: Option<String>,
     pub permission_type: Option<String>,
+}
+
+/// Тело запроса массового создания бронирований из корзины (одно уведомление вместо N).
+#[derive(Debug, Deserialize)]
+pub struct CreateBulkBookingsRequest {
+    pub bookings: Vec<CreateBookingRequest>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

@@ -18,6 +18,7 @@ import com.invenbase.app.models.Equipment;
 import com.invenbase.app.utils.AuthManager;
 import com.invenbase.app.utils.CartManager;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -149,7 +150,7 @@ public class EquipmentDetailActivity extends BaseActivity {
         boolean canEdit = authManager.isAdmin() || authManager.isResponsible();
         buttonEdit.setVisibility(canEdit ? View.VISIBLE : View.GONE);
         buttonQrCode.setVisibility(canEdit ? View.VISIBLE : View.GONE);
-        buttonDelete.setVisibility(authManager.isAdmin() ? View.VISIBLE : View.GONE);
+        buttonDelete.setVisibility(canEdit ? View.VISIBLE : View.GONE);
     }
 
     private void addToCart() {
@@ -184,10 +185,29 @@ public class EquipmentDetailActivity extends BaseActivity {
 
     private void deleteEquipment() {
         if (equipment == null) return;
+        final android.widget.EditText input = new android.widget.EditText(this);
+        input.setHint(equipment.getName());
+        input.setMinEms(12);
+
+        android.widget.LinearLayout wrap = new android.widget.LinearLayout(this);
+        wrap.setOrientation(android.widget.LinearLayout.VERTICAL);
+        int pad = (int) (40 * getResources().getDisplayMetrics().density);
+        wrap.setPadding(pad, pad, pad, 0);
+        wrap.addView(input);
+
         new android.app.AlertDialog.Builder(this)
-                .setMessage(R.string.confirm_delete_equipment)
+                .setTitle(R.string.confirm_delete_equipment)
+                .setMessage(getString(R.string.confirm_delete_equipment) + "\n\n" +
+                        "Для подтверждения введите точное название оборудования.")
+                .setView(wrap)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.delete, (dialog, which) -> {
+                    String typed = input.getText().toString().trim();
+                    if (!equipment.getName().equals(typed)) {
+                        Toast.makeText(this, "Название оборудования не совпадает. Удаление отменено.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     progressBar.setVisibility(View.VISIBLE);
                     apiService.deleteEquipment(equipment.getId()).enqueue(new Callback<Void>() {
                         @Override
@@ -216,84 +236,187 @@ public class EquipmentDetailActivity extends BaseActivity {
         
         progressBar.setVisibility(View.VISIBLE);
         
-        // Сначала получаем данные QR-кода
+        // Сначала получаем данные QR-кода (код, название, описание)
         apiService.getQRCodeData(equipment.getId()).enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    String qrData = (String) response.body().get("qr_code");
-                    
-                    // Затем генерируем изображение QR-кода
+                    Map<String, Object> data = response.body();
+                    final String qrData = data.get("qr_code") != null ? data.get("qr_code").toString() : null;
+                    final String qrName = data.get("name") != null ? data.get("name").toString() : (equipment.getName() != null ? equipment.getName() : "");
+                    String qrDesc = data.get("description") != null ? data.get("description").toString() : "";
+                    final String qrDescFinal = (qrDesc != null && !qrDesc.trim().isEmpty()) ? qrDesc : "—";
+
                     apiService.generateQRCode(equipment.getId()).enqueue(new Callback<ResponseBody>() {
                         @Override
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            progressBar.setVisibility(View.GONE);
                             if (response.isSuccessful() && response.body() != null) {
-                                showQRCodeDialog(response.body(), qrData);
+                                try {
+                                    final byte[] bodyBytes = response.body().bytes();
+                                    runOnUiThread(() -> {
+                                        progressBar.setVisibility(View.GONE);
+                                        showQRCodeDialog(bodyBytes, qrData, qrName, qrDescFinal);
+                                    });
+                                } catch (IOException e) {
+                                    runOnUiThread(() -> {
+                                        progressBar.setVisibility(View.GONE);
+                                        Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                                    });
+                                }
                             } else {
-                                Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                                runOnUiThread(() -> {
+                                    progressBar.setVisibility(View.GONE);
+                                    Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                                });
                             }
                         }
 
                         @Override
                         public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            progressBar.setVisibility(View.GONE);
-                            Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                            runOnUiThread(() -> {
+                                progressBar.setVisibility(View.GONE);
+                                Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                            });
                         }
                     });
                 } else {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                    runOnUiThread(() -> {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                    });
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                runOnUiThread(() -> {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                });
             }
         });
     }
 
-    private void showQRCodeDialog(ResponseBody qrBody, String qrData) {
+    private static String trimTo(String s, int maxLen) {
+        if (s == null) return "";
+        return s.length() <= maxLen ? s : s.substring(0, maxLen - 1) + "…";
+    }
+
+    private android.graphics.Bitmap buildQRLabelBitmap(android.graphics.Bitmap qrBitmap, String qrData, String name, String desc) {
+        float density = getResources().getDisplayMetrics().density;
+        int qrSize = Math.min(qrBitmap.getWidth(), qrBitmap.getHeight());
+        int padding = (int) (24 * density);
+        int lineHeight = (int) (18 * density);
+        int textSizePx = (int) (13 * density);
+        // Ширина картинки с запасом для текста (минимум ~320dp), QR по центру
+        int minWidth = (int) (320 * density);
+        int width = Math.max(qrSize + padding * 2, minWidth);
+        int height = padding + qrSize + padding + lineHeight * 3 + padding;
+
+        android.graphics.Bitmap label = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas canvas = new android.graphics.Canvas(label);
+        canvas.drawColor(android.graphics.Color.WHITE);
+
+        int qrX = (width - qrSize) / 2;
+        android.graphics.Rect src = new android.graphics.Rect(0, 0, qrBitmap.getWidth(), qrBitmap.getHeight());
+        android.graphics.Rect dst = new android.graphics.Rect(qrX, padding, qrX + qrSize, padding + qrSize);
+        canvas.drawBitmap(qrBitmap, src, dst, null);
+
+        android.graphics.Paint paint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(android.graphics.Color.BLACK);
+        paint.setTextSize(textSizePx);
+        paint.setTextAlign(android.graphics.Paint.Align.CENTER);
+        int centerX = width / 2;
+        int y = padding + qrSize + padding + lineHeight;
+        String codeText = trimTo(getString(R.string.qr_manual_code) + (qrData != null ? qrData : ""), 52);
+        canvas.drawText(codeText, centerX, y, paint);
+        y += lineHeight;
+        String nameText = trimTo(getString(R.string.name) + ": " + (name != null ? name : ""), 52);
+        canvas.drawText(nameText, centerX, y, paint);
+        y += lineHeight;
+        String descStr = (desc != null && !desc.equals("—")) ? desc : "—";
+        String descText = trimTo(getString(R.string.description) + ": " + descStr, 52);
+        canvas.drawText(descText, centerX, y, paint);
+        return label;
+    }
+
+    private void showQRCodeDialog(byte[] qrBytes, String qrData, String qrName, String qrDesc) {
         try {
-            byte[] qrBytes = qrBody.bytes();
             android.graphics.Bitmap qrBitmap = android.graphics.BitmapFactory.decodeByteArray(qrBytes, 0, qrBytes.length);
-            
+            if (qrBitmap == null) {
+                // Сервер может отдавать SVG (старая сборка) — BitmapFactory не декодирует SVG
+                boolean looksLikeSvg = qrBytes.length > 10 && (
+                    (qrBytes[0] == '<' && (qrBytes[1] == '?' || (qrBytes[1] == 's' && qrBytes[2] == 'v'))) ||
+                    (qrBytes[0] == (byte) 0xef && qrBytes[1] == (byte) 0xbb && qrBytes[2] == (byte) 0xbf && qrBytes[3] == '<')
+                );
+                Toast.makeText(this, looksLikeSvg ? R.string.qr_server_needs_png : R.string.error, Toast.LENGTH_LONG).show();
+                return;
+            }
+            android.graphics.Bitmap labelBitmap = buildQRLabelBitmap(qrBitmap, qrData, qrName, qrDesc);
+
             android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
             View dialogView = getLayoutInflater().inflate(R.layout.dialog_qr_code, null);
-            
+
             android.widget.ImageView imageView = dialogView.findViewById(R.id.image_qr_code);
             TextView textQrData = dialogView.findViewById(R.id.text_qr_data);
             Button buttonDownload = dialogView.findViewById(R.id.button_download_qr);
-            
+            Button buttonPrint = dialogView.findViewById(R.id.button_print_qr);
+
             imageView.setImageBitmap(qrBitmap);
             if (qrData != null) {
-                textQrData.setText(qrData);
+                textQrData.setText(getString(R.string.qr_manual_code) + qrData);
+                textQrData.setVisibility(View.VISIBLE);
             } else {
                 textQrData.setVisibility(View.GONE);
             }
-            
+
+            String baseName = equipment.getName() != null ? equipment.getName().replaceAll("[\\\\/:*?\"<>|\\p{Cntrl}]", "_").replaceAll("\\s+", " ").trim() : "";
+            if (baseName.isEmpty()) baseName = equipment.getId() != null ? equipment.getId().length() >= 8 ? equipment.getId().substring(0, 8) : equipment.getId() : "qr";
+            String filename = "qr-" + baseName + ".png";
+
             buttonDownload.setOnClickListener(v -> {
-                // Сохраняем QR-код в галерею
-                String filename = "qr-code-" + equipment.getId() + ".png";
                 android.content.ContentValues values = new android.content.ContentValues();
                 values.put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, filename);
                 values.put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/png");
-                
                 android.net.Uri uri = getContentResolver().insert(
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-                
                 try {
                     java.io.OutputStream out = getContentResolver().openOutputStream(uri);
-                    qrBitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
-                    out.close();
+                    labelBitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
+                    if (out != null) out.close();
                     Toast.makeText(this, getString(R.string.qr_code_saved), Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     Toast.makeText(this, R.string.error, Toast.LENGTH_SHORT).show();
                 }
             });
-            
+
+            if (buttonPrint != null) {
+                buttonPrint.setVisibility(View.VISIBLE);
+                buttonPrint.setOnClickListener(v -> {
+                    try {
+                        android.content.ContentValues values = new android.content.ContentValues();
+                        values.put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, filename);
+                        values.put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/png");
+                        android.net.Uri uri = getContentResolver().insert(
+                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                        if (uri != null) {
+                            java.io.OutputStream out = getContentResolver().openOutputStream(uri);
+                            labelBitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
+                            if (out != null) out.close();
+                            Intent intent = new Intent(Intent.ACTION_SEND);
+                            intent.setType("image/png");
+                            intent.putExtra(Intent.EXTRA_STREAM, uri);
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            startActivity(Intent.createChooser(intent, getString(R.string.print_or_share)));
+                        } else {
+                            Toast.makeText(this, R.string.error, Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(this, R.string.error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
             builder.setView(dialogView);
             builder.setPositiveButton(R.string.cancel, null);
             builder.setTitle(R.string.qr_code);

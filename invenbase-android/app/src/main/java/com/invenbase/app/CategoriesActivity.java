@@ -59,7 +59,7 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
         Button buttonAdd = findViewById(R.id.button_add_category);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new CategoriesAdapter(this, authManager.isAdmin());
+        adapter = new CategoriesAdapter(this, authManager.isAdmin() || authManager.isResponsible());
         recyclerView.setAdapter(adapter);
 
         buttonAdd.setOnClickListener(v -> showCategoryDialog(null));
@@ -164,13 +164,31 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
         });
     }
 
-    private void deleteCategory(String id) {
+    private void deleteCategory(Category target) {
+        final EditText input = new EditText(this);
+        input.setHint(target.getName());
+        input.setMinEms(12);
+
+        android.widget.LinearLayout wrap = new android.widget.LinearLayout(this);
+        wrap.setOrientation(android.widget.LinearLayout.VERTICAL);
+        int pad = (int) (40 * getResources().getDisplayMetrics().density);
+        wrap.setPadding(pad, pad, pad, 0);
+        wrap.addView(input);
+
         new AlertDialog.Builder(this)
-                .setMessage(R.string.confirm_delete_category)
+                .setTitle(R.string.confirm_delete_category)
+                .setMessage("Для подтверждения введите точное название категории.")
+                .setView(wrap)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.delete, (dialog, which) -> {
+                    String typed = input.getText().toString().trim();
+                    if (!target.getName().equals(typed)) {
+                        Toast.makeText(this, "Название категории не совпадает. Удаление отменено.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     progressBar.setVisibility(View.VISIBLE);
-                    apiService.deleteCategory(id).enqueue(new Callback<Void>() {
+                    apiService.deleteCategory(target.getId()).enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             progressBar.setVisibility(View.GONE);
@@ -197,11 +215,11 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
 
     @Override
     public void onDelete(Category category) {
-        if (!authManager.isAdmin()) {
+        if (!authManager.isAdmin() && !authManager.isResponsible()) {
             Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();
             return;
         }
-        deleteCategory(category.getId());
+        deleteCategory(category);
     }
 }
 

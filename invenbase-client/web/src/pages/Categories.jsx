@@ -9,6 +9,8 @@ const Categories = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({ name: '', description: '' });
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState('');
 
   useEffect(() => {
     if (isAdmin() || isResponsible()) {
@@ -65,12 +67,26 @@ const Categories = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    const category = categories.find(c => c.id === id);
-    if (!window.confirm(`Вы уверены, что хотите удалить категорию "${category?.name}"?\n\nВнимание: Если в этой категории есть оборудование, удаление может быть невозможно.`)) {
+  const openDeleteModal = (category) => {
+    if (category) {
+      setDeleteTarget(category);
+      setDeleteConfirmName('');
+    }
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteTarget(null);
+    setDeleteConfirmName('');
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    if (deleteConfirmName.trim() !== deleteTarget.name.trim()) {
+      alert('Название категории не совпадает. Удаление отменено.');
       return;
     }
-
+    const id = deleteTarget.id;
+    closeDeleteModal();
     try {
       await categoriesAPI.delete(id);
       alert('Категория удалена');
@@ -132,9 +148,9 @@ const Categories = () => {
                       <span className="material-icons" style={{ fontSize: '18px' }}>edit</span>
                       Редактировать
                     </button>
-                    {isAdmin() && (
+                    {(isAdmin() || isResponsible()) && (
                       <button
-                        onClick={() => handleDelete(category.id)}
+                        onClick={() => openDeleteModal(category)}
                         className="btn btn-danger"
                         style={{ fontSize: '12px', padding: '6px 12px' }}
                       >
@@ -158,6 +174,58 @@ const Categories = () => {
           </div>
         )}
       </div>
+
+      {/* Модальное окно подтверждения удаления категории */}
+      {deleteTarget && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={closeDeleteModal}
+        >
+          <div
+            className="card"
+            style={{
+              maxWidth: '400px',
+              width: '90%',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ marginTop: 0 }}>Удаление категории</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
+              Для подтверждения введите точное название: <strong style={{ color: 'var(--text-primary)' }}>{deleteTarget.name}</strong>
+            </p>
+            <input
+              type="text"
+              className="input"
+              placeholder={deleteTarget.name}
+              value={deleteConfirmName}
+              onChange={(e) => setDeleteConfirmName(e.target.value)}
+              style={{ marginBottom: '16px' }}
+              autoFocus
+            />
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button type="button" onClick={closeDeleteModal} className="btn btn-secondary">
+                Отмена
+              </button>
+              <button type="button" onClick={handleDeleteConfirm} className="btn btn-danger">
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Модальное окно */}
       {showModal && (

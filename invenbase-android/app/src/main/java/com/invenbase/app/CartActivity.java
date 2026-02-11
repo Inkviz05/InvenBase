@@ -1,30 +1,37 @@
 package com.invenbase.app;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
 import com.invenbase.app.adapters.CartAdapter;
 import com.invenbase.app.api.ApiClient;
 import com.invenbase.app.api.ApiService;
+import com.invenbase.app.models.ApiError;
 import com.invenbase.app.models.Booking;
+import com.invenbase.app.models.BulkBookingsRequest;
 import com.invenbase.app.models.CartItem;
+import com.invenbase.app.models.CreateBookingItem;
 import com.invenbase.app.utils.CartManager;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Date;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 
 import retrofit2.Call;
@@ -39,6 +46,11 @@ public class CartActivity extends BaseActivity {
     private TextView textEmpty;
     private Button buttonCreateBookings;
     private ProgressBar progressBar;
+    private View cardPeriod;
+    private EditText editPeriodStart;
+    private EditText editPeriodEnd;
+    private final Calendar startCalendar = Calendar.getInstance();
+    private final Calendar endCalendar = Calendar.getInstance();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,6 +64,13 @@ public class CartActivity extends BaseActivity {
         textEmpty = findViewById(R.id.text_cart_empty);
         buttonCreateBookings = findViewById(R.id.button_create_bookings);
         progressBar = findViewById(R.id.progress_bar);
+        cardPeriod = findViewById(R.id.card_period);
+        editPeriodStart = findViewById(R.id.edit_period_start);
+        editPeriodEnd = findViewById(R.id.edit_period_end);
+
+        initPeriodCalendars();
+        editPeriodStart.setOnClickListener(v -> pickDateTime(startCalendar, editPeriodStart));
+        editPeriodEnd.setOnClickListener(v -> pickDateTime(endCalendar, editPeriodEnd));
 
         adapter = new CartAdapter();
         recyclerCart.setLayoutManager(new LinearLayoutManager(this));
@@ -66,6 +85,47 @@ public class CartActivity extends BaseActivity {
         loadCart();
     }
 
+    private void initPeriodCalendars() {
+        // Инициализируем значения календарей, но поля оставляем пустыми —
+        // пользователь должен сам выбрать период явно.
+        startCalendar.setTimeInMillis(System.currentTimeMillis());
+        endCalendar.setTimeInMillis(System.currentTimeMillis());
+        endCalendar.add(Calendar.DAY_OF_MONTH, 1);
+    }
+
+    private void pickDateTime(Calendar calendar, EditText target) {
+        Calendar now = Calendar.getInstance();
+        DatePickerDialog datePicker = new DatePickerDialog(
+                this,
+                (view, year, month, dayOfMonth) -> {
+                    calendar.set(Calendar.YEAR, year);
+                    calendar.set(Calendar.MONTH, month);
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    TimePickerDialog timePicker = new TimePickerDialog(
+                            this,
+                            (timeView, hourOfDay, minute) -> {
+                                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                calendar.set(Calendar.MINUTE, minute);
+                                target.setText(formatLocal(calendar));
+                            },
+                            now.get(Calendar.HOUR_OF_DAY),
+                            now.get(Calendar.MINUTE),
+                            true
+                    );
+                    timePicker.show();
+                },
+                now.get(Calendar.YEAR),
+                now.get(Calendar.MONTH),
+                now.get(Calendar.DAY_OF_MONTH)
+        );
+        datePicker.show();
+    }
+
+    private String formatLocal(Calendar calendar) {
+        SimpleDateFormat fmt = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
+        return fmt.format(calendar.getTime());
+    }
+
     private void loadCart() {
         List<CartItem> items = cartManager.getItems();
         adapter.setItems(items);
@@ -73,6 +133,7 @@ public class CartActivity extends BaseActivity {
         recyclerCart.setVisibility(hasItems ? View.VISIBLE : View.GONE);
         buttonCreateBookings.setEnabled(hasItems);
         textEmpty.setVisibility(hasItems ? View.GONE : View.VISIBLE);
+        cardPeriod.setVisibility(hasItems ? View.VISIBLE : View.GONE);
     }
 
     private void createBulkBookings() {
@@ -80,53 +141,68 @@ public class CartActivity extends BaseActivity {
         if (items.isEmpty()) {
             return;
         }
-
-        progressBar.setVisibility(View.VISIBLE);
-        buttonCreateBookings.setEnabled(false);
-        createNextBooking(items, 0);
-    }
-
-    private void createNextBooking(List<CartItem> items, int index) {
-        if (index >= items.size()) {
-            progressBar.setVisibility(View.GONE);
-            cartManager.clear();
-            loadCart();
-            Toast.makeText(this, R.string.booking_created, Toast.LENGTH_SHORT).show();
+        if (editPeriodStart.getText().toString().trim().isEmpty()
+                || editPeriodEnd.getText().toString().trim().isEmpty()) {
+            Toast.makeText(this, R.string.fill_period_fields, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (endCalendar.getTimeInMillis() <= startCalendar.getTimeInMillis()) {
+            Toast.makeText(this, R.string.invalid_period, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        CartItem item = items.get(index);
-        Map<String, Object> data = buildDefaultBookingPayload(item.getEquipmentId(), item.getQuantity());
-        apiService.createBooking(data).enqueue(new Callback<Booking>() {
+        String startIso = buildIsoDate(new Date(startCalendar.getTimeInMillis()));
+        String endIso = buildIsoDate(new Date(endCalendar.getTimeInMillis()));
+        List<CreateBookingItem> bookings = new ArrayList<>();
+        for (CartItem item : items) {
+            bookings.add(new CreateBookingItem(
+                    item.getEquipmentId(),
+                    item.getQuantity(),
+                    startIso,
+                    endIso,
+                    "QR",
+                    "internal"
+            ));
+        }
+        BulkBookingsRequest body = new BulkBookingsRequest(bookings);
+
+        progressBar.setVisibility(View.VISIBLE);
+        buttonCreateBookings.setEnabled(false);
+        apiService.createBulkBookings(body).enqueue(new Callback<List<Booking>>() {
             @Override
-            public void onResponse(Call<Booking> call, Response<Booking> response) {
-                if (response.isSuccessful()) {
-                    createNextBooking(items, index + 1);
+            public void onResponse(Call<List<Booking>> call, Response<List<Booking>> response) {
+                progressBar.setVisibility(View.GONE);
+                buttonCreateBookings.setEnabled(true);
+                if (response.isSuccessful() && response.body() != null) {
+                    cartManager.clear();
+                    loadCart();
+                    Toast.makeText(CartActivity.this, R.string.booking_created, Toast.LENGTH_SHORT).show();
                 } else {
-                    progressBar.setVisibility(View.GONE);
-                    buttonCreateBookings.setEnabled(true);
-                    Toast.makeText(CartActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                    String msg = getErrorMessage(response);
+                    Toast.makeText(CartActivity.this, msg, Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<Booking> call, Throwable t) {
+            public void onFailure(Call<List<Booking>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 buttonCreateBookings.setEnabled(true);
-                Toast.makeText(CartActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                String msg = t.getMessage() != null ? t.getMessage() : getString(R.string.error);
+                Toast.makeText(CartActivity.this, msg, Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    private Map<String, Object> buildDefaultBookingPayload(String equipmentId, int quantity) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("equipment_id", equipmentId);
-        data.put("quantity", quantity);
-        data.put("permission_type", "internal");
-        data.put("purpose", "QR");
-        data.put("start_date", buildIsoDate(new Date()));
-        data.put("end_date", buildIsoDate(new Date(System.currentTimeMillis() + 24L * 60L * 60L * 1000L)));
-        return data;
+    private String getErrorMessage(Response<?> response) {
+        if (response.errorBody() == null) return getString(R.string.error);
+        try {
+            String body = response.errorBody().string();
+            ApiError err = new Gson().fromJson(body, ApiError.class);
+            if (err != null && err.getMessage() != null && !err.getMessage().isEmpty()) {
+                return err.getMessage();
+            }
+        } catch (IOException ignored) { }
+        return getString(R.string.error);
     }
 
     private String buildIsoDate(Date date) {

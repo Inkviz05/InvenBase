@@ -17,6 +17,8 @@ const EquipmentDetail = () => {
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState(null);
   const [qrData, setQrData] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmName, setDeleteConfirmName] = useState('');
 
   useEffect(() => {
     fetchEquipment();
@@ -33,11 +35,20 @@ const EquipmentDetail = () => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm('Вы уверены, что хотите удалить это оборудование?')) {
+  const openDeleteModal = () => {
+    if (equipment) {
+      setDeleteConfirmName('');
+      setShowDeleteModal(true);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!equipment) return;
+    if (deleteConfirmName.trim() !== equipment.name.trim()) {
+      alert('Название оборудования не совпадает. Удаление отменено.');
       return;
     }
-
+    setShowDeleteModal(false);
     try {
       await equipmentAPI.delete(id);
       navigate('/equipment');
@@ -63,15 +74,103 @@ const EquipmentDetail = () => {
     }
   };
 
+  const buildQRLabelCanvas = (qrImageUrl, callback) => {
+    if (!qrImageUrl || !equipment) return;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const qrSize = 280;
+      const padding = 24;
+      const lineHeight = 22;
+      const codeText = `Код для ручного ввода: ${qrData || equipment.qr_code || ''}`;
+      const nameText = `Название: ${equipment.name || ''}`;
+      const descText = `Описание: ${(equipment.description && equipment.description.trim()) ? equipment.description.trim() : '—'}`;
+      const maxTextWidth = 320;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.font = '14px sans-serif';
+      const wrap = (t) => {
+        const lines = [];
+        let rest = t;
+        while (rest.length) {
+          let chunk = rest.slice(0, 28);
+          if (chunk.length < rest.length) {
+            const lastSpace = chunk.lastIndexOf(' ');
+            if (lastSpace > 18) chunk = chunk.slice(0, lastSpace + 1);
+          }
+          lines.push(chunk);
+          rest = rest.slice(chunk.length).trim();
+        }
+        return lines;
+      };
+      const descLines = wrap(descText.length > 80 ? descText.slice(0, 80) + '…' : descText);
+      const textLines = [codeText, nameText, ...descLines];
+      canvas.width = Math.max(qrSize + padding * 2, maxTextWidth + padding * 2);
+      canvas.height = padding + qrSize + padding + textLines.length * lineHeight + padding;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const qrX = (canvas.width - qrSize) / 2;
+      ctx.drawImage(img, 0, 0, img.width, img.height, qrX, padding, qrSize, qrSize);
+      ctx.fillStyle = '#000';
+      ctx.font = '14px sans-serif';
+      let y = padding + qrSize + padding + lineHeight;
+      [codeText, nameText].forEach((t) => {
+        ctx.fillText(t.length > 42 ? t.slice(0, 42) + '…' : t, padding, y);
+        y += lineHeight;
+      });
+      descLines.forEach((line) => {
+        ctx.fillText(line, padding, y);
+        y += lineHeight;
+      });
+      callback(canvas);
+    };
+    img.onerror = () => callback(null);
+    img.src = qrCodeUrl;
+  };
+
   const handleDownloadQR = () => {
-    if (qrCodeUrl) {
-      const link = document.createElement('a');
-      link.href = qrCodeUrl;
-      link.download = `qr-code-${id}.svg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    buildQRLabelCanvas(qrCodeUrl, (canvas) => {
+      if (!canvas) return;
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const rawName = (equipment?.name || id || '').trim();
+        const safeName = rawName.replace(/[\x00-\x1f\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim() || `qr-${(id || '').slice(0, 8)}`;
+        link.download = `qr-${safeName}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    });
+  };
+
+  const handlePrintQR = () => {
+    buildQRLabelCanvas(qrCodeUrl, (canvas) => {
+      if (!canvas) return;
+      const dataUrl = canvas.toDataURL('image/png');
+      const w = window.open('', '_blank');
+      if (!w) {
+        alert('Разрешите всплывающие окна для печати');
+        return;
+      }
+      w.document.write(`
+        <!DOCTYPE html><html><head><title>QR-код: ${equipment?.name || ''}</title></head>
+        <body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;">
+          <img src="${dataUrl}" alt="QR" style="max-width:100%;height:auto;" />
+        </body></html>
+      `);
+      w.document.close();
+      w.onload = () => {
+        w.focus();
+        w.setTimeout(() => {
+          w.print();
+          w.onafterprint = () => w.close();
+        }, 250);
+      };
+    });
   };
 
   if (loading) {
@@ -213,8 +312,8 @@ const EquipmentDetail = () => {
               <span className="material-icons">qr_code</span>
               QR-код
             </button>
-            {isAdmin() && (
-              <button onClick={handleDelete} className="btn btn-danger">
+            {(isAdmin() || isResponsible()) && (
+              <button onClick={openDeleteModal} className="btn btn-danger">
                 <span className="material-icons">delete</span>
                 Удалить
               </button>
@@ -222,6 +321,58 @@ const EquipmentDetail = () => {
           </>
         )}
       </div>
+
+      {/* Модальное окно подтверждения удаления */}
+      {showDeleteModal && equipment && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div
+            className="card"
+            style={{
+              maxWidth: '400px',
+              width: '90%',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ marginTop: 0 }}>Удаление оборудования</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
+              Для подтверждения введите точное название: <strong style={{ color: 'var(--text-primary)' }}>{equipment.name}</strong>
+            </p>
+            <input
+              type="text"
+              className="input"
+              placeholder={equipment.name}
+              value={deleteConfirmName}
+              onChange={(e) => setDeleteConfirmName(e.target.value)}
+              style={{ marginBottom: '16px' }}
+              autoFocus
+            />
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button type="button" onClick={() => setShowDeleteModal(false)} className="btn btn-secondary">
+                Отмена
+              </button>
+              <button type="button" onClick={handleDeleteConfirm} className="btn btn-danger">
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Модальное окно QR-кода */}
       {showQRModal && (
@@ -297,10 +448,16 @@ const EquipmentDetail = () => {
                     <strong style={{ color: 'var(--text-primary)' }}>Код:</strong> <span style={{ color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{qrData}</span>
                   </div>
                 )}
-                <button onClick={handleDownloadQR} className="btn btn-primary">
-                  <span className="material-icons">download</span>
-                  Скачать QR-код
-                </button>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <button onClick={handleDownloadQR} className="btn btn-primary">
+                    <span className="material-icons">download</span>
+                    Скачать PNG
+                  </button>
+                  <button onClick={handlePrintQR} className="btn btn-secondary">
+                    <span className="material-icons">print</span>
+                    Печать
+                  </button>
+                </div>
               </div>
             )}
           </div>

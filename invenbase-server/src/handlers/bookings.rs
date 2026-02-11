@@ -1,7 +1,7 @@
 use actix_web::{web, HttpResponse};
 use uuid::Uuid;
 
-use crate::models::{Booking, BookingWithDetails, CreateBookingRequest, UpdateBookingRequest};
+use crate::models::{Booking, BookingWithDetails, CreateBookingRequest, CreateBulkBookingsRequest, UpdateBookingRequest};
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
 use crate::app_state::AppState;
@@ -118,6 +118,125 @@ pub async fn create_booking(
     .await?;
 
     Ok(HttpResponse::Created().json(booking))
+}
+
+/// Массовое создание бронирований (из корзины): одно уведомление администраторам вместо N.
+pub async fn create_bulk_bookings(
+    state: web::Data<AppState>,
+    claims: Claims,
+    req: web::Json<CreateBulkBookingsRequest>,
+) -> Result<HttpResponse, AppError> {
+    let user_id = uuid::Uuid::parse_str(&claims.sub)
+        .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
+
+    if req.bookings.is_empty() {
+        return Err(AppError::BadRequest("Список бронирований пуст".to_string()));
+    }
+
+    let mut created: Vec<Booking> = Vec::with_capacity(req.bookings.len());
+
+    let mut tx = state.db.pool.begin().await?;
+
+    for req_item in &req.bookings {
+        if let Some(equipment_id) = req_item.equipment_id {
+            let available: Option<(i32,)> = sqlx::query_as::<sqlx::Postgres, _>(
+                "SELECT available_quantity FROM equipment WHERE id = $1 FOR UPDATE"
+            )
+            .bind(equipment_id)
+            .fetch_optional(&mut *tx)
+            .await?;
+
+            if let Some((available_qty,)) = available {
+                if available_qty < req_item.quantity {
+                    return Err(AppError::BadRequest(
+                        format!("Недостаточно оборудования. Доступно: {}", available_qty)
+                    ));
+                }
+            } else {
+                return Err(AppError::NotFound("Equipment not found".to_string()));
+            }
+        }
+
+        let booking_id = uuid::Uuid::new_v4();
+        let permission_type = req_item.permission_type.as_deref().unwrap_or("internal").to_string();
+
+        sqlx::query::<sqlx::Postgres>(
+            "INSERT INTO bookings (id, user_id, equipment_id, group_id, quantity, start_date, end_date, purpose, permission_type, status)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending')"
+        )
+        .bind(booking_id)
+        .bind(user_id)
+        .bind(&req_item.equipment_id)
+        .bind(&req_item.group_id)
+        .bind(req_item.quantity)
+        .bind(req_item.start_date)
+        .bind(req_item.end_date)
+        .bind(&req_item.purpose)
+        .bind(&permission_type)
+        .execute(&mut *tx)
+        .await?;
+
+        if let Some(equipment_id) = req_item.equipment_id {
+            sqlx::query::<sqlx::Postgres>(
+                "UPDATE equipment SET available_quantity = available_quantity - $1 WHERE id = $2"
+            )
+            .bind(req_item.quantity)
+            .bind(equipment_id)
+            .execute(&mut *tx)
+            .await?;
+        }
+
+        let booking: Booking = sqlx::query_as::<sqlx::Postgres, _>(
+            "SELECT id, user_id, equipment_id, group_id, quantity, start_date, end_date, purpose, status, permission_type, created_at, updated_at 
+             FROM bookings WHERE id = $1"
+        )
+        .bind(booking_id)
+        .fetch_one(&mut *tx)
+        .await?;
+        created.push(booking);
+    }
+
+    tx.commit().await?;
+
+    let count = created.len();
+    let notification_message = format!(
+        "Пользователь {} создал {} бронирований",
+        claims.username,
+        count
+    );
+
+    let _ = sqlx::query::<sqlx::Postgres>(
+        "INSERT INTO notifications (user_id, title, message, notification_type)
+         SELECT id, 'Новые бронирования', $1, 'booking_request'
+         FROM users WHERE role IN ('admin', 'responsible')"
+    )
+    .bind(&notification_message)
+    .execute(&state.db.pool)
+    .await;
+
+    let admin_user_ids: Vec<(Uuid,)> = sqlx::query_as::<sqlx::Postgres, (Uuid,)>(
+        "SELECT id FROM users WHERE role IN ('admin', 'responsible')"
+    )
+    .fetch_all(&state.db.pool)
+    .await
+    .unwrap_or_default();
+
+    let mut data = serde_json::Map::new();
+    data.insert("type".to_string(), serde_json::Value::String("booking_request".to_string()));
+    data.insert("count".to_string(), serde_json::Value::Number(serde_json::Number::from(count)));
+    for (admin_id,) in admin_user_ids {
+        send_push_to_user(
+            state.get_ref(),
+            admin_id,
+            "Новые бронирования",
+            &notification_message,
+            data.clone(),
+        ).await;
+    }
+
+    log::info!("Bulk booking: {} bookings created by {}, one notification sent", count, claims.username);
+
+    Ok(HttpResponse::Created().json(created))
 }
 
 pub async fn get_bookings(

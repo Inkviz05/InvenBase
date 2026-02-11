@@ -49,7 +49,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                 .route("/{id}", web::put().to(|state: web::Data<AppState>, auth: AdminOrResponsible, path: web::Path<_>, req: web::Json<_>| async move {
                     equipment::update_equipment(state, auth.claims(), path, req).await
                 }))
-                .route("/{id}", web::delete().to(|state: web::Data<AppState>, auth: AdminOnly, path: web::Path<_>| async move {
+                .route("/{id}", web::delete().to(|state: web::Data<AppState>, auth: AdminOrResponsible, path: web::Path<_>| async move {
                     equipment::delete_equipment(state, auth.claims(), path).await
                 }))
         )
@@ -69,7 +69,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                 .route("/{id}", web::put().to(|state: web::Data<AppState>, auth: AdminOrResponsible, path: web::Path<_>, req: web::Json<_>| async move {
                     categories::update_category(state, auth.claims(), path, req).await
                 }))
-                .route("/{id}", web::delete().to(|state: web::Data<AppState>, auth: AdminOnly, path: web::Path<_>| async move {
+                .route("/{id}", web::delete().to(|state: web::Data<AppState>, auth: AdminOrResponsible, path: web::Path<_>| async move {
                     categories::delete_category(state, auth.claims(), path).await
                 }))
         )
@@ -99,6 +99,9 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
             web::scope("/bookings")
                 .route("", web::get().to(|state: web::Data<AppState>, auth: Authenticated| async move {
                     bookings::get_bookings(state, auth.claims()).await
+                }))
+                .route("bulk", web::post().to(|state: web::Data<AppState>, auth: Authenticated, req: web::Json<_>| async move {
+                    bookings::create_bulk_bookings(state, auth.claims(), req).await
                 }))
                 .route("", web::post().to(|state: web::Data<AppState>, auth: Authenticated, req: web::Json<_>| async move {
                     bookings::create_booking(state, auth.claims(), req).await

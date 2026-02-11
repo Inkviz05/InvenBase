@@ -1,21 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { equipmentAPI } from '../api/equipment';
 
 const QRScanner = () => {
+  const [searchParams] = useSearchParams();
+  const isManualMode = searchParams.get('mode') === 'manual';
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [cameraPermission, setCameraPermission] = useState(null);
+  const [manualCode, setManualCode] = useState('');
+  const [manualSubmitting, setManualSubmitting] = useState(false);
   const scannerRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkCameraPermission();
+    if (!isManualMode) checkCameraPermission();
     return () => {
       stopScanning();
     };
-  }, []);
+  }, [isManualMode]);
 
   const checkCameraPermission = async () => {
     try {
@@ -191,6 +195,66 @@ const QRScanner = () => {
       await handleQRCode(qrCode);
     }
   };
+
+  const handleManualFormSubmit = async (e) => {
+    e.preventDefault();
+    const code = manualCode.trim();
+    if (!code) {
+      setError('Введите QR-код');
+      return;
+    }
+    setError('');
+    setManualSubmitting(true);
+    try {
+      await handleQRCode(code);
+      setManualCode('');
+    } finally {
+      setManualSubmitting(false);
+    }
+  };
+
+  // Режим «Ввести код вручную» — только форма, без камеры
+  if (isManualMode) {
+    return (
+      <div>
+        <h1 style={{ marginBottom: '24px' }}>Ввод кода вручную</h1>
+        {error && <div className="error-message">{error}</div>}
+        <div className="card">
+          <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>
+            Введите QR-код оборудования (например, EQ-40c09389ba41)
+          </p>
+          <form onSubmit={handleManualFormSubmit}>
+            <input
+              type="text"
+              className="input"
+              value={manualCode}
+              onChange={(e) => setManualCode(e.target.value)}
+              placeholder="QR-код оборудования"
+              autoFocus
+              style={{ marginBottom: '16px', width: '100%' }}
+            />
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button type="submit" className="btn btn-primary" disabled={manualSubmitting}>
+                {manualSubmitting ? 'Поиск...' : 'Найти оборудование'}
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>
+                На главную
+              </button>
+            </div>
+          </form>
+        </div>
+        {result && (
+          <div className="card" style={{ marginTop: '24px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+            <h3>Найдено оборудование:</h3>
+            <p><strong>{result.name}</strong></p>
+            <button onClick={() => navigate(`/equipment/${result.id}`)} className="btn btn-primary">
+              Перейти к оборудованию
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div>

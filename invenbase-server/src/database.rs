@@ -59,6 +59,7 @@ impl Database {
                 category_id UUID REFERENCES equipment_categories(id),
                 quantity INTEGER NOT NULL DEFAULT 1,
                 available_quantity INTEGER NOT NULL DEFAULT 1,
+                is_unique BOOLEAN NOT NULL DEFAULT false,
                 location VARCHAR(255),
                 qr_code VARCHAR(255) UNIQUE,
                 responsible_user_id UUID REFERENCES users(id),
@@ -189,6 +190,13 @@ impl Database {
         )
         .execute(&self.pool)
         .await?;
+
+        // Миграция: добавить is_unique в существующие таблицы equipment (если колонки ещё нет)
+        let _ = sqlx::query(
+            "DO $$ BEGIN ALTER TABLE equipment ADD COLUMN is_unique BOOLEAN NOT NULL DEFAULT false; EXCEPTION WHEN duplicate_column THEN NULL; END $$"
+        )
+        .execute(&self.pool)
+        .await;
 
         // Создание индексов для оптимизации
         sqlx::query("CREATE INDEX IF NOT EXISTS idx_equipment_category ON equipment(category_id)")

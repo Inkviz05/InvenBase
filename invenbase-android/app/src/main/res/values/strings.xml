@@ -33,6 +33,9 @@
     <string name="available">Доступно</string>
     <string name="booked">Забронировано</string>
     <string name="total">Всего</string>
+    <string name="equipment_unique_single">Уникальное (1 экземпляр)</string>
+    <string name="qr_manual_code">Код для ручного ввода: </string>
+    <string name="print_or_share">Печать / Отправить</string>
     
     <!-- Bookings -->
     <string name="booking_list">Список бронирований</string>
@@ -98,6 +101,7 @@
     <string name="status">Статус</string>
     <string name="qr_code">QR-код</string>
     <string name="qr_code_saved">QR-код сохранён в галерею</string>
+    <string name="qr_server_needs_png">Сервер отдаёт старый формат (SVG). Пересоберите и перезапустите сервер — он должен отдавать QR в формате PNG.</string>
     <string name="download">Скачать</string>
     <string name="add_to_cart">Добавить в корзину</string>
     <string name="in_cart">В корзине</string>
@@ -108,6 +112,10 @@
     <!-- Cart -->
     <string name="cart_title">Корзина бронирований</string>
     <string name="cart_empty">Корзина пуста</string>
+    <string name="period_start">Начало периода</string>
+    <string name="period_end">Конец периода</string>
+    <string name="fill_period_fields">Укажите даты начала и окончания периода</string>
+    <string name="invalid_period">Укажите корректный период: дата окончания должна быть позже даты начала</string>
     <string name="create_bulk_booking">Создать бронирования</string>
     <string name="cart_quantity">Количество: %1$d</string>
     <string name="remove">Удалить</string>

@@ -1,6 +1,7 @@
 package com.invenbase.app.api;
 
 import com.invenbase.app.models.Booking;
+import com.invenbase.app.models.BulkBookingsRequest;
 import com.invenbase.app.models.Category;
 import com.invenbase.app.models.Equipment;
 import com.invenbase.app.models.LoginRequest;
@@ -56,6 +57,10 @@ public interface ApiService {
     
     @POST("/api/bookings")
     Call<Booking> createBooking(@Body Map<String, Object> data);
+
+    /** Массовое создание бронирований (из корзины). Одно уведомление администраторам вместо N. */
+    @POST("/api/bookings/bulk")
+    Call<List<Booking>> createBulkBookings(@Body BulkBookingsRequest data);
     
     @PUT("/api/bookings/{id}")
     Call<Booking> updateBooking(@Path("id") String id, @Body Map<String, Object> data);

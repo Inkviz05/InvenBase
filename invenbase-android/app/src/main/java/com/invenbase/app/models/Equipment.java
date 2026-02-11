@@ -23,7 +23,10 @@ public class Equipment {
     
     @SerializedName("available_quantity")
     private int availableQuantity;
-    
+
+    @SerializedName("is_unique")
+    private boolean isUnique;
+
     @SerializedName("location")
     private String location;
     
@@ -95,6 +98,14 @@ public class Equipment {
 
     public void setAvailableQuantity(int availableQuantity) {
         this.availableQuantity = availableQuantity;
+    }
+
+    public boolean isUnique() {
+        return isUnique;
+    }
+
+    public void setUnique(boolean unique) {
+        isUnique = unique;
     }
 
     public String getLocation() {

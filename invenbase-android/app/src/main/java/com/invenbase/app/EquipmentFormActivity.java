@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -40,6 +41,8 @@ public class EquipmentFormActivity extends BaseActivity {
     private Spinner spinnerCategory;
     private EditText editQuantity;
     private EditText editAvailableQuantity;
+    private CheckBox checkUnique;
+    private View quantityRow;
     private EditText editLocation;
     private Spinner spinnerStatus;
     private Button buttonSave;
@@ -69,7 +72,23 @@ public class EquipmentFormActivity extends BaseActivity {
         spinnerCategory = findViewById(R.id.spinner_category);
         editQuantity = findViewById(R.id.edit_quantity);
         editAvailableQuantity = findViewById(R.id.edit_available_quantity);
+        checkUnique = findViewById(R.id.check_unique);
+        quantityRow = findViewById(R.id.quantity_row);
         editLocation = findViewById(R.id.edit_location);
+
+        checkUnique.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                editQuantity.setText("1");
+                editAvailableQuantity.setText("1");
+                editQuantity.setEnabled(false);
+                editAvailableQuantity.setEnabled(false);
+                quantityRow.setVisibility(View.GONE);
+            } else {
+                editQuantity.setEnabled(true);
+                editAvailableQuantity.setEnabled(true);
+                quantityRow.setVisibility(View.VISIBLE);
+            }
+        });
         spinnerStatus = findViewById(R.id.spinner_status);
         buttonSave = findViewById(R.id.button_save);
         progressBar = findViewById(R.id.progress_bar);
@@ -127,6 +146,14 @@ public class EquipmentFormActivity extends BaseActivity {
                     editQuantity.setText(String.valueOf(eq.getQuantity()));
                     editAvailableQuantity.setText(String.valueOf(eq.getAvailableQuantity()));
                     editLocation.setText(eq.getLocation());
+                    checkUnique.setChecked(eq.isUnique());
+                    if (eq.isUnique()) {
+                        editQuantity.setEnabled(false);
+                        editAvailableQuantity.setEnabled(false);
+                        quantityRow.setVisibility(View.GONE);
+                    } else {
+                        quantityRow.setVisibility(View.VISIBLE);
+                    }
                     if (eq.getCategoryId() != null) {
                         for (int i = 0; i < categories.size(); i++) {
                             if (categories.get(i).getId().equals(eq.getCategoryId())) {
@@ -153,10 +180,15 @@ public class EquipmentFormActivity extends BaseActivity {
 
     private void save() {
         String name = editName.getText().toString().trim();
+        boolean isUnique = checkUnique.isChecked();
         String qtyStr = editQuantity.getText().toString().trim();
         String availStr = editAvailableQuantity.getText().toString().trim();
 
-        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(qtyStr)) {
+        if (TextUtils.isEmpty(name)) {
+            Toast.makeText(this, R.string.fill_required_fields, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!isUnique && TextUtils.isEmpty(qtyStr)) {
             Toast.makeText(this, R.string.fill_required_fields, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -168,8 +200,15 @@ public class EquipmentFormActivity extends BaseActivity {
         if (catPos > 0) {
             data.put("category_id", categories.get(catPos - 1).getId());
         }
-        data.put("quantity", Integer.parseInt(qtyStr));
-        data.put("available_quantity", TextUtils.isEmpty(availStr) ? Integer.parseInt(qtyStr) : Integer.parseInt(availStr));
+        data.put("is_unique", isUnique);
+        if (isUnique) {
+            data.put("quantity", 1);
+            data.put("available_quantity", 1);
+        } else {
+            int qty = Integer.parseInt(qtyStr);
+            data.put("quantity", qty);
+            data.put("available_quantity", TextUtils.isEmpty(availStr) ? qty : Integer.parseInt(availStr));
+        }
         data.put("location", editLocation.getText().toString().trim());
         String status = spinnerStatus.getSelectedItemPosition() == 0 ? "available" :
                 spinnerStatus.getSelectedItemPosition() == 1 ? "maintenance" : "unavailable";

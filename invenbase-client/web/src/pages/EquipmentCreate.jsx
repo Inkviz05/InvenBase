@@ -14,6 +14,7 @@ const EquipmentCreate = () => {
     category_id: '',
     quantity: 1,
     available_quantity: 1,
+    is_unique: false,
     location: '',
     status: 'available',
   });
@@ -48,8 +49,13 @@ const EquipmentCreate = () => {
       if (!dataToSend.category_id) {
         delete dataToSend.category_id;
       }
-      dataToSend.quantity = parseInt(dataToSend.quantity);
-      dataToSend.available_quantity = parseInt(dataToSend.available_quantity);
+      if (dataToSend.is_unique) {
+        dataToSend.quantity = 1;
+        dataToSend.available_quantity = 1;
+      } else {
+        dataToSend.quantity = parseInt(dataToSend.quantity) || 1;
+        dataToSend.available_quantity = parseInt(dataToSend.available_quantity) ?? dataToSend.quantity;
+      }
 
       await equipmentAPI.create(dataToSend);
       alert('Оборудование создано');
@@ -116,30 +122,57 @@ const EquipmentCreate = () => {
               </select>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-              <div>
-                <label className="label">Количество *</label>
+            <div style={{ marginBottom: '8px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                 <input
-                  type="number"
-                  className="input"
-                  value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                  min="1"
-                  required
+                  type="checkbox"
+                  checked={formData.is_unique}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setFormData({
+                      ...formData,
+                      is_unique: checked,
+                      quantity: checked ? 1 : formData.quantity,
+                      available_quantity: checked ? 1 : formData.available_quantity,
+                    });
+                  }}
                 />
-              </div>
-
-              <div>
-                <label className="label">Доступно</label>
-                <input
-                  type="number"
-                  className="input"
-                  value={formData.available_quantity}
-                  onChange={(e) => setFormData({ ...formData, available_quantity: e.target.value })}
-                  min="0"
-                />
-              </div>
+                <span>Уникальное (1 экземпляр)</span>
+              </label>
+              <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                Если отмечено, оборудование считается в единственном экземпляре; количество фиксируется на 1.
+              </p>
             </div>
+
+            {!formData.is_unique && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                <div>
+                  <label className="label">Количество *</label>
+                  <input
+                    type="number"
+                    className="input"
+                    value={formData.quantity}
+                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                    min="1"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Доступно</label>
+                  <input
+                    type="number"
+                    className="input"
+                    value={formData.available_quantity}
+                    onChange={(e) => setFormData({ ...formData, available_quantity: e.target.value })}
+                    min="0"
+                  />
+                </div>
+              </div>
+            )}
+            {formData.is_unique && (
+              <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Количество: 1 (фиксировано)</p>
+            )}
 
             <div>
               <label className="label">Местоположение</label>

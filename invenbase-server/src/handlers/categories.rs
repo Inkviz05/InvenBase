@@ -103,14 +103,31 @@ pub async fn delete_category(
     claims: Claims,
     path: web::Path<Uuid>,
 ) -> Result<HttpResponse, AppError> {
-    AuthService::require_role(&claims, "admin")?;
+    AuthService::require_any_role(&claims, &["admin", "responsible"])?;
 
     let category_id = path.into_inner();
 
     let result = sqlx::query::<sqlx::Postgres>("DELETE FROM equipment_categories WHERE id = $1")
         .bind(category_id)
         .execute(&state.db.pool)
-        .await?;
+        .await
+        .map_err(|e| {
+            // В категории ещё есть оборудование — возвращаем понятную ошибку вместо 500
+            if let sqlx::Error::Database(db_err) = &e {
+                if db_err.code().as_deref() == Some("23503")
+                    && db_err
+                        .constraint()
+                        .map(|c| c.to_string())
+                        == Some("equipment_category_id_fkey".to_string())
+                {
+                    return AppError::BadRequest(
+                        "Нельзя удалить категорию, пока в ней есть оборудование. Сначала удалите или перенесите оборудование."
+                            .to_string(),
+                    );
+                }
+            }
+            AppError::from(e)
+        })?;
 
     if result.rows_affected() == 0 {
         return Err(AppError::NotFound("Category not found".to_string()));

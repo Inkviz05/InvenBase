@@ -360,15 +360,14 @@ const Dashboard = () => {
             <span className="material-icons">qr_code_scanner</span>
             Сканировать QR-код
           </Link>
-          <button
-            type="button"
-            onClick={() => navigate('/scanner')}
+          <Link
+            to="/scanner?mode=manual"
             className="btn btn-secondary"
-            style={{ justifyContent: 'center' }}
+            style={{ textDecoration: 'none', justifyContent: 'center' }}
           >
             <span className="material-icons">keyboard</span>
-            Ввести вручную
-          </button>
+            Ввести код вручную
+          </Link>
         </>
       )}
       </div>

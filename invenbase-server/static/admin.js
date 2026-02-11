@@ -256,7 +256,7 @@ async function loadEquipment() {
                     ${isResponsible ? `
                         <div class="action-buttons">
                             <button class="btn btn-sm btn-primary" onclick="editEquipment('${eq.id}')">Редактировать</button>
-                            ${currentUser.role === 'admin' ? `<button class="btn btn-sm btn-danger" onclick="deleteEquipment('${eq.id}')">Удалить</button>` : ''}
+                            ${isResponsible ? `<button class="btn btn-sm btn-danger" onclick="deleteEquipment('${eq.id}')">Удалить</button>` : ''}
                             <button class="btn btn-sm btn-secondary" onclick="generateQR('${eq.id}')">QR-код</button>
                         </div>
                     ` : '<span style="color: #999;">-</span>'}
@@ -288,7 +288,7 @@ async function loadCategories() {
                     ${isResponsible ? `
                         <div class="action-buttons">
                             <button class="btn btn-sm btn-primary" onclick="editCategory('${cat.id}')">Редактировать</button>
-                            ${currentUser.role === 'admin' ? `<button class="btn btn-sm btn-danger" onclick="deleteCategory('${cat.id}')">Удалить</button>` : ''}
+                            ${isResponsible ? `<button class="btn btn-sm btn-danger" onclick="deleteCategory('${cat.id}')">Удалить</button>` : ''}
                         </div>
                     ` : '<span style="color: #999;">-</span>'}
                 </td>
@@ -572,8 +572,12 @@ function showAddEquipmentModal() {
                 <select name="category_id" id="categorySelect"></select>
             </div>
             <div class="form-group">
+                <label><input type="checkbox" name="is_unique" id="equipmentIsUniqueAdd" onchange="toggleQuantityGroup('add')"> Уникальное (1 экземпляр)</label>
+                <p class="form-hint">Если отмечено, оборудование в единственном экземпляре; количество фиксируется на 1.</p>
+            </div>
+            <div class="form-group" id="equipmentQuantityGroupAdd">
                 <label>Количество *</label>
-                <input type="number" name="quantity" required min="1">
+                <input type="number" name="quantity" id="equipmentQuantityAdd" value="1" required min="1">
             </div>
             <div class="form-group">
                 <label>Местоположение</label>
@@ -585,6 +589,17 @@ function showAddEquipmentModal() {
             </div>
         </form>
     `;
+    window.toggleQuantityGroup = function(mode) {
+        const isUnique = document.getElementById(mode === 'add' ? 'equipmentIsUniqueAdd' : 'equipmentIsUniqueEdit').checked;
+        const group = document.getElementById(mode === 'add' ? 'equipmentQuantityGroupAdd' : 'equipmentQuantityGroupEdit');
+        const availGroup = document.getElementById('equipmentAvailableGroupEdit');
+        const qtyInput = document.getElementById(mode === 'add' ? 'equipmentQuantityAdd' : 'equipmentQuantityEdit');
+        const availInput = document.getElementById('equipmentAvailableEdit');
+        if (group) group.style.display = isUnique ? 'none' : 'block';
+        if (availGroup) availGroup.style.display = isUnique ? 'none' : 'block';
+        if (qtyInput) { qtyInput.value = isUnique ? '1' : qtyInput.value; qtyInput.required = !isUnique; }
+        if (availInput) availInput.value = isUnique ? '1' : availInput.value;
+    };
     loadCategoriesForSelect();
     document.getElementById('modalOverlay').classList.add('show');
 }
@@ -666,10 +681,17 @@ async function saveEquipment(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData);
-    
+
     if (data.category_id === '') delete data.category_id;
-    data.quantity = parseInt(data.quantity);
-    
+    data.is_unique = !!data.is_unique;
+    if (data.is_unique) {
+        data.quantity = 1;
+        data.available_quantity = 1;
+    } else {
+        data.quantity = parseInt(data.quantity) || 1;
+        data.available_quantity = data.quantity;
+    }
+
     try {
         const response = await fetch(`${API_BASE}/equipment`, {
             method: 'POST',
@@ -751,8 +773,9 @@ async function saveUser(event) {
 
 // Удаление
 async function deleteEquipment(id) {
-    if (currentUser.role !== 'admin') {
-        showError('Только администраторы могут удалять оборудование');
+    const canDelete = currentUser.role === 'admin' || currentUser.role === 'responsible';
+    if (!canDelete) {
+        showError('Удалять оборудование могут только администратор или ответственный');
         return;
     }
     
@@ -767,14 +790,20 @@ async function deleteEquipment(id) {
         }
         
         const equipment = await equipmentResponse.json();
-        
-        const confirmed = confirm(
-            `Вы уверены, что хотите удалить оборудование "${equipment.name}"?\n\n` +
-            `Это действие нельзя отменить. Все связанные бронирования будут затронуты.`
+
+        const input = await showConfirmNameModal(
+            equipment.name,
+            'Удаление оборудования',
+            `Для подтверждения введите точное название: <strong>${equipment.name}</strong>`
         );
-        
-        if (!confirmed) return;
-        
+        if (input === null || input === undefined) {
+            return;
+        }
+        if (input !== equipment.name.trim()) {
+            showError('Название оборудования не совпадает. Удаление отменено.');
+            return;
+        }
+
         const response = await fetch(`${API_BASE}/equipment/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${authToken}` }
@@ -794,8 +823,9 @@ async function deleteEquipment(id) {
 }
 
 async function deleteCategory(id) {
-    if (currentUser.role !== 'admin') {
-        showError('Только администраторы могут удалять категории');
+    const canDelete = currentUser.role === 'admin' || currentUser.role === 'responsible';
+    if (!canDelete) {
+        showError('Удалять категории могут только администратор или ответственный');
         return;
     }
     
@@ -810,14 +840,19 @@ async function deleteCategory(id) {
         }
         
         const category = await categoryResponse.json();
-        
-        const confirmed = confirm(
-            `Вы уверены, что хотите удалить категорию "${category.name}"?\n\n` +
-            `Внимание: Если в этой категории есть оборудование, удаление может быть невозможно.\n` +
-            `Это действие нельзя отменить.`
+
+        const input = await showConfirmNameModal(
+            category.name,
+            'Удаление категории',
+            `Для подтверждения введите точное название: <strong>${category.name}</strong>`
         );
-        
-        if (!confirmed) return;
+        if (input === null || input === undefined) {
+            return;
+        }
+        if (input !== category.name.trim()) {
+            showError('Название категории не совпадает. Удаление отменено.');
+            return;
+        }
         
         const response = await fetch(`${API_BASE}/categories/${id}`, {
             method: 'DELETE',
@@ -965,12 +1000,16 @@ async function editEquipment(id) {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Количество *</label>
-                    <input type="number" name="quantity" value="${equipment.quantity || 1}" required min="1">
+                    <label><input type="checkbox" name="is_unique" id="equipmentIsUniqueEdit" ${equipment.is_unique ? 'checked' : ''} onchange="toggleQuantityGroup('edit')"> Уникальное (1 экземпляр)</label>
+                    <p class="form-hint">Если отмечено, оборудование в единственном экземпляре; количество фиксируется на 1.</p>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="equipmentQuantityGroupEdit" style="${equipment.is_unique ? 'display:none' : ''}">
+                    <label>Количество *</label>
+                    <input type="number" name="quantity" id="equipmentQuantityEdit" value="${equipment.quantity || 1}" ${equipment.is_unique ? '' : 'required'} min="1">
+                </div>
+                <div class="form-group" id="equipmentAvailableGroupEdit" style="${equipment.is_unique ? 'display:none' : ''}">
                     <label>Доступно</label>
-                    <input type="number" name="available_quantity" value="${equipment.available_quantity || 0}" min="0">
+                    <input type="number" name="available_quantity" id="equipmentAvailableEdit" value="${equipment.available_quantity ?? 0}" min="0">
                 </div>
                 <div class="form-group">
                     <label>Местоположение</label>
@@ -1105,13 +1144,19 @@ async function updateEquipment(event, id) {
     event.preventDefault();
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData);
-    
+
     if (data.category_id === '') delete data.category_id;
-    data.quantity = parseInt(data.quantity);
-    if (data.available_quantity !== undefined) {
-        data.available_quantity = parseInt(data.available_quantity);
+    data.is_unique = !!data.is_unique;
+    if (data.is_unique) {
+        data.quantity = 1;
+        data.available_quantity = 1;
+    } else {
+        data.quantity = parseInt(data.quantity) || 1;
+        if (data.available_quantity !== undefined) {
+            data.available_quantity = parseInt(data.available_quantity);
+        }
     }
-    
+
     try {
         const response = await fetch(`${API_BASE}/equipment/${id}`, {
             method: 'PUT',
@@ -1216,54 +1261,47 @@ async function loadCategoriesForSelect() {
 
 async function generateQR(id) {
     try {
-        // Получаем данные QR-кода
         const dataResponse = await fetch(`${API_BASE}/qr/${id}/data`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
-        
         let qrData = '';
+        let qrName = '';
+        let qrDesc = '';
         if (dataResponse.ok) {
             const data = await dataResponse.json();
             qrData = data.qr_code || '';
+            qrName = data.name || '';
+            qrDesc = (data.description && data.description.trim()) ? data.description.trim() : '—';
         }
-        
-        // Создаём URL для QR-кода с токеном авторизации
+        window._qrModalData = { id, qrData, qrName, qrDesc };
+
         const qrUrl = `${API_BASE}/qr/${id}`;
-        
         document.getElementById('modalTitle').textContent = 'QR-код оборудования';
         document.getElementById('modalBody').innerHTML = `
             <div class="qr-code-container">
                 <div class="qr-code-image">
-                    <img src="${qrUrl}?t=${Date.now()}" alt="QR Code" style="display: block; width: 400px; height: 400px; max-width: 100%;" 
-                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5RUtL0vQ8L3RleHQ+PC9zdmc+';">
+                    <img id="qrModalImage" alt="QR Code" style="display: block; width: 280px; height: 280px; max-width: 100%; margin: 0 auto;">
                 </div>
-                <div class="qr-code-text">
-                    <strong>Код:</strong> ${qrData}
-                </div>
-                <div style="margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="downloadQR('${id}', '${qrUrl}')">Скачать QR-код</button>
+                <div class="qr-code-text"><strong>Код для ручного ввода:</strong> ${qrData}</div>
+                <div style="margin-top: 12px;"><strong>Название:</strong> ${qrName}</div>
+                ${qrDesc !== '—' ? `<div style="margin-top: 8px;"><strong>Описание:</strong> ${qrDesc.length > 60 ? qrDesc.slice(0, 60) + '…' : qrDesc}</div>` : ''}
+                <div style="margin-top: 20px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="downloadQRAsPng()">Скачать PNG</button>
+                    <button class="btn btn-secondary" onclick="printQRLabel()">Печать</button>
                 </div>
             </div>
         `;
-        
-        // Устанавливаем заголовок авторизации для изображения через fetch и создаём blob URL
+
         try {
-            const qrResponse = await fetch(qrUrl, {
-                headers: { 'Authorization': `Bearer ${authToken}` }
-            });
-            
+            const qrResponse = await fetch(qrUrl, { headers: { 'Authorization': `Bearer ${authToken}` } });
             if (qrResponse.ok) {
-                const svgBlob = await qrResponse.blob();
-                const svgUrl = URL.createObjectURL(svgBlob);
-                const img = document.querySelector('.qr-code-image img');
-                if (img) {
-                    img.src = svgUrl;
-                }
+                const pngBlob = await qrResponse.blob();
+                const img = document.getElementById('qrModalImage');
+                if (img) img.src = URL.createObjectURL(pngBlob);
             }
         } catch (e) {
             console.error('Ошибка загрузки QR-кода:', e);
         }
-        
         document.getElementById('modalOverlay').classList.add('show');
     } catch (error) {
         console.error('Ошибка генерации QR-кода:', error);
@@ -1271,14 +1309,76 @@ async function generateQR(id) {
     }
 }
 
-function downloadQR(id, qrUrl) {
-    const link = document.createElement('a');
-    link.href = qrUrl;
-    link.download = `qr-code-${id}.svg`;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+function buildQRLabelCanvas(callback) {
+    const d = window._qrModalData;
+    const imgEl = document.getElementById('qrModalImage');
+    if (!d || !imgEl || !imgEl.src) {
+        showError('Сначала откройте QR-код оборудования');
+        return;
+    }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() {
+        const qrSize = 280;
+        const padding = 24;
+        const lineHeight = 22;
+        const codeText = 'Код для ручного ввода: ' + (d.qrData || '');
+        const nameText = 'Название: ' + (d.qrName || '');
+        const descText = 'Описание: ' + (d.qrDesc && d.qrDesc !== '—' ? (d.qrDesc.length > 80 ? d.qrDesc.slice(0, 80) + '…' : d.qrDesc) : '—');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = Math.max(qrSize + padding * 2, 320 + padding * 2);
+        canvas.height = padding + qrSize + padding + lineHeight * 3 + padding;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const qrX = (canvas.width - qrSize) / 2;
+        ctx.drawImage(img, 0, 0, img.width, img.height, qrX, padding, qrSize, qrSize);
+        ctx.fillStyle = '#000';
+        ctx.font = '14px sans-serif';
+        let y = padding + qrSize + padding + lineHeight;
+        ctx.fillText(codeText.length > 48 ? codeText.slice(0, 48) + '…' : codeText, padding, y);
+        y += lineHeight;
+        ctx.fillText(nameText.length > 48 ? nameText.slice(0, 48) + '…' : nameText, padding, y);
+        y += lineHeight;
+        ctx.fillText(descText.length > 48 ? descText.slice(0, 48) + '…' : descText, padding, y);
+        callback(canvas);
+    };
+    img.onerror = function() { showError('Не удалось загрузить изображение QR'); };
+    img.src = imgEl.src;
+}
+
+function downloadQRAsPng() {
+    buildQRLabelCanvas(function(canvas) {
+        canvas.toBlob(function(blob) {
+            if (!blob) return;
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'qr-' + (window._qrModalData.qrName || window._qrModalData.id || 'equipment').replace(/[^a-zA-Z0-9-_]/g, '_') + '.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }, 'image/png');
+    });
+}
+
+function printQRLabel() {
+    buildQRLabelCanvas(function(canvas) {
+        const dataUrl = canvas.toDataURL('image/png');
+        const w = window.open('', '_blank');
+        if (!w) {
+            showError('Разрешите всплывающие окна для печати');
+            return;
+        }
+        w.document.write('<!DOCTYPE html><html><head><title>QR: ' + (window._qrModalData.qrName || '') + '</title></head><body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;"><img src="' + dataUrl + '" alt="QR" style="max-width:100%;height:auto;" /></body></html>');
+        w.document.close();
+        w.onload = function() {
+            w.focus();
+            w.print();
+            w.onafterprint = function() { w.close(); };
+        };
+    });
 }
 
 function filterEquipment() {
@@ -1497,6 +1597,50 @@ function showSuccess(message) {
 
 function showError(message) {
     showNotification(message, 'error');
+}
+
+// Модальное окно ввода названия для подтверждения удаления (вместо prompt, который может блокироваться)
+function showConfirmNameModal(expectedName, title, labelText) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.cssText = 'max-width:400px;width:90%;padding:24px;';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = expectedName;
+        input.className = 'input';
+        input.style.cssText = 'width:100%;margin:16px 0;box-sizing:border-box;';
+        const btnWrap = document.createElement('div');
+        btnWrap.style.cssText = 'display:flex;gap:12px;justify-content:flex-end;';
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn btn-secondary';
+        cancelBtn.textContent = 'Отмена';
+        const okBtn = document.createElement('button');
+        okBtn.className = 'btn btn-danger';
+        okBtn.textContent = 'Удалить';
+
+        const close = (value) => {
+            overlay.remove();
+            resolve(value);
+        };
+
+        cancelBtn.onclick = () => close(null);
+        okBtn.onclick = () => close(input.value ? input.value.trim() : '');
+        overlay.onclick = (e) => { if (e.target === overlay) close(null); };
+        card.onclick = (e) => e.stopPropagation();
+
+        card.innerHTML = `<h3 style="margin-top:0">${title}</h3><p style="color:var(--text-secondary)">${labelText}</p>`;
+        card.appendChild(input);
+        btnWrap.appendChild(cancelBtn);
+        btnWrap.appendChild(okBtn);
+        card.appendChild(btnWrap);
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+        input.focus();
+    });
 }
 
 function showNotification(message, type) {

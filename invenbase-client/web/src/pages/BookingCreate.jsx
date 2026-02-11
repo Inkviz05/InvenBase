@@ -29,6 +29,7 @@ const BookingCreate = () => {
   const [showManualInput, setShowManualInput] = useState(false);
   const [manualQRCode, setManualQRCode] = useState('');
   const [selectedEquipmentData, setSelectedEquipmentData] = useState(null);
+  const [loadingFromUrl, setLoadingFromUrl] = useState(!!(isRegularUser && equipmentIdParam));
   const scannerRef = useRef(null);
 
   useEffect(() => {
@@ -43,6 +44,30 @@ const BookingCreate = () => {
       }
     };
   }, [isRegularUser]);
+
+  // Для обычного пользователя: при переходе с equipment_id в URL сразу подставляем оборудование (без повторного сканирования)
+  useEffect(() => {
+    if (!isRegularUser || !equipmentIdParam) {
+      setLoadingFromUrl(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await equipmentAPI.getById(equipmentIdParam);
+        if (!cancelled) {
+          setSelectedEquipmentData(data);
+          setFormData(prev => ({ ...prev, equipment_id: equipmentIdParam }));
+          setError('');
+        }
+      } catch (err) {
+        if (!cancelled) setError('Оборудование не найдено');
+      } finally {
+        if (!cancelled) setLoadingFromUrl(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [equipmentIdParam, isRegularUser]);
 
   const checkCameraPermission = async () => {
     try {
@@ -259,8 +284,16 @@ const BookingCreate = () => {
     ? selectedEquipmentData 
     : equipment.find(eq => eq.id === formData.equipment_id);
 
-  // Для обычных пользователей: показываем QR-сканер или ручной ввод
+  // Для обычных пользователей: показываем QR-сканер или ручной ввод (или загрузку при переходе по ссылке с equipment_id)
   if (isRegularUser && !selectedEquipment) {
+    if (loadingFromUrl) {
+      return (
+        <div className="booking-create-container">
+          <h1 className="page-title">Создать бронирование</h1>
+          <div className="card"><div className="loading"><div className="spinner"></div></div><p style={{ marginTop: '12px' }}>Загрузка...</p></div>
+        </div>
+      );
+    }
     return (
       <div className="booking-create-container">
         <h1 className="page-title">Создать бронирование</h1>
