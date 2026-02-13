@@ -396,3 +396,64 @@ pub struct CategoryStatistics {
     pub booked: i64,
 }
 
+// ========== Support (техподдержка) ==========
+
+#[derive(Debug, Serialize, Deserialize, FromRow, Clone)]
+pub struct SupportRequest {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub subject: String,
+    pub message: String,
+    pub status: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub admin_comment: Option<String>,
+}
+
+#[derive(Debug, Serialize, FromRow)]
+pub struct SupportRequestWithUser {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub user_name: Option<String>,
+    pub subject: String,
+    pub message: String,
+    pub status: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub admin_comment: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateSupportRequestRequest {
+    pub subject: String,
+    pub message: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateSupportRequestRequest {
+    pub status: Option<String>,
+    pub admin_comment: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, FromRow, Clone)]
+pub struct SupportRequestMessage {
+    pub id: Uuid,
+    pub support_request_id: Uuid,
+    pub author_user_id: Option<Uuid>,
+    pub is_staff: bool,
+    pub message: String,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SupportRequestWithMessages {
+    #[serde(flatten)]
+    pub request: SupportRequestWithUser,
+    pub messages: Vec<SupportRequestMessage>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AddSupportMessageRequest {
+    pub message: String,
+}
+

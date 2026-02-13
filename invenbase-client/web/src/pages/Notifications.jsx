@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { notificationsAPI } from '../api/notifications';
 import { bookingsAPI } from '../api/bookings';
 import { useAuth } from '../context/AuthContext';
@@ -155,6 +156,7 @@ const Notifications = () => {
             const booking = notification.booking_id ? bookingsData[notification.booking_id] : null;
             const isProcessing = processingIds.has(notification.id);
             const isBookingNotification = booking && canManageBookings && booking.status === 'pending';
+            const isSupportNotification = notification.notification_type === 'support_new' || notification.notification_type === 'support_reply';
             
             return (
               <div
@@ -165,6 +167,8 @@ const Notifications = () => {
                   opacity: notification.is_read ? 0.7 : 1,
                   background: isBookingNotification && !notification.is_read 
                     ? 'linear-gradient(to right, rgba(168, 85, 247, 0.1), transparent)' 
+                    : isSupportNotification && !notification.is_read
+                    ? 'linear-gradient(to right, rgba(56, 142, 60, 0.08), transparent)'
                     : 'var(--card-bg)'
                 }}
               >
@@ -175,7 +179,7 @@ const Notifications = () => {
                         fontSize: '20px', 
                         color: notification.is_read ? 'var(--text-secondary)' : 'var(--primary-color)'
                       }}>
-                        {booking ? 'event' : 'notifications'}
+                        {booking ? 'event' : isSupportNotification ? 'support_agent' : 'notifications'}
                       </span>
                       <h3 style={{ margin: 0, fontSize: '18px' }}>{notification.title}</h3>
                       {!notification.is_read && (
@@ -190,7 +194,23 @@ const Notifications = () => {
                     <p style={{ marginBottom: '12px', color: 'var(--text-secondary)' }}>
                       {notification.message}
                     </p>
-                    
+                    {isSupportNotification && (
+                      <Link
+                        to="/support"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '14px',
+                          color: 'var(--primary-color)',
+                          textDecoration: 'none',
+                          marginBottom: '12px',
+                        }}
+                      >
+                        <span className="material-icons" style={{ fontSize: '18px' }}>open_in_new</span>
+                        Перейти в Поддержку
+                      </Link>
+                    )}
                     {/* Детали бронирования */}
                     {booking && (
                       <div className="booking-details" style={{

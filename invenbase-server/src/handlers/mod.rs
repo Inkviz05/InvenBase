@@ -11,4 +11,5 @@ pub mod logs;
 pub mod reports;
 pub mod qr;
 pub mod push;
+pub mod support;
 

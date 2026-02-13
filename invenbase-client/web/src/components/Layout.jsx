@@ -472,6 +472,28 @@ const Layout = () => {
             <span className="material-icons" style={{ fontSize: '20px' }}>qr_code_scanner</span>
             Сканер QR
           </Link>
+          <Link
+            to="/support"
+            onClick={() => setShowMobileMenu(false)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px 24px',
+              color: isActive('/support') ? 'white' : 'rgba(255,255,255,0.8)',
+              textDecoration: 'none',
+              fontWeight: isActive('/support') ? 600 : 400,
+              background: isActive('/support') ? 'var(--sidebar-hover)' : 'transparent',
+              borderLeft: isActive('/support') ? '3px solid var(--primary-color)' : '3px solid transparent',
+              transition: 'all 0.2s ease',
+              textTransform: 'uppercase',
+              fontSize: '13px',
+              letterSpacing: '0.5px'
+            }}
+          >
+            <span className="material-icons" style={{ fontSize: '20px' }}>support_agent</span>
+            Поддержка
+          </Link>
           {(isAdmin() || isResponsible()) && (
             <>
               <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>

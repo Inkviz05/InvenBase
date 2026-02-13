@@ -19,6 +19,7 @@ import SquadDetail from './pages/SquadDetail';
 import Users from './pages/Users';
 import Reports from './pages/Reports';
 import Logs from './pages/Logs';
+import Support from './pages/Support';
 import Layout from './components/Layout';
 import './index.css';
 
@@ -60,6 +61,7 @@ const AppRoutes = () => {
         <Route path="users" element={<Users />} />
         <Route path="reports" element={<Reports />} />
         <Route path="logs" element={<Logs />} />
+        <Route path="support" element={<Support />} />
       </Route>
     </Routes>
   );

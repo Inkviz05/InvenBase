@@ -241,6 +241,40 @@ impl Database {
         .execute(&self.pool)
         .await?;
 
+        // Таблица заявок в техподдержку
+        sqlx::query(
+            r#"
+            CREATE TABLE IF NOT EXISTS support_requests (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                subject VARCHAR(500) NOT NULL,
+                message TEXT NOT NULL,
+                status VARCHAR(50) NOT NULL DEFAULT 'open',
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                admin_comment TEXT
+            )
+            "#,
+        )
+        .execute(&self.pool)
+        .await?;
+
+        // Сообщения в заявке (переписка до закрытия)
+        sqlx::query(
+            r#"
+            CREATE TABLE IF NOT EXISTS support_request_messages (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                support_request_id UUID NOT NULL REFERENCES support_requests(id) ON DELETE CASCADE,
+                author_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+                is_staff BOOLEAN NOT NULL DEFAULT FALSE,
+                message TEXT NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+            "#,
+        )
+        .execute(&self.pool)
+        .await?;
+
         // Миграция: добавить is_unique в существующие таблицы equipment (если колонки ещё нет)
         let _ = sqlx::query(
             "DO $$ BEGIN ALTER TABLE equipment ADD COLUMN is_unique BOOLEAN NOT NULL DEFAULT false; EXCEPTION WHEN duplicate_column THEN NULL; END $$"
@@ -302,6 +336,18 @@ impl Database {
             .await?;
 
         sqlx::query("CREATE INDEX IF NOT EXISTS idx_equipment_movements_moved_at ON equipment_movements(moved_at)")
+            .execute(&self.pool)
+            .await?;
+
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_support_requests_user ON support_requests(user_id)")
+            .execute(&self.pool)
+            .await?;
+
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_support_requests_status ON support_requests(status)")
+            .execute(&self.pool)
+            .await?;
+
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_support_request_messages_request ON support_request_messages(support_request_id)")
             .execute(&self.pool)
             .await?;
 

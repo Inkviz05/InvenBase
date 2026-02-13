@@ -56,11 +56,14 @@ const Squads = () => {
   const handleOpenModal = (squad = null) => {
     if (squad) {
       setEditingSquad(squad);
+      const respId = squad.responsible_user_id || '';
+      const respUser = respId ? users.find((u) => u.id === respId) : null;
+      const allowedResponsible = respUser && (respUser.role === 'admin' || respUser.role === 'responsible');
       setFormData({ 
         name: squad.name || '', 
         description: squad.description || '', 
         location: squad.location || '',
-        responsible_user_id: squad.responsible_user_id || '' 
+        responsible_user_id: allowedResponsible ? respId : '' 
       });
     } else {
       setEditingSquad(null);
@@ -351,12 +354,17 @@ const Squads = () => {
                   onChange={(e) => setFormData({ ...formData, responsible_user_id: e.target.value })}
                 >
                   <option value="">Не назначен</option>
-                  {users.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.full_name || user.username} ({user.role === 'admin' ? 'Администратор' : user.role === 'responsible' ? 'Ответственный' : 'Пользователь'})
-                    </option>
-                  ))}
+                  {users
+                    .filter((u) => u.role === 'admin' || u.role === 'responsible')
+                    .map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.full_name || user.username} ({user.role === 'admin' ? 'Администратор' : 'Ответственный'})
+                      </option>
+                    ))}
                 </select>
+                <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  Только пользователи с ролью «Администратор» или «Ответственный».
+                </p>
               </div>
 
               <div style={{ marginBottom: '24px' }}>

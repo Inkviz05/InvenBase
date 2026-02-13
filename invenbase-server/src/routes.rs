@@ -229,6 +229,22 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                 .route("/register-token", web::post().to(|state: web::Data<AppState>, auth: Authenticated, body: web::Json<_>| async move {
                     push::register_push_token(state, auth.claims(), body).await
                 }))
+        )
+        // Техподдержка
+        .service(
+            web::scope("/support")
+                .route("/requests", web::get().to(|state: web::Data<AppState>, auth: Authenticated| async move {
+                    support::get_support_requests(state, auth.claims()).await
+                }))
+                .route("/requests", web::post().to(|state: web::Data<AppState>, auth: Authenticated, req: web::Json<_>| async move {
+                    support::create_support_request(state, auth.claims(), req).await
+                }))
+                .route("/requests/{id}", web::put().to(|state: web::Data<AppState>, auth: AdminOnly, path: web::Path<_>, req: web::Json<_>| async move {
+                    support::update_support_request(state, auth.claims(), path, req).await
+                }))
+                .route("/requests/{id}/messages", web::post().to(|state: web::Data<AppState>, auth: Authenticated, path: web::Path<_>, req: web::Json<_>| async move {
+                    support::add_support_message(state, auth.claims(), path, req).await
+                }))
         );
 }
 

@@ -13,6 +13,21 @@ pub async fn create_squad(
 ) -> Result<HttpResponse, AppError> {
     AuthService::require_any_role(&claims, &["admin", "responsible"])?;
 
+    if let Some(resp_id) = req.responsible_user_id {
+        let role: Option<(String,)> = sqlx::query_as(
+            "SELECT role FROM users WHERE id = $1"
+        )
+        .bind(resp_id)
+        .fetch_optional(&state.db.pool)
+        .await?;
+        match role.as_ref().map(|r| r.0.as_str()) {
+            Some("admin") | Some("responsible") => {}
+            _ => return Err(AppError::BadRequest(
+                "Ответственным сквада можно назначить только пользователя с ролью «Администратор» или «Ответственный».".to_string(),
+            )),
+        }
+    }
+
     let squad_id = uuid::Uuid::new_v4();
 
     sqlx::query::<sqlx::Postgres>(
@@ -98,6 +113,21 @@ pub async fn update_squad(
 
     if exists.is_none() || !exists.unwrap().0 {
         return Err(AppError::NotFound("Squad not found".to_string()));
+    }
+
+    if let Some(resp_id) = req.responsible_user_id {
+        let role: Option<(String,)> = sqlx::query_as(
+            "SELECT role FROM users WHERE id = $1"
+        )
+        .bind(resp_id)
+        .fetch_optional(&state.db.pool)
+        .await?;
+        match role.as_ref().map(|r| r.0.as_str()) {
+            Some("admin") | Some("responsible") => {}
+            _ => return Err(AppError::BadRequest(
+                "Ответственным сквада можно назначить только пользователя с ролью «Администратор» или «Ответственный».".to_string(),
+            )),
+        }
     }
 
     // Обновляем только переданные поля
