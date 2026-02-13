@@ -203,6 +203,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         } else if (itemId == R.id.menu_cart) {
             startActivity(new Intent(this, CartActivity.class));
             return true;
+        } else if (itemId == R.id.menu_support) {
+            startActivity(new Intent(this, SupportActivity.class));
+            return true;
         } else if (itemId == R.id.menu_categories) {
             startActivity(new Intent(this, CategoriesActivity.class));
             return true;
@@ -248,6 +251,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             startActivity(new Intent(this, UsersActivity.class));
         } else if (itemId == R.id.drawer_notifications) {
             startActivity(new Intent(this, NotificationsActivity.class));
+        } else if (itemId == R.id.drawer_support) {
+            startActivity(new Intent(this, SupportActivity.class));
         } else if (itemId == R.id.drawer_cart) {
             startActivity(new Intent(this, CartActivity.class));
         } else if (itemId == R.id.drawer_logout) {

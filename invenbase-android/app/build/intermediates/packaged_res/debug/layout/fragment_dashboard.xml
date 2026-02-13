@@ -103,6 +103,14 @@
                     android:visibility="gone"
                     android:textSize="@dimen/text_size_medium"
                     style="@style/Widget.Material3.Button" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_quick_support"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/button_height"
+                    android:text="@string/support"
+                    android:textSize="@dimen/text_size_medium"
+                    style="@style/Widget.Material3.Button.OutlinedButton" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

@@ -92,7 +92,7 @@
 47-->[androidx.core:core:1.9.0] C:\Users\Inkvi\.gradle\caches\transforms-3\ea3cc7f95b387edecfcb39d9c15e2a6f\transformed\core-1.9.0\AndroidManifest.xml:26:22-94
 48
 49    <application
-49-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:13:5-93:19
+49-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:13:5-98:19
 50        android:name="com.invenbase.app.InvenBaseApplication"
 50-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:14:9-45
 51        android:allowBackup="true"
@@ -232,297 +232,305 @@
 121            android:theme="@style/Theme.InvenBase" />
 121-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:92:13-51
 122        <activity
-122-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:47:9-53:63
-123            android:name="com.journeyapps.barcodescanner.CaptureActivity"
-123-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:48:13-74
-124            android:clearTaskOnLaunch="true"
-124-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:49:13-45
-125            android:screenOrientation="sensorLandscape"
-125-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:50:13-56
-126            android:stateNotNeeded="true"
-126-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:51:13-42
-127            android:theme="@style/zxing_CaptureTheme"
-127-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:52:13-54
-128            android:windowSoftInputMode="stateAlwaysHidden" />
-128-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:53:13-60
-129
-130        <provider
-130-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
-131            android:name="androidx.startup.InitializationProvider"
-131-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:25:13-67
-132            android:authorities="com.invenbase.app.androidx-startup"
-132-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:26:13-68
-133            android:exported="false" >
-133-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:27:13-37
-134            <meta-data
-134-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
-135                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-135-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:30:17-75
-136                android:value="androidx.startup" />
-136-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:31:17-49
-137            <meta-data
-137-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\Inkvi\.gradle\caches\transforms-3\7b1dd634148a4d9cc882b23f536678e0\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
-138                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-138-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\Inkvi\.gradle\caches\transforms-3\7b1dd634148a4d9cc882b23f536678e0\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
-139                android:value="androidx.startup" />
-139-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\Inkvi\.gradle\caches\transforms-3\7b1dd634148a4d9cc882b23f536678e0\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
-140            <meta-data
-140-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
-141                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-141-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
-142                android:value="androidx.startup" />
-142-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
-143        </provider>
-144
-145        <receiver
-145-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:29:9-40:20
-146            android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
-146-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:30:13-78
-147            android:exported="true"
-147-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:31:13-36
-148            android:permission="com.google.android.c2dm.permission.SEND" >
-148-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:32:13-73
-149            <intent-filter>
-149-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:33:13-35:29
-150                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-150-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:34:17-81
-150-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:34:25-78
-151            </intent-filter>
-152
-153            <meta-data
-153-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:37:13-39:40
-154                android:name="com.google.android.gms.cloudmessaging.FINISHED_AFTER_HANDLED"
-154-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:38:17-92
-155                android:value="true" />
-155-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:39:17-37
-156        </receiver>
-157        <!--
-158             FirebaseMessagingService performs security checks at runtime,
-159             but set to not exported to explicitly avoid allowing another app to call it.
-160        -->
-161        <service
-161-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:46:9-53:19
-162            android:name="com.google.firebase.messaging.FirebaseMessagingService"
-162-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:47:13-82
-163            android:directBootAware="true"
-163-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:48:13-43
-164            android:exported="false" >
-164-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:49:13-37
-165            <intent-filter android:priority="-500" >
-165-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:29:13-31:29
-166                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-166-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:30:17-78
-166-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:30:25-75
-167            </intent-filter>
-168        </service>
-169        <service
-169-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:54:9-63:19
-170            android:name="com.google.firebase.components.ComponentDiscoveryService"
-170-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:55:13-84
-171            android:directBootAware="true"
-171-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:32:13-43
-172            android:exported="false" >
-172-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:56:13-37
-173            <meta-data
-173-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:57:13-59:85
-174                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingKtxRegistrar"
-174-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:58:17-122
-175                android:value="com.google.firebase.components.ComponentRegistrar" />
-175-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:59:17-82
-176            <meta-data
-176-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:60:13-62:85
-177                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingRegistrar"
-177-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:61:17-119
-178                android:value="com.google.firebase.components.ComponentRegistrar" />
-178-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:62:17-82
-179            <meta-data
-179-->[com.google.android.gms:play-services-measurement-api:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\AndroidManifest.xml:37:13-39:85
-180                android:name="com.google.firebase.components:com.google.firebase.analytics.connector.internal.AnalyticsConnectorRegistrar"
-180-->[com.google.android.gms:play-services-measurement-api:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\AndroidManifest.xml:38:17-139
-181                android:value="com.google.firebase.components.ComponentRegistrar" />
-181-->[com.google.android.gms:play-services-measurement-api:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\AndroidManifest.xml:39:17-82
-182            <meta-data
-182-->[com.google.firebase:firebase-installations:17.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\0f2acbaa6819feaca5016220ee08274a\transformed\firebase-installations-17.2.0\AndroidManifest.xml:15:13-17:85
-183                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsKtxRegistrar"
-183-->[com.google.firebase:firebase-installations:17.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\0f2acbaa6819feaca5016220ee08274a\transformed\firebase-installations-17.2.0\AndroidManifest.xml:16:17-130
-184                android:value="com.google.firebase.components.ComponentRegistrar" />
-184-->[com.google.firebase:firebase-installations:17.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\0f2acbaa6819feaca5016220ee08274a\transformed\firebase-installations-17.2.0\AndroidManifest.xml:17:17-82
-185            <meta-data
-185-->[com.google.firebase:firebase-installations:17.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\0f2acbaa6819feaca5016220ee08274a\transformed\firebase-installations-17.2.0\AndroidManifest.xml:18:13-20:85
-186                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsRegistrar"
-186-->[com.google.firebase:firebase-installations:17.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\0f2acbaa6819feaca5016220ee08274a\transformed\firebase-installations-17.2.0\AndroidManifest.xml:19:17-127
-187                android:value="com.google.firebase.components.ComponentRegistrar" />
-187-->[com.google.firebase:firebase-installations:17.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\0f2acbaa6819feaca5016220ee08274a\transformed\firebase-installations-17.2.0\AndroidManifest.xml:20:17-82
-188            <meta-data
-188-->[com.google.firebase:firebase-common-ktx:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\f7f3b3084808527038bfe07dc0906402\transformed\firebase-common-ktx-20.4.2\AndroidManifest.xml:12:13-14:85
-189                android:name="com.google.firebase.components:com.google.firebase.ktx.FirebaseCommonLegacyRegistrar"
-189-->[com.google.firebase:firebase-common-ktx:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\f7f3b3084808527038bfe07dc0906402\transformed\firebase-common-ktx-20.4.2\AndroidManifest.xml:13:17-116
-190                android:value="com.google.firebase.components.ComponentRegistrar" />
-190-->[com.google.firebase:firebase-common-ktx:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\f7f3b3084808527038bfe07dc0906402\transformed\firebase-common-ktx-20.4.2\AndroidManifest.xml:14:17-82
-191            <meta-data
-191-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:35:13-37:85
-192                android:name="com.google.firebase.components:com.google.firebase.FirebaseCommonKtxRegistrar"
-192-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:36:17-109
-193                android:value="com.google.firebase.components.ComponentRegistrar" />
-193-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:37:17-82
-194            <meta-data
-194-->[com.google.firebase:firebase-datatransport:18.1.7] C:\Users\Inkvi\.gradle\caches\transforms-3\db8733082192ee0f6f0249c6f7b3cf26\transformed\firebase-datatransport-18.1.7\AndroidManifest.xml:27:13-29:85
-195                android:name="com.google.firebase.components:com.google.firebase.datatransport.TransportRegistrar"
-195-->[com.google.firebase:firebase-datatransport:18.1.7] C:\Users\Inkvi\.gradle\caches\transforms-3\db8733082192ee0f6f0249c6f7b3cf26\transformed\firebase-datatransport-18.1.7\AndroidManifest.xml:28:17-115
-196                android:value="com.google.firebase.components.ComponentRegistrar" />
-196-->[com.google.firebase:firebase-datatransport:18.1.7] C:\Users\Inkvi\.gradle\caches\transforms-3\db8733082192ee0f6f0249c6f7b3cf26\transformed\firebase-datatransport-18.1.7\AndroidManifest.xml:29:17-82
-197        </service>
-198
-199        <receiver
-199-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:29:9-33:20
-200            android:name="com.google.android.gms.measurement.AppMeasurementReceiver"
-200-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:30:13-85
-201            android:enabled="true"
-201-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:31:13-35
-202            android:exported="false" >
-202-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:32:13-37
-203        </receiver>
-204
-205        <service
-205-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:35:9-38:40
-206            android:name="com.google.android.gms.measurement.AppMeasurementService"
-206-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:36:13-84
-207            android:enabled="true"
-207-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:37:13-35
-208            android:exported="false" />
-208-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:38:13-37
+122-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:94:9-97:54
+123            android:name="com.invenbase.app.SupportActivity"
+123-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:95:13-44
+124            android:exported="false"
+124-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:96:13-37
+125            android:theme="@style/Theme.InvenBase" />
+125-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:97:13-51
+126        <activity
+126-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:47:9-53:63
+127            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+127-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:48:13-74
+128            android:clearTaskOnLaunch="true"
+128-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:49:13-45
+129            android:screenOrientation="sensorLandscape"
+129-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:50:13-56
+130            android:stateNotNeeded="true"
+130-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:51:13-42
+131            android:theme="@style/zxing_CaptureTheme"
+131-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:52:13-54
+132            android:windowSoftInputMode="stateAlwaysHidden" />
+132-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\04714fe5d4444a0f8c78b1526f0092de\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:53:13-60
+133
+134        <provider
+134-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+135            android:name="androidx.startup.InitializationProvider"
+135-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:25:13-67
+136            android:authorities="com.invenbase.app.androidx-startup"
+136-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:26:13-68
+137            android:exported="false" >
+137-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:27:13-37
+138            <meta-data
+138-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+139                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+139-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:30:17-75
+140                android:value="androidx.startup" />
+140-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\eefdbdc2f0f27e19cb67131f594abce1\transformed\emoji2-1.2.0\AndroidManifest.xml:31:17-49
+141            <meta-data
+141-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\Inkvi\.gradle\caches\transforms-3\7b1dd634148a4d9cc882b23f536678e0\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+142                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+142-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\Inkvi\.gradle\caches\transforms-3\7b1dd634148a4d9cc882b23f536678e0\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+143                android:value="androidx.startup" />
+143-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\Inkvi\.gradle\caches\transforms-3\7b1dd634148a4d9cc882b23f536678e0\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+144            <meta-data
+144-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
+145                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+145-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
+146                android:value="androidx.startup" />
+146-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
+147        </provider>
+148
+149        <receiver
+149-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:29:9-40:20
+150            android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
+150-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:30:13-78
+151            android:exported="true"
+151-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:31:13-36
+152            android:permission="com.google.android.c2dm.permission.SEND" >
+152-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:32:13-73
+153            <intent-filter>
+153-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:33:13-35:29
+154                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+154-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:34:17-81
+154-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:34:25-78
+155            </intent-filter>
+156
+157            <meta-data
+157-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:37:13-39:40
+158                android:name="com.google.android.gms.cloudmessaging.FINISHED_AFTER_HANDLED"
+158-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:38:17-92
+159                android:value="true" />
+159-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:39:17-37
+160        </receiver>
+161        <!--
+162             FirebaseMessagingService performs security checks at runtime,
+163             but set to not exported to explicitly avoid allowing another app to call it.
+164        -->
+165        <service
+165-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:46:9-53:19
+166            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+166-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:47:13-82
+167            android:directBootAware="true"
+167-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:48:13-43
+168            android:exported="false" >
+168-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:49:13-37
+169            <intent-filter android:priority="-500" >
+169-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:29:13-31:29
+170                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+170-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:30:17-78
+170-->C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:30:25-75
+171            </intent-filter>
+172        </service>
+173        <service
+173-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:54:9-63:19
+174            android:name="com.google.firebase.components.ComponentDiscoveryService"
+174-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:55:13-84
+175            android:directBootAware="true"
+175-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:32:13-43
+176            android:exported="false" >
+176-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:56:13-37
+177            <meta-data
+177-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:57:13-59:85
+178                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingKtxRegistrar"
+178-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:58:17-122
+179                android:value="com.google.firebase.components.ComponentRegistrar" />
+179-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:59:17-82
+180            <meta-data
+180-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:60:13-62:85
+181                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingRegistrar"
+181-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:61:17-119
+182                android:value="com.google.firebase.components.ComponentRegistrar" />
+182-->[com.google.firebase:firebase-messaging:23.4.0] C:\Users\Inkvi\.gradle\caches\transforms-3\5b9546d7eebc4619adc11fe066c59762\transformed\firebase-messaging-23.4.0\AndroidManifest.xml:62:17-82
+183            <meta-data
+183-->[com.google.android.gms:play-services-measurement-api:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\AndroidManifest.xml:37:13-39:85
+184                android:name="com.google.firebase.components:com.google.firebase.analytics.connector.internal.AnalyticsConnectorRegistrar"
+184-->[com.google.android.gms:play-services-measurement-api:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\AndroidManifest.xml:38:17-139
+185                android:value="com.google.firebase.components.ComponentRegistrar" />
+185-->[com.google.android.gms:play-services-measurement-api:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\AndroidManifest.xml:39:17-82
+186            <meta-data
+186-->[com.google.firebase:firebase-installations:17.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\0f2acbaa6819feaca5016220ee08274a\transformed\firebase-installations-17.2.0\AndroidManifest.xml:15:13-17:85
+187                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsKtxRegistrar"
+187-->[com.google.firebase:firebase-installations:17.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\0f2acbaa6819feaca5016220ee08274a\transformed\firebase-installations-17.2.0\AndroidManifest.xml:16:17-130
+188                android:value="com.google.firebase.components.ComponentRegistrar" />
+188-->[com.google.firebase:firebase-installations:17.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\0f2acbaa6819feaca5016220ee08274a\transformed\firebase-installations-17.2.0\AndroidManifest.xml:17:17-82
+189            <meta-data
+189-->[com.google.firebase:firebase-installations:17.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\0f2acbaa6819feaca5016220ee08274a\transformed\firebase-installations-17.2.0\AndroidManifest.xml:18:13-20:85
+190                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsRegistrar"
+190-->[com.google.firebase:firebase-installations:17.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\0f2acbaa6819feaca5016220ee08274a\transformed\firebase-installations-17.2.0\AndroidManifest.xml:19:17-127
+191                android:value="com.google.firebase.components.ComponentRegistrar" />
+191-->[com.google.firebase:firebase-installations:17.2.0] C:\Users\Inkvi\.gradle\caches\transforms-3\0f2acbaa6819feaca5016220ee08274a\transformed\firebase-installations-17.2.0\AndroidManifest.xml:20:17-82
+192            <meta-data
+192-->[com.google.firebase:firebase-common-ktx:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\f7f3b3084808527038bfe07dc0906402\transformed\firebase-common-ktx-20.4.2\AndroidManifest.xml:12:13-14:85
+193                android:name="com.google.firebase.components:com.google.firebase.ktx.FirebaseCommonLegacyRegistrar"
+193-->[com.google.firebase:firebase-common-ktx:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\f7f3b3084808527038bfe07dc0906402\transformed\firebase-common-ktx-20.4.2\AndroidManifest.xml:13:17-116
+194                android:value="com.google.firebase.components.ComponentRegistrar" />
+194-->[com.google.firebase:firebase-common-ktx:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\f7f3b3084808527038bfe07dc0906402\transformed\firebase-common-ktx-20.4.2\AndroidManifest.xml:14:17-82
+195            <meta-data
+195-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:35:13-37:85
+196                android:name="com.google.firebase.components:com.google.firebase.FirebaseCommonKtxRegistrar"
+196-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:36:17-109
+197                android:value="com.google.firebase.components.ComponentRegistrar" />
+197-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:37:17-82
+198            <meta-data
+198-->[com.google.firebase:firebase-datatransport:18.1.7] C:\Users\Inkvi\.gradle\caches\transforms-3\db8733082192ee0f6f0249c6f7b3cf26\transformed\firebase-datatransport-18.1.7\AndroidManifest.xml:27:13-29:85
+199                android:name="com.google.firebase.components:com.google.firebase.datatransport.TransportRegistrar"
+199-->[com.google.firebase:firebase-datatransport:18.1.7] C:\Users\Inkvi\.gradle\caches\transforms-3\db8733082192ee0f6f0249c6f7b3cf26\transformed\firebase-datatransport-18.1.7\AndroidManifest.xml:28:17-115
+200                android:value="com.google.firebase.components.ComponentRegistrar" />
+200-->[com.google.firebase:firebase-datatransport:18.1.7] C:\Users\Inkvi\.gradle\caches\transforms-3\db8733082192ee0f6f0249c6f7b3cf26\transformed\firebase-datatransport-18.1.7\AndroidManifest.xml:29:17-82
+201        </service>
+202
+203        <receiver
+203-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:29:9-33:20
+204            android:name="com.google.android.gms.measurement.AppMeasurementReceiver"
+204-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:30:13-85
+205            android:enabled="true"
+205-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:31:13-35
+206            android:exported="false" >
+206-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:32:13-37
+207        </receiver>
+208
 209        <service
-209-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:39:9-43:72
-210            android:name="com.google.android.gms.measurement.AppMeasurementJobService"
-210-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:40:13-87
+209-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:35:9-38:40
+210            android:name="com.google.android.gms.measurement.AppMeasurementService"
+210-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:36:13-84
 211            android:enabled="true"
-211-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:41:13-35
-212            android:exported="false"
-212-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:42:13-37
-213            android:permission="android.permission.BIND_JOB_SERVICE" />
-213-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:43:13-69
-214
-215        <property
-215-->[com.google.android.gms:play-services-measurement-api:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\AndroidManifest.xml:30:9-32:61
-216            android:name="android.adservices.AD_SERVICES_CONFIG"
-216-->[com.google.android.gms:play-services-measurement-api:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\AndroidManifest.xml:31:13-65
-217            android:resource="@xml/ga_ad_services_config" />
-217-->[com.google.android.gms:play-services-measurement-api:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\AndroidManifest.xml:32:13-58
+211-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:37:13-35
+212            android:exported="false" />
+212-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:38:13-37
+213        <service
+213-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:39:9-43:72
+214            android:name="com.google.android.gms.measurement.AppMeasurementJobService"
+214-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:40:13-87
+215            android:enabled="true"
+215-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:41:13-35
+216            android:exported="false"
+216-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:42:13-37
+217            android:permission="android.permission.BIND_JOB_SERVICE" />
+217-->[com.google.android.gms:play-services-measurement:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\56e9527e70fde314bdd95b181de38b18\transformed\play-services-measurement-21.5.0\AndroidManifest.xml:43:13-69
 218
-219        <activity
-219-->[com.google.android.gms:play-services-base:18.0.1] C:\Users\Inkvi\.gradle\caches\transforms-3\a1c2586f4b2a642564bc877b7ac8eeb2\transformed\play-services-base-18.0.1\AndroidManifest.xml:20:9-22:45
-220            android:name="com.google.android.gms.common.api.GoogleApiActivity"
-220-->[com.google.android.gms:play-services-base:18.0.1] C:\Users\Inkvi\.gradle\caches\transforms-3\a1c2586f4b2a642564bc877b7ac8eeb2\transformed\play-services-base-18.0.1\AndroidManifest.xml:20:19-85
-221            android:exported="false"
-221-->[com.google.android.gms:play-services-base:18.0.1] C:\Users\Inkvi\.gradle\caches\transforms-3\a1c2586f4b2a642564bc877b7ac8eeb2\transformed\play-services-base-18.0.1\AndroidManifest.xml:22:19-43
-222            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-222-->[com.google.android.gms:play-services-base:18.0.1] C:\Users\Inkvi\.gradle\caches\transforms-3\a1c2586f4b2a642564bc877b7ac8eeb2\transformed\play-services-base-18.0.1\AndroidManifest.xml:21:19-78
-223
-224        <provider
-224-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:23:9-28:39
-225            android:name="com.google.firebase.provider.FirebaseInitProvider"
-225-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:24:13-77
-226            android:authorities="com.invenbase.app.firebaseinitprovider"
-226-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:25:13-72
-227            android:directBootAware="true"
-227-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:26:13-43
-228            android:exported="false"
-228-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:27:13-37
-229            android:initOrder="100" />
-229-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:28:13-36
-230
-231        <uses-library
-231-->[androidx.privacysandbox.ads:ads-adservices:1.0.0-beta05] C:\Users\Inkvi\.gradle\caches\transforms-3\a1a3c61fd3df8c61dc695399da070f0b\transformed\ads-adservices-1.0.0-beta05\AndroidManifest.xml:23:9-25:40
-232            android:name="android.ext.adservices"
-232-->[androidx.privacysandbox.ads:ads-adservices:1.0.0-beta05] C:\Users\Inkvi\.gradle\caches\transforms-3\a1a3c61fd3df8c61dc695399da070f0b\transformed\ads-adservices-1.0.0-beta05\AndroidManifest.xml:24:13-50
-233            android:required="false" />
-233-->[androidx.privacysandbox.ads:ads-adservices:1.0.0-beta05] C:\Users\Inkvi\.gradle\caches\transforms-3\a1a3c61fd3df8c61dc695399da070f0b\transformed\ads-adservices-1.0.0-beta05\AndroidManifest.xml:25:13-37
-234        <uses-library
-234-->[androidx.window:window:1.0.0] C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\AndroidManifest.xml:25:9-27:40
-235            android:name="androidx.window.extensions"
-235-->[androidx.window:window:1.0.0] C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\AndroidManifest.xml:26:13-54
-236            android:required="false" />
-236-->[androidx.window:window:1.0.0] C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\AndroidManifest.xml:27:13-37
-237        <uses-library
-237-->[androidx.window:window:1.0.0] C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\AndroidManifest.xml:28:9-30:40
-238            android:name="androidx.window.sidecar"
-238-->[androidx.window:window:1.0.0] C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\AndroidManifest.xml:29:13-51
-239            android:required="false" />
-239-->[androidx.window:window:1.0.0] C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\AndroidManifest.xml:30:13-37
-240
-241        <meta-data
-241-->[com.google.android.gms:play-services-basement:18.1.0] C:\Users\Inkvi\.gradle\caches\transforms-3\21a109c9cf6b9d3a4604b08ed35de1c9\transformed\play-services-basement-18.1.0\AndroidManifest.xml:21:9-23:69
-242            android:name="com.google.android.gms.version"
-242-->[com.google.android.gms:play-services-basement:18.1.0] C:\Users\Inkvi\.gradle\caches\transforms-3\21a109c9cf6b9d3a4604b08ed35de1c9\transformed\play-services-basement-18.1.0\AndroidManifest.xml:22:13-58
-243            android:value="@integer/google_play_services_version" />
-243-->[com.google.android.gms:play-services-basement:18.1.0] C:\Users\Inkvi\.gradle\caches\transforms-3\21a109c9cf6b9d3a4604b08ed35de1c9\transformed\play-services-basement-18.1.0\AndroidManifest.xml:23:13-66
+219        <property
+219-->[com.google.android.gms:play-services-measurement-api:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\AndroidManifest.xml:30:9-32:61
+220            android:name="android.adservices.AD_SERVICES_CONFIG"
+220-->[com.google.android.gms:play-services-measurement-api:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\AndroidManifest.xml:31:13-65
+221            android:resource="@xml/ga_ad_services_config" />
+221-->[com.google.android.gms:play-services-measurement-api:21.5.0] C:\Users\Inkvi\.gradle\caches\transforms-3\1b4ea12958e2b1cbccda30d8208b254b\transformed\play-services-measurement-api-21.5.0\AndroidManifest.xml:32:13-58
+222
+223        <activity
+223-->[com.google.android.gms:play-services-base:18.0.1] C:\Users\Inkvi\.gradle\caches\transforms-3\a1c2586f4b2a642564bc877b7ac8eeb2\transformed\play-services-base-18.0.1\AndroidManifest.xml:20:9-22:45
+224            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+224-->[com.google.android.gms:play-services-base:18.0.1] C:\Users\Inkvi\.gradle\caches\transforms-3\a1c2586f4b2a642564bc877b7ac8eeb2\transformed\play-services-base-18.0.1\AndroidManifest.xml:20:19-85
+225            android:exported="false"
+225-->[com.google.android.gms:play-services-base:18.0.1] C:\Users\Inkvi\.gradle\caches\transforms-3\a1c2586f4b2a642564bc877b7ac8eeb2\transformed\play-services-base-18.0.1\AndroidManifest.xml:22:19-43
+226            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+226-->[com.google.android.gms:play-services-base:18.0.1] C:\Users\Inkvi\.gradle\caches\transforms-3\a1c2586f4b2a642564bc877b7ac8eeb2\transformed\play-services-base-18.0.1\AndroidManifest.xml:21:19-78
+227
+228        <provider
+228-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:23:9-28:39
+229            android:name="com.google.firebase.provider.FirebaseInitProvider"
+229-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:24:13-77
+230            android:authorities="com.invenbase.app.firebaseinitprovider"
+230-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:25:13-72
+231            android:directBootAware="true"
+231-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:26:13-43
+232            android:exported="false"
+232-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:27:13-37
+233            android:initOrder="100" />
+233-->[com.google.firebase:firebase-common:20.4.2] C:\Users\Inkvi\.gradle\caches\transforms-3\64fcccedacec84bc66328022e51476c9\transformed\firebase-common-20.4.2\AndroidManifest.xml:28:13-36
+234
+235        <uses-library
+235-->[androidx.privacysandbox.ads:ads-adservices:1.0.0-beta05] C:\Users\Inkvi\.gradle\caches\transforms-3\a1a3c61fd3df8c61dc695399da070f0b\transformed\ads-adservices-1.0.0-beta05\AndroidManifest.xml:23:9-25:40
+236            android:name="android.ext.adservices"
+236-->[androidx.privacysandbox.ads:ads-adservices:1.0.0-beta05] C:\Users\Inkvi\.gradle\caches\transforms-3\a1a3c61fd3df8c61dc695399da070f0b\transformed\ads-adservices-1.0.0-beta05\AndroidManifest.xml:24:13-50
+237            android:required="false" />
+237-->[androidx.privacysandbox.ads:ads-adservices:1.0.0-beta05] C:\Users\Inkvi\.gradle\caches\transforms-3\a1a3c61fd3df8c61dc695399da070f0b\transformed\ads-adservices-1.0.0-beta05\AndroidManifest.xml:25:13-37
+238        <uses-library
+238-->[androidx.window:window:1.0.0] C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\AndroidManifest.xml:25:9-27:40
+239            android:name="androidx.window.extensions"
+239-->[androidx.window:window:1.0.0] C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\AndroidManifest.xml:26:13-54
+240            android:required="false" />
+240-->[androidx.window:window:1.0.0] C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\AndroidManifest.xml:27:13-37
+241        <uses-library
+241-->[androidx.window:window:1.0.0] C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\AndroidManifest.xml:28:9-30:40
+242            android:name="androidx.window.sidecar"
+242-->[androidx.window:window:1.0.0] C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\AndroidManifest.xml:29:13-51
+243            android:required="false" />
+243-->[androidx.window:window:1.0.0] C:\Users\Inkvi\.gradle\caches\transforms-3\12336d1acb6f935547c3ca1f622284fc\transformed\window-1.0.0\AndroidManifest.xml:30:13-37
 244
-245        <service
-245-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\a676af32a1f804aff96043dd7892a22d\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:28:9-34:19
-246            android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
-246-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\a676af32a1f804aff96043dd7892a22d\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:29:13-103
-247            android:exported="false" >
-247-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\a676af32a1f804aff96043dd7892a22d\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:30:13-37
-248            <meta-data
-248-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\a676af32a1f804aff96043dd7892a22d\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:31:13-33:39
-249                android:name="backend:com.google.android.datatransport.cct.CctBackendFactory"
-249-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\a676af32a1f804aff96043dd7892a22d\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:32:17-94
-250                android:value="cct" />
-250-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\a676af32a1f804aff96043dd7892a22d\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:33:17-36
-251        </service>
-252        <service
-252-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:26:9-30:19
-253            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
-253-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:27:13-117
-254            android:exported="false"
-254-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:28:13-37
-255            android:permission="android.permission.BIND_JOB_SERVICE" >
-255-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:29:13-69
-256        </service>
-257
-258        <receiver
-258-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:32:9-34:40
-259            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"
-259-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:33:13-132
-260            android:exported="false" />
-260-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:34:13-37
-261        <receiver
-261-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
-262            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-262-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
-263            android:directBootAware="false"
-263-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
-264            android:enabled="true"
-264-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
-265            android:exported="true"
-265-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
-266            android:permission="android.permission.DUMP" >
-266-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
-267            <intent-filter>
-267-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
-268                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-268-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
-268-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
-269            </intent-filter>
-270            <intent-filter>
-270-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
-271                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-271-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
-271-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
-272            </intent-filter>
-273            <intent-filter>
-273-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
-274                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-274-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
-274-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
-275            </intent-filter>
-276            <intent-filter>
-276-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
-277                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-277-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
-277-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
-278            </intent-filter>
-279        </receiver>
-280    </application>
-281
-282</manifest>
+245        <meta-data
+245-->[com.google.android.gms:play-services-basement:18.1.0] C:\Users\Inkvi\.gradle\caches\transforms-3\21a109c9cf6b9d3a4604b08ed35de1c9\transformed\play-services-basement-18.1.0\AndroidManifest.xml:21:9-23:69
+246            android:name="com.google.android.gms.version"
+246-->[com.google.android.gms:play-services-basement:18.1.0] C:\Users\Inkvi\.gradle\caches\transforms-3\21a109c9cf6b9d3a4604b08ed35de1c9\transformed\play-services-basement-18.1.0\AndroidManifest.xml:22:13-58
+247            android:value="@integer/google_play_services_version" />
+247-->[com.google.android.gms:play-services-basement:18.1.0] C:\Users\Inkvi\.gradle\caches\transforms-3\21a109c9cf6b9d3a4604b08ed35de1c9\transformed\play-services-basement-18.1.0\AndroidManifest.xml:23:13-66
+248
+249        <service
+249-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\a676af32a1f804aff96043dd7892a22d\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:28:9-34:19
+250            android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
+250-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\a676af32a1f804aff96043dd7892a22d\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:29:13-103
+251            android:exported="false" >
+251-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\a676af32a1f804aff96043dd7892a22d\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:30:13-37
+252            <meta-data
+252-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\a676af32a1f804aff96043dd7892a22d\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:31:13-33:39
+253                android:name="backend:com.google.android.datatransport.cct.CctBackendFactory"
+253-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\a676af32a1f804aff96043dd7892a22d\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:32:17-94
+254                android:value="cct" />
+254-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\a676af32a1f804aff96043dd7892a22d\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:33:17-36
+255        </service>
+256        <service
+256-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:26:9-30:19
+257            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
+257-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:27:13-117
+258            android:exported="false"
+258-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:28:13-37
+259            android:permission="android.permission.BIND_JOB_SERVICE" >
+259-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:29:13-69
+260        </service>
+261
+262        <receiver
+262-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:32:9-34:40
+263            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"
+263-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:33:13-132
+264            android:exported="false" />
+264-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\Inkvi\.gradle\caches\transforms-3\3191b00f3fa88f0e43c4c50158248a9a\transformed\transport-runtime-3.1.8\AndroidManifest.xml:34:13-37
+265        <receiver
+265-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
+266            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+266-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
+267            android:directBootAware="false"
+267-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
+268            android:enabled="true"
+268-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
+269            android:exported="true"
+269-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
+270            android:permission="android.permission.DUMP" >
+270-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
+271            <intent-filter>
+271-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
+272                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+272-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
+272-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
+273            </intent-filter>
+274            <intent-filter>
+274-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
+275                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+275-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
+275-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
+276            </intent-filter>
+277            <intent-filter>
+277-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
+278                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+278-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
+278-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
+279            </intent-filter>
+280            <intent-filter>
+280-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
+281                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+281-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
+281-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Inkvi\.gradle\caches\transforms-3\f13e87f17e63b4a8a5bc7bc3411ed195\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
+282            </intent-filter>
+283        </receiver>
+284    </application>
+285
+286</manifest>

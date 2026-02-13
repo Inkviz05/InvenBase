@@ -120,6 +120,10 @@
             android:exported="false"
             android:theme="@style/Theme.InvenBase" />
         <activity
+            android:name="com.invenbase.app.SupportActivity"
+            android:exported="false"
+            android:theme="@style/Theme.InvenBase" />
+        <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:clearTaskOnLaunch="true"
             android:screenOrientation="sensorLandscape"

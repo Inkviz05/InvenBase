@@ -90,6 +90,11 @@
             android:name=".EquipmentFormActivity"
             android:exported="false"
             android:theme="@style/Theme.InvenBase" />
+
+        <activity
+            android:name=".SupportActivity"
+            android:exported="false"
+            android:theme="@style/Theme.InvenBase" />
     </application>
 
 </manifest>

@@ -12,6 +12,11 @@
         android:title="@string/cart_title"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/menu_support"
+        android:icon="@android:drawable/ic_menu_help"
+        android:title="@string/support"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/menu_categories"
         android:title="@string/categories"
         app:showAsAction="never" />

@@ -239,9 +239,15 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                 .route("/requests", web::post().to(|state: web::Data<AppState>, auth: Authenticated, req: web::Json<_>| async move {
                     support::create_support_request(state, auth.claims(), req).await
                 }))
-                .route("/requests/{id}", web::put().to(|state: web::Data<AppState>, auth: AdminOnly, path: web::Path<_>, req: web::Json<_>| async move {
-                    support::update_support_request(state, auth.claims(), path, req).await
-                }))
+                .service(
+                    web::resource("/requests/{id}")
+                        .route(web::put().to(|state: web::Data<AppState>, auth: AdminOnly, path: web::Path<_>, req: web::Json<_>| async move {
+                            support::update_support_request(state, auth.claims(), path, req).await
+                        }))
+                        .route(web::delete().to(|state: web::Data<AppState>, auth: AdminOnly, path: web::Path<_>| async move {
+                            support::delete_support_request(state, auth.claims(), path).await
+                        }))
+                )
                 .route("/requests/{id}/messages", web::post().to(|state: web::Data<AppState>, auth: Authenticated, path: web::Path<_>, req: web::Json<_>| async move {
                     support::add_support_message(state, auth.claims(), path, req).await
                 }))

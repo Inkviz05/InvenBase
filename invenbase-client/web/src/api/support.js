@@ -20,4 +20,8 @@ export const supportAPI = {
     const response = await apiClient.post(`/support/requests/${requestId}/messages`, data);
     return response.data;
   },
+
+  deleteRequest: async (id) => {
+    await apiClient.delete(`/support/requests/${id}`);
+  },
 };

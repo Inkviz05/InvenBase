@@ -181,4 +181,41 @@
     <string name="select_equipment">Выбрать оборудование</string>
     <string name="quick_booking">Быстрое бронирование</string>
     <string name="view_notifications">Просмотреть уведомления</string>
+
+    <!-- Support -->
+    <string name="support">Поддержка</string>
+    <string name="support_title">Техническая поддержка</string>
+    <string name="support_how_to_get_help">Как получить помощь</string>
+    <string name="support_how_help_text">Опишите проблему в форме ниже — мы создадим заявку и ответим вам. В одной заявке можно вести переписку до её закрытия. Создавать новую заявку нужно только после того, как заявка получит статус «Закрыта».</string>
+    <string name="support_create_ticket">Оставить заявку</string>
+    <string name="support_subject">Тема</string>
+    <string name="support_subject_hint">Кратко опишите тему обращения</string>
+    <string name="support_message">Сообщение</string>
+    <string name="support_message_hint">Опишите проблему подробнее</string>
+    <string name="support_submit_ticket">Отправить заявку</string>
+    <string name="support_my_requests">Мои заявки</string>
+    <string name="support_all_requests">Все заявки</string>
+    <string name="support_no_requests">Заявок пока нет</string>
+    <string name="support_status_open">Открыта</string>
+    <string name="support_status_in_progress">В работе</string>
+    <string name="support_status_answered">Ответ дан</string>
+    <string name="support_status_closed">Закрыта</string>
+    <string name="support_reply_label">Ответ поддержки</string>
+    <string name="support_add_message">Добавить сообщение в заявку</string>
+    <string name="support_add_reply">Ответить / добавить ответ</string>
+    <string name="support_new_reply">Новый ответ (будет добавлен в переписку)</string>
+    <string name="support_add_reply_button">Добавить ответ</string>
+    <string name="support_request_status">Статус заявки</string>
+    <string name="support_ticket_sent">Заявка отправлена</string>
+    <string name="support_message_added">Сообщение добавлено</string>
+    <string name="support_reply_saved">Ответ добавлен в переписку</string>
+    <string name="support_from">От: %1$s</string>
+    <string name="support_admin_card_desc">Заявки пользователей и ответы</string>
+    <string name="support_tab_create">Создать заявку</string>
+    <string name="support_tab_requests">Заявки</string>
+    <string name="support_delete_request">Удалить заявку</string>
+    <string name="support_admin_cannot_create">Администратор не может создавать заявки</string>
+    <string name="support_delete_confirm">Удалить закрытую заявку? Действие нельзя отменить.</string>
+    <string name="support_deleted">Заявка удалена</string>
+    <string name="support_delete_only_closed">Удалить можно только закрытую заявку</string>
 </resources>

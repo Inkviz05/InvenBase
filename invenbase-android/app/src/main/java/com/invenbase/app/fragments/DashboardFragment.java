@@ -22,6 +22,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.invenbase.app.BookingFormActivity;
 import com.invenbase.app.CartActivity;
 import com.invenbase.app.NotificationsActivity;
+import com.invenbase.app.SupportActivity;
 import com.invenbase.app.R;
 import com.invenbase.app.adapters.StatsAdapter;
 import com.invenbase.app.api.ApiClient;
@@ -54,6 +55,7 @@ public class DashboardFragment extends Fragment {
     private Button buttonQuickAddEquipment;
     private Button buttonQuickScanner;
     private Button buttonQuickManualInput;
+    private Button buttonQuickSupport;
     private Button buttonViewNotifications;
 
     @Nullable
@@ -74,6 +76,7 @@ public class DashboardFragment extends Fragment {
         buttonQuickAddEquipment = view.findViewById(R.id.button_quick_add_equipment);
         buttonQuickScanner = view.findViewById(R.id.button_quick_scanner);
         buttonQuickManualInput = view.findViewById(R.id.button_quick_manual_input);
+        buttonQuickSupport = view.findViewById(R.id.button_quick_support);
         buttonViewNotifications = view.findViewById(R.id.button_view_notifications);
         Button buttonLogout = view.findViewById(R.id.button_logout);
 
@@ -244,6 +247,12 @@ public class DashboardFragment extends Fragment {
         buttonViewNotifications.setOnClickListener(v -> {
             if (getActivity() != null) {
                 startActivity(new Intent(getActivity(), NotificationsActivity.class));
+            }
+        });
+
+        buttonQuickSupport.setOnClickListener(v -> {
+            if (getActivity() != null) {
+                startActivity(new Intent(getActivity(), SupportActivity.class));
             }
         });
     }

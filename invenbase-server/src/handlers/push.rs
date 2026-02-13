@@ -3,7 +3,7 @@ use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 use std::fs;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use jsonwebtoken::{encode, Header, EncodingKey, Algorithm};
 
 use crate::app_state::AppState;
@@ -231,6 +231,119 @@ pub async fn send_push_to_user(
                 log::error!("Error sending FCM push to user {}: {:?}", user_id, err);
             }
         }
+    }
+}
+
+/// Отправка push админам, но не на устройства автора заявки (чтобы автор не получал уведомление о своей заявке).
+pub async fn send_push_to_user_excluding_tokens(
+    state: &AppState,
+    user_id: Uuid,
+    title: &str,
+    body: &str,
+    mut data: serde_json::Map<String, serde_json::Value>,
+    exclude_tokens: &[String],
+) {
+    let devices: Vec<(String,)> = match sqlx::query_as::<sqlx::Postgres, (String,)>(
+        "SELECT fcm_token FROM user_devices WHERE user_id = $1",
+    )
+    .bind(user_id)
+    .fetch_all(&state.db.pool)
+    .await
+    {
+        Ok(list) => list,
+        Err(err) => {
+            log::error!("Failed to load user devices for push: {:?}", err);
+            return;
+        }
+    };
+
+    let exclude: HashSet<&str> = exclude_tokens.iter().map(String::as_str).collect();
+    let devices: Vec<(String,)> = devices
+        .into_iter()
+        .filter(|(t,)| !exclude.contains(t.as_str()))
+        .collect();
+
+    if devices.is_empty() {
+        log::info!(
+            "Skipping push to user {}: all devices are excluded (author's devices)",
+            user_id
+        );
+        return;
+    }
+
+    log::info!(
+        "Sending push to user {} ({} devices, {} excluded): title='{}'",
+        user_id,
+        devices.len(),
+        exclude_tokens.len(),
+        title
+    );
+
+    data.insert(
+        "title".to_string(),
+        serde_json::Value::String(title.to_string()),
+    );
+    data.insert(
+        "body".to_string(),
+        serde_json::Value::String(body.to_string()),
+    );
+
+    if let (Some(project_id), Some(service_account_path)) = (
+        state.config.fcm_project_id.clone(),
+        state.config.fcm_service_account_path.clone(),
+    ) {
+        if let Ok(sent_count) = send_push_v1(
+            &state.db.pool,
+            &project_id,
+            &service_account_path,
+            title,
+            body,
+            &data,
+            &devices,
+            user_id,
+        )
+        .await
+        {
+            if sent_count > 0 {
+                log::info!("Push sent via HTTP v1 to user {} ({} devices)", user_id, sent_count);
+                return;
+            }
+        }
+    }
+
+    let server_key = match state.config.fcm_server_key.clone() {
+        Some(key) => key,
+        None => return,
+    };
+    let client = reqwest::Client::new();
+    for (token,) in devices {
+        let mut fcm_data: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+        for (key, value) in &data {
+            let value_str = match value {
+                serde_json::Value::String(s) => s.clone(),
+                serde_json::Value::Number(n) => n.to_string(),
+                serde_json::Value::Bool(b) => b.to_string(),
+                serde_json::Value::Null => "null".to_string(),
+                serde_json::Value::Array(_) | serde_json::Value::Object(_) => {
+                    serde_json::to_string(value).unwrap_or_else(|_| value.to_string())
+                }
+            };
+            fcm_data.insert(key.clone(), value_str);
+        }
+        let payload = serde_json::json!({
+            "to": token,
+            "notification": { "title": title, "body": body, "sound": "default" },
+            "data": fcm_data,
+            "priority": "high",
+            "time_to_live": 86400
+        });
+        let _ = client
+            .post("https://fcm.googleapis.com/fcm/send")
+            .header("Authorization", format!("key={}", server_key))
+            .header("Content-Type", "application/json")
+            .json(&payload)
+            .send()
+            .await;
     }
 }
 

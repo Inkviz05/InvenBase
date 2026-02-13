@@ -16,6 +16,7 @@ import com.invenbase.app.EquipmentFormActivity;
 import com.invenbase.app.LogsActivity;
 import com.invenbase.app.ReportsActivity;
 import com.invenbase.app.R;
+import com.invenbase.app.SupportActivity;
 import com.invenbase.app.UsersActivity;
 import com.invenbase.app.utils.AuthManager;
 
@@ -41,6 +42,7 @@ public class AdminFragment extends Fragment {
 
         MaterialCardView cardAddEquipment = view.findViewById(R.id.card_add_equipment);
         MaterialCardView cardReports = view.findViewById(R.id.card_reports);
+        MaterialCardView cardSupport = view.findViewById(R.id.card_support);
         MaterialCardView cardCategories = view.findViewById(R.id.card_categories);
         MaterialCardView cardUsers = view.findViewById(R.id.card_users);
         MaterialCardView cardLogs = view.findViewById(R.id.card_logs);
@@ -54,6 +56,7 @@ public class AdminFragment extends Fragment {
         }
 
         cardReports.setOnClickListener(v -> startActivity(new Intent(requireContext(), ReportsActivity.class)));
+        cardSupport.setOnClickListener(v -> startActivity(new Intent(requireContext(), SupportActivity.class)));
         cardCategories.setOnClickListener(v -> startActivity(new Intent(requireContext(), CategoriesActivity.class)));
         cardUsers.setOnClickListener(v -> startActivity(new Intent(requireContext(), UsersActivity.class)));
         cardLogs.setOnClickListener(v -> startActivity(new Intent(requireContext(), LogsActivity.class)));

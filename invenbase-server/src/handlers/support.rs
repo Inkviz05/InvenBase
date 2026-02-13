@@ -14,6 +14,13 @@ pub async fn create_support_request(
     claims: Claims,
     req: web::Json<CreateSupportRequestRequest>,
 ) -> Result<HttpResponse, AppError> {
+    // Создавать заявки могут только пользователи и ответственные, не админы
+    if claims.role == "admin" {
+        return Err(AppError::BadRequest(
+            "Администратор не может создавать заявки. Заявки создают пользователи или ответственные.".to_string(),
+        ));
+    }
+
     let user_id = uuid::Uuid::parse_str(&claims.sub)
         .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
 
@@ -49,7 +56,7 @@ pub async fn create_support_request(
     .fetch_one(&state.db.pool)
     .await?;
 
-    // Уведомления админам о новой заявке
+    // Уведомления только админам о новой заявке (никогда не отправляем автору заявки)
     let notif_title = "Новая заявка в поддержку";
     let notif_message = format!(
         "Пользователь {} оставил заявку: {}",
@@ -59,16 +66,18 @@ pub async fn create_support_request(
     let _ = sqlx::query::<sqlx::Postgres>(
         "INSERT INTO notifications (user_id, title, message, notification_type)
          SELECT id, $1, $2, 'support_new'
-         FROM users WHERE role = 'admin'"
+         FROM users WHERE role = 'admin' AND id != $3"
     )
     .bind(&notif_title)
     .bind(&notif_message)
+    .bind(user_id)
     .execute(&state.db.pool)
     .await;
 
     let admin_ids: Vec<(uuid::Uuid,)> = sqlx::query_as(
-        "SELECT id FROM users WHERE role = 'admin'"
+        "SELECT id FROM users WHERE role = 'admin' AND id != $1"
     )
+    .bind(user_id)
     .fetch_all(&state.db.pool)
     .await
     .unwrap_or_default();
@@ -171,15 +180,29 @@ pub async fn update_support_request(
     AuthService::require_role(&claims, "admin")?;
     let request_id = path.into_inner();
 
-    let exists: Option<(bool,)> = sqlx::query_as(
-        "SELECT EXISTS(SELECT 1 FROM support_requests WHERE id = $1)"
+    let current: Option<(String,)> = sqlx::query_as(
+        "SELECT status FROM support_requests WHERE id = $1"
     )
     .bind(request_id)
     .fetch_optional(&state.db.pool)
     .await?;
-    if exists.is_none() || !exists.unwrap().0 {
+    let current_status = current.as_ref().map(|c| c.0.as_str());
+    if current_status.is_none() {
         return Err(AppError::NotFound("Заявка не найдена".to_string()));
     }
+    let current_status = current_status.unwrap();
+
+    // Закрытую заявку нельзя редактировать (ответить) — только удалить
+    if current_status == "closed" {
+        return Err(AppError::BadRequest(
+            "Заявка закрыта. Ответить нельзя, можно только удалить заявку.".to_string(),
+        ));
+    }
+
+    let new_status = req.status.as_deref().unwrap_or(current_status);
+    // При переводе в «закрыта» не принимаем ответ в этом запросе — только смена статуса
+    let allow_comment = req.admin_comment.as_ref().map(|s| !s.is_empty()).unwrap_or(false)
+        && new_status != "closed";
 
     let mut conditions = Vec::new();
     let mut bind_count = 1;
@@ -193,7 +216,7 @@ pub async fn update_support_request(
         conditions.push(format!("status = ${}", bind_count));
         bind_count += 1;
     }
-    if req.admin_comment.is_some() {
+    if allow_comment {
         conditions.push(format!("admin_comment = ${}", bind_count));
         bind_count += 1;
     }
@@ -210,24 +233,28 @@ pub async fn update_support_request(
     if let Some(ref s) = req.status {
         q = q.bind(s);
     }
-    if let Some(ref c) = req.admin_comment {
-        q = q.bind(c);
+    if allow_comment {
+        if let Some(ref c) = req.admin_comment {
+            q = q.bind(c);
+        }
     }
     q = q.bind(request_id);
     q.execute(&state.db.pool).await?;
 
     // Сохраняем ответ в переписку (для истории)
-    if let Some(ref comment) = req.admin_comment {
-        let admin_id = uuid::Uuid::parse_str(&claims.sub).unwrap_or_default();
-        let _ = sqlx::query::<sqlx::Postgres>(
-            "INSERT INTO support_request_messages (support_request_id, author_user_id, is_staff, message)
-             VALUES ($1, $2, TRUE, $3)"
-        )
-        .bind(request_id)
-        .bind(admin_id)
-        .bind(comment.as_str())
-        .execute(&state.db.pool)
-        .await;
+    if allow_comment {
+        if let Some(ref comment) = req.admin_comment {
+            let admin_id = uuid::Uuid::parse_str(&claims.sub).unwrap_or_default();
+            let _ = sqlx::query::<sqlx::Postgres>(
+                "INSERT INTO support_request_messages (support_request_id, author_user_id, is_staff, message)
+                 VALUES ($1, $2, TRUE, $3)"
+            )
+            .bind(request_id)
+            .bind(admin_id)
+            .bind(comment.as_str())
+            .execute(&state.db.pool)
+            .await;
+        }
     }
 
     let updated: SupportRequestWithUser = sqlx::query_as::<sqlx::Postgres, _>(
@@ -241,8 +268,9 @@ pub async fn update_support_request(
     .fetch_one(&state.db.pool)
     .await?;
 
-    // Уведомление автору заявки об ответе (только если был указан ответ)
-    if req.admin_comment.is_some() {
+    // Уведомление только автору заявки об ответе (никогда не отправляем тому, кто ответил — админу)
+    let responder_id = uuid::Uuid::parse_str(&claims.sub).unwrap_or_default();
+    if allow_comment && updated.user_id != responder_id {
         let notif_title = "По заявке дан ответ";
         let subject_preview = if updated.subject.len() > 50 {
             format!("{}…", &updated.subject[..50])
@@ -345,4 +373,35 @@ pub async fn add_support_message(
     .await?;
 
     Ok(HttpResponse::Created().json(created))
+}
+
+/// Удалить заявку (только админ, только закрытую заявку).
+pub async fn delete_support_request(
+    state: web::Data<AppState>,
+    claims: Claims,
+    path: web::Path<uuid::Uuid>,
+) -> Result<HttpResponse, AppError> {
+    AuthService::require_role(&claims, "admin")?;
+    let request_id = path.into_inner();
+
+    let row: Option<(String,)> = sqlx::query_as(
+        "SELECT status FROM support_requests WHERE id = $1"
+    )
+    .bind(request_id)
+    .fetch_optional(&state.db.pool)
+    .await?;
+
+    let (status,) = row.ok_or_else(|| AppError::NotFound("Заявка не найдена".to_string()))?;
+    if status != "closed" {
+        return Err(AppError::BadRequest(
+            "Удалить можно только закрытую заявку. Сначала закройте заявку.".to_string(),
+        ));
+    }
+
+    sqlx::query::<sqlx::Postgres>("DELETE FROM support_requests WHERE id = $1")
+        .bind(request_id)
+        .execute(&state.db.pool)
+        .await?;
+
+    Ok(HttpResponse::NoContent().finish())
 }

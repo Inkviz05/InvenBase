@@ -49,6 +49,10 @@
             android:icon="@android:drawable/ic_menu_view"
             android:title="@string/notifications" />
         <item
+            android:id="@+id/drawer_support"
+            android:icon="@android:drawable/ic_menu_help"
+            android:title="@string/support" />
+        <item
             android:id="@+id/drawer_cart"
             android:icon="@android:drawable/ic_menu_agenda"
             android:title="@string/cart_title" />

@@ -41,6 +41,9 @@ public final class FragmentDashboardBinding implements ViewBinding {
   public final MaterialButton buttonQuickScanner;
 
   @NonNull
+  public final MaterialButton buttonQuickSupport;
+
+  @NonNull
   public final MaterialButton buttonViewNotifications;
 
   @NonNull
@@ -59,9 +62,9 @@ public final class FragmentDashboardBinding implements ViewBinding {
       @NonNull MaterialButton buttonLogout, @NonNull MaterialButton buttonQuickAddEquipment,
       @NonNull MaterialButton buttonQuickCart, @NonNull MaterialButton buttonQuickEquipment,
       @NonNull MaterialButton buttonQuickManualInput, @NonNull MaterialButton buttonQuickScanner,
-      @NonNull MaterialButton buttonViewNotifications, @NonNull ProgressBar progressBar,
-      @NonNull RecyclerView recyclerStats, @NonNull TextView textNotificationsInfo,
-      @NonNull TextView textWelcome) {
+      @NonNull MaterialButton buttonQuickSupport, @NonNull MaterialButton buttonViewNotifications,
+      @NonNull ProgressBar progressBar, @NonNull RecyclerView recyclerStats,
+      @NonNull TextView textNotificationsInfo, @NonNull TextView textWelcome) {
     this.rootView = rootView;
     this.buttonLogout = buttonLogout;
     this.buttonQuickAddEquipment = buttonQuickAddEquipment;
@@ -69,6 +72,7 @@ public final class FragmentDashboardBinding implements ViewBinding {
     this.buttonQuickEquipment = buttonQuickEquipment;
     this.buttonQuickManualInput = buttonQuickManualInput;
     this.buttonQuickScanner = buttonQuickScanner;
+    this.buttonQuickSupport = buttonQuickSupport;
     this.buttonViewNotifications = buttonViewNotifications;
     this.progressBar = progressBar;
     this.recyclerStats = recyclerStats;
@@ -139,6 +143,12 @@ public final class FragmentDashboardBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.button_quick_support;
+      MaterialButton buttonQuickSupport = ViewBindings.findChildViewById(rootView, id);
+      if (buttonQuickSupport == null) {
+        break missingId;
+      }
+
       id = R.id.button_view_notifications;
       MaterialButton buttonViewNotifications = ViewBindings.findChildViewById(rootView, id);
       if (buttonViewNotifications == null) {
@@ -171,8 +181,8 @@ public final class FragmentDashboardBinding implements ViewBinding {
 
       return new FragmentDashboardBinding((NestedScrollView) rootView, buttonLogout,
           buttonQuickAddEquipment, buttonQuickCart, buttonQuickEquipment, buttonQuickManualInput,
-          buttonQuickScanner, buttonViewNotifications, progressBar, recyclerStats,
-          textNotificationsInfo, textWelcome);
+          buttonQuickScanner, buttonQuickSupport, buttonViewNotifications, progressBar,
+          recyclerStats, textNotificationsInfo, textWelcome);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

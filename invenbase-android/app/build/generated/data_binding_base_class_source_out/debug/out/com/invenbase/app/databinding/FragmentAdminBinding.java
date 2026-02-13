@@ -32,17 +32,21 @@ public final class FragmentAdminBinding implements ViewBinding {
   public final MaterialCardView cardReports;
 
   @NonNull
+  public final MaterialCardView cardSupport;
+
+  @NonNull
   public final MaterialCardView cardUsers;
 
   private FragmentAdminBinding(@NonNull NestedScrollView rootView,
       @NonNull MaterialCardView cardAddEquipment, @NonNull MaterialCardView cardCategories,
       @NonNull MaterialCardView cardLogs, @NonNull MaterialCardView cardReports,
-      @NonNull MaterialCardView cardUsers) {
+      @NonNull MaterialCardView cardSupport, @NonNull MaterialCardView cardUsers) {
     this.rootView = rootView;
     this.cardAddEquipment = cardAddEquipment;
     this.cardCategories = cardCategories;
     this.cardLogs = cardLogs;
     this.cardReports = cardReports;
+    this.cardSupport = cardSupport;
     this.cardUsers = cardUsers;
   }
 
@@ -97,6 +101,12 @@ public final class FragmentAdminBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.card_support;
+      MaterialCardView cardSupport = ViewBindings.findChildViewById(rootView, id);
+      if (cardSupport == null) {
+        break missingId;
+      }
+
       id = R.id.card_users;
       MaterialCardView cardUsers = ViewBindings.findChildViewById(rootView, id);
       if (cardUsers == null) {
@@ -104,7 +114,7 @@ public final class FragmentAdminBinding implements ViewBinding {
       }
 
       return new FragmentAdminBinding((NestedScrollView) rootView, cardAddEquipment, cardCategories,
-          cardLogs, cardReports, cardUsers);
+          cardLogs, cardReports, cardSupport, cardUsers);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

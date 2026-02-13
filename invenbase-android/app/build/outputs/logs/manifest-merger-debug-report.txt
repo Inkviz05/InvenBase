@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:2:1-95:12
-INJECTED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:2:1-95:12
-INJECTED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:2:1-95:12
-INJECTED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:2:1-95:12
+ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:2:1-100:12
+INJECTED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:2:1-100:12
+INJECTED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:2:1-100:12
+INJECTED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:2:1-100:12
 MERGED from [androidx.databinding:viewbinding:8.1.0] C:\Users\Inkvi\.gradle\caches\transforms-3\8719d70859f1e389600bf3e02aa6c75f\transformed\viewbinding-8.1.0\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.navigation:navigation-common:2.7.5] C:\Users\Inkvi\.gradle\caches\transforms-3\10e61ac554b4e50dfc1afe2013a0a40e\transformed\navigation-common-2.7.5\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.navigation:navigation-runtime:2.7.5] C:\Users\Inkvi\.gradle\caches\transforms-3\062ed1df8c987880a3a8786d9e2a1153\transformed\navigation-runtime-2.7.5\AndroidManifest.xml:17:1-22:12
@@ -175,8 +175,8 @@ MERGED from [com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Inkvi\.gradl
 	android:name
 		ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:11:19-67
 application
-ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:13:5-93:19
-INJECTED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:13:5-93:19
+ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:13:5-98:19
+INJECTED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:13:5-98:19
 MERGED from [com.google.android.material:material:1.10.0] C:\Users\Inkvi\.gradle\caches\transforms-3\bf71e49cb4534e34fe8d212656f8e696\transformed\material-1.10.0\AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.10.0] C:\Users\Inkvi\.gradle\caches\transforms-3\bf71e49cb4534e34fe8d212656f8e696\transformed\material-1.10.0\AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] C:\Users\Inkvi\.gradle\caches\transforms-3\3a54afbdf4069b39ffb67d1dcd87f47d\transformed\constraintlayout-2.1.4\AndroidManifest.xml:9:5-20
@@ -375,6 +375,14 @@ ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\s
 		ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:92:13-51
 	android:name
 		ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:90:13-50
+activity#com.invenbase.app.SupportActivity
+ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:94:9-97:54
+	android:exported
+		ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:96:13-37
+	android:theme
+		ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:97:13-51
+	android:name
+		ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:95:13-44
 uses-sdk
 INJECTED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml

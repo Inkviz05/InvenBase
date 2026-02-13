@@ -137,4 +137,20 @@ public interface ApiService {
     
     @GET("/api/qr/{id}/data")
     Call<Map<String, Object>> getQRCodeData(@Path("id") String id);
+
+    // Support (техподдержка)
+    @GET("/api/support/requests")
+    Call<List<Map<String, Object>>> getSupportRequests();
+
+    @POST("/api/support/requests")
+    Call<Map<String, Object>> createSupportRequest(@Body Map<String, String> data);
+
+    @POST("/api/support/requests/{id}/messages")
+    Call<Map<String, Object>> addSupportMessage(@Path("id") String id, @Body Map<String, String> data);
+
+    @PUT("/api/support/requests/{id}")
+    Call<Map<String, Object>> updateSupportRequest(@Path("id") String id, @Body Map<String, Object> data);
+
+    @DELETE("/api/support/requests/{id}")
+    Call<Void> deleteSupportRequest(@Path("id") String id);
 }
