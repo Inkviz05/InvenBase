@@ -95,6 +95,16 @@
             android:name=".SupportActivity"
             android:exported="false"
             android:theme="@style/Theme.InvenBase" />
+
+        <activity
+            android:name=".SquadsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.InvenBase" />
+
+        <activity
+            android:name=".SquadDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.InvenBase" />
     </application>
 
 </manifest>

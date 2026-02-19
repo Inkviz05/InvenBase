@@ -3,14 +3,23 @@ package com.invenbase.app;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.invenbase.app.api.ApiClient;
 import com.invenbase.app.api.ApiService;
@@ -20,8 +29,10 @@ import com.invenbase.app.utils.CartManager;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -50,10 +61,15 @@ public class EquipmentDetailActivity extends BaseActivity {
     private Button buttonAddToCart;
     private Button buttonBookOne;
     private Button buttonOpenCart;
+    private Button buttonMove;
     private Button buttonEdit;
     private Button buttonQrCode;
     private Button buttonDelete;
     private Equipment equipment;
+    private RecyclerView recyclerMovements;
+    private TextView textMovementsEmpty;
+    private List<Map<String, Object>> movementsList = new ArrayList<>();
+    private List<Map<String, Object>> squadsList = new ArrayList<>();
 
     public static void open(Context context, String equipmentId) {
         Intent intent = new Intent(context, EquipmentDetailActivity.class);
@@ -83,11 +99,18 @@ public class EquipmentDetailActivity extends BaseActivity {
         buttonAddToCart = findViewById(R.id.button_add_to_cart);
         buttonBookOne = findViewById(R.id.button_book_one);
         buttonOpenCart = findViewById(R.id.button_open_cart);
+        buttonMove = findViewById(R.id.button_move);
         buttonEdit = findViewById(R.id.button_edit);
         buttonQrCode = findViewById(R.id.button_qr_code);
         buttonDelete = findViewById(R.id.button_delete);
+        recyclerMovements = findViewById(R.id.recycler_movements);
+        textMovementsEmpty = findViewById(R.id.text_movements_empty);
+
+        recyclerMovements.setLayoutManager(new LinearLayoutManager(this));
+        recyclerMovements.setAdapter(new MovementsAdapter(movementsList));
 
         buttonOpenCart.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
+        buttonMove.setOnClickListener(v -> openMoveDialog());
         buttonAddToCart.setOnClickListener(v -> addToCart());
         buttonBookOne.setOnClickListener(v -> openBookingForm());
         buttonEdit.setOnClickListener(v -> openEditForm());
@@ -103,6 +126,8 @@ public class EquipmentDetailActivity extends BaseActivity {
 
         setTitle(getString(R.string.equipment_detail));
         loadEquipment(equipmentId);
+        loadMovements(equipmentId);
+        loadSquads();
     }
 
     private void loadEquipment(String equipmentId) {
@@ -148,9 +173,180 @@ public class EquipmentDetailActivity extends BaseActivity {
         buttonBookOne.setEnabled(equipment.getAvailableQuantity() > 0);
 
         boolean canEdit = authManager.isAdmin() || authManager.isResponsible();
+        buttonMove.setVisibility(canEdit ? View.VISIBLE : View.GONE);
         buttonEdit.setVisibility(canEdit ? View.VISIBLE : View.GONE);
         buttonQrCode.setVisibility(canEdit ? View.VISIBLE : View.GONE);
         buttonDelete.setVisibility(canEdit ? View.VISIBLE : View.GONE);
+    }
+
+    private void loadMovements(String equipmentId) {
+        apiService.getEquipmentMovements(equipmentId).enqueue(new Callback<List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    movementsList.clear();
+                    movementsList.addAll(response.body());
+                    if (recyclerMovements.getAdapter() != null) {
+                        recyclerMovements.getAdapter().notifyDataSetChanged();
+                    }
+                    textMovementsEmpty.setVisibility(movementsList.isEmpty() ? View.VISIBLE : View.GONE);
+                    recyclerMovements.setVisibility(movementsList.isEmpty() ? View.GONE : View.VISIBLE);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
+        });
+    }
+
+    private void loadSquads() {
+        apiService.getSquads().enqueue(new Callback<List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    squadsList.clear();
+                    squadsList.addAll(response.body());
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
+        });
+    }
+
+    private void openMoveDialog() {
+        if (equipment == null) return;
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_equipment_move, null, false);
+        Spinner spinnerSquad = view.findViewById(R.id.spinner_move_squad);
+        EditText editLocation = view.findViewById(R.id.edit_move_location);
+        EditText editComment = view.findViewById(R.id.edit_move_comment);
+
+        List<String> squadNames = new ArrayList<>();
+        squadNames.add(getString(R.string.no_squad));
+        List<String> squadIds = new ArrayList<>();
+        squadIds.add("");
+        for (Map<String, Object> s : squadsList) {
+            squadNames.add(str(s.get("name")));
+            squadIds.add(str(s.get("id")));
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, squadNames);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSquad.setAdapter(adapter);
+
+        String currentSquadId = equipment.getSquadId();
+        if (currentSquadId != null && !currentSquadId.isEmpty()) {
+            for (int i = 0; i < squadIds.size(); i++) {
+                if (squadIds.get(i).equals(currentSquadId)) {
+                    spinnerSquad.setSelection(i);
+                    break;
+                }
+            }
+        }
+        editLocation.setText(equipment.getLocation() != null ? equipment.getLocation() : "");
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.equipment_move)
+                .setView(view)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.save, null)
+                .create();
+        dialog.setOnShowListener(d -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                String toSquadId = squadIds.get(spinnerSquad.getSelectedItemPosition());
+                if (toSquadId.isEmpty()) toSquadId = null;
+                String toLocation = editLocation.getText().toString().trim();
+                String comment = editComment.getText().toString().trim();
+                Map<String, Object> data = new HashMap<>();
+                data.put("to_squad_id", toSquadId);
+                data.put("to_location", toLocation.isEmpty() ? null : toLocation);
+                data.put("comment", comment.isEmpty() ? null : comment);
+                dialog.dismiss();
+                submitMove(equipment.getId(), data);
+            });
+        });
+        dialog.show();
+    }
+
+    private static String str(Object o) {
+        return o == null ? "" : String.valueOf(o);
+    }
+
+    private void submitMove(String equipmentId, Map<String, Object> data) {
+        progressBar.setVisibility(View.VISIBLE);
+        apiService.moveEquipment(equipmentId, data).enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                progressBar.setVisibility(View.GONE);
+                if (response.isSuccessful()) {
+                    Toast.makeText(EquipmentDetailActivity.this, R.string.move_success, Toast.LENGTH_SHORT).show();
+                    loadEquipment(equipmentId);
+                    loadMovements(equipmentId);
+                } else {
+                    Toast.makeText(EquipmentDetailActivity.this, response.message() != null ? response.message() : getString(R.string.error), Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private static class MovementsAdapter extends RecyclerView.Adapter<MovementsAdapter.VH> {
+        private final List<Map<String, Object>> items;
+
+        MovementsAdapter(List<Map<String, Object>> items) {
+            this.items = items;
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_movement, parent, false);
+            return new VH(v);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            Map<String, Object> m = items.get(position);
+            String when = str(m.get("moved_at"));
+            if (!when.isEmpty()) {
+                try {
+                    SimpleDateFormat in = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+                    Date d = in.parse(when.replace("Z", "").replaceAll("\\+\\d{2}:\\d{2}$", ""));
+                    if (d != null) {
+                        when = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(d);
+                    }
+                } catch (Exception ignored) {}
+            }
+            holder.when.setText(holder.itemView.getContext().getString(R.string.move_when) + ": " + (when.isEmpty() ? "—" : when));
+            holder.from.setText(holder.itemView.getContext().getString(R.string.move_from) + ": " + (str(m.get("from_location")).isEmpty() ? "—" : str(m.get("from_location"))));
+            holder.to.setText(holder.itemView.getContext().getString(R.string.move_to) + ": " + (str(m.get("to_location")).isEmpty() ? "—" : str(m.get("to_location"))));
+            holder.by.setText(holder.itemView.getContext().getString(R.string.move_by) + ": " + (str(m.get("moved_by_name")).isEmpty() ? "—" : str(m.get("moved_by_name"))));
+            String comment = str(m.get("comment"));
+            if (!comment.isEmpty()) {
+                holder.comment.setVisibility(View.VISIBLE);
+                holder.comment.setText(comment);
+            } else {
+                holder.comment.setVisibility(View.GONE);
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
+
+        static class VH extends RecyclerView.ViewHolder {
+            final TextView when, from, to, by, comment;
+            VH(@NonNull View itemView) {
+                super(itemView);
+                when = itemView.findViewById(R.id.text_movement_when);
+                from = itemView.findViewById(R.id.text_movement_from);
+                to = itemView.findViewById(R.id.text_movement_to);
+                by = itemView.findViewById(R.id.text_movement_by);
+                comment = itemView.findViewById(R.id.text_movement_comment);
+            }
+        }
     }
 
     private void addToCart() {

@@ -8,8 +8,16 @@
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\mipmap-xhdpi\\ic_launcher_round.png"
     },
     {
+        "merged": "com.invenbase.app-merged_res-55:/layout_activity_equipment_form.xml.flat",
+        "source": "com.invenbase.app-main-57:/layout/activity_equipment_form.xml"
+    },
+    {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_item_log.xml.flat",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_log.xml"
+    },
+    {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_dialog_squad.xml.flat",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\dialog_squad.xml"
     },
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_notification_expanded.xml.flat",
@@ -24,12 +32,12 @@
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\fragment_scanner.xml"
     },
     {
-        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_item_cart.xml.flat",
-        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_cart.xml"
-    },
-    {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_notification_collapsed.xml.flat",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\notification_collapsed.xml"
+    },
+    {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_item_cart.xml.flat",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_cart.xml"
     },
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_activity_login.xml.flat",
@@ -48,6 +56,10 @@
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\menu\\bottom_navigation.xml"
     },
     {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_activity_squads.xml.flat",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\activity_squads.xml"
+    },
+    {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_activity_equipment_form.xml.flat",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\activity_equipment_form.xml"
     },
@@ -58,6 +70,10 @@
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\color_bottom_nav_selector.xml.flat",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\color\\bottom_nav_selector.xml"
+    },
+    {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_item_movement.xml.flat",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_movement.xml"
     },
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_fragment_bookings.xml.flat",
@@ -116,6 +132,10 @@
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\mipmap-xxhdpi\\ic_launcher_round.png"
     },
     {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_activity_squad_detail.xml.flat",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\activity_squad_detail.xml"
+    },
+    {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_activity_categories.xml.flat",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\activity_categories.xml"
     },
@@ -130,6 +150,14 @@
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\mipmap-xxxhdpi_ic_launcher.png.flat",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\mipmap-xxxhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_item_squad_equipment.xml.flat",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_squad_equipment.xml"
+    },
+    {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_item_squad_category.xml.flat",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_squad_category.xml"
     },
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\mipmap-xxhdpi_ic_launcher.png.flat",
@@ -160,6 +188,10 @@
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\drawable\\icon_background.xml"
     },
     {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_dialog_equipment_move.xml.flat",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\dialog_equipment_move.xml"
+    },
+    {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_activity_equipment_detail.xml.flat",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\activity_equipment_detail.xml"
     },
@@ -170,6 +202,10 @@
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_item_stat.xml.flat",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_stat.xml"
+    },
+    {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_item_squad.xml.flat",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_squad.xml"
     },
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\layout_activity_booking_form.xml.flat",
@@ -222,9 +258,5 @@
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-merged_res-55:\\mipmap-mdpi_ic_launcher_round.png.flat",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\mipmap-mdpi\\ic_launcher_round.png"
-    },
-    {
-        "merged": "com.invenbase.app-merged_res-55:/layout_item_support_request.xml.flat",
-        "source": "com.invenbase.app-main-57:/layout/item_support_request.xml"
     }
 ]

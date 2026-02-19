@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.google.android.material.button.MaterialButton;
@@ -35,6 +36,9 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
   public final MaterialButton buttonEdit;
 
   @NonNull
+  public final MaterialButton buttonMove;
+
+  @NonNull
   public final MaterialButton buttonOpenCart;
 
   @NonNull
@@ -45,6 +49,9 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
 
   @NonNull
   public final ProgressBar progressBar;
+
+  @NonNull
+  public final RecyclerView recyclerMovements;
 
   @NonNull
   public final TextView textEquipmentAvailable;
@@ -70,24 +77,31 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
   @NonNull
   public final TextView textEquipmentStatus;
 
+  @NonNull
+  public final TextView textMovementsEmpty;
+
   private ActivityEquipmentDetailBinding(@NonNull FrameLayout rootView,
       @NonNull MaterialButton buttonAddToCart, @NonNull MaterialButton buttonBookOne,
       @NonNull MaterialButton buttonDelete, @NonNull MaterialButton buttonEdit,
-      @NonNull MaterialButton buttonOpenCart, @NonNull MaterialButton buttonQrCode,
-      @NonNull LinearLayout contentContainer, @NonNull ProgressBar progressBar,
+      @NonNull MaterialButton buttonMove, @NonNull MaterialButton buttonOpenCart,
+      @NonNull MaterialButton buttonQrCode, @NonNull LinearLayout contentContainer,
+      @NonNull ProgressBar progressBar, @NonNull RecyclerView recyclerMovements,
       @NonNull TextView textEquipmentAvailable, @NonNull TextView textEquipmentCategory,
       @NonNull TextView textEquipmentDescription, @NonNull TextView textEquipmentLocation,
       @NonNull TextView textEquipmentName, @NonNull TextView textEquipmentQr,
-      @NonNull TextView textEquipmentQuantity, @NonNull TextView textEquipmentStatus) {
+      @NonNull TextView textEquipmentQuantity, @NonNull TextView textEquipmentStatus,
+      @NonNull TextView textMovementsEmpty) {
     this.rootView = rootView;
     this.buttonAddToCart = buttonAddToCart;
     this.buttonBookOne = buttonBookOne;
     this.buttonDelete = buttonDelete;
     this.buttonEdit = buttonEdit;
+    this.buttonMove = buttonMove;
     this.buttonOpenCart = buttonOpenCart;
     this.buttonQrCode = buttonQrCode;
     this.contentContainer = contentContainer;
     this.progressBar = progressBar;
+    this.recyclerMovements = recyclerMovements;
     this.textEquipmentAvailable = textEquipmentAvailable;
     this.textEquipmentCategory = textEquipmentCategory;
     this.textEquipmentDescription = textEquipmentDescription;
@@ -96,6 +110,7 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
     this.textEquipmentQr = textEquipmentQr;
     this.textEquipmentQuantity = textEquipmentQuantity;
     this.textEquipmentStatus = textEquipmentStatus;
+    this.textMovementsEmpty = textMovementsEmpty;
   }
 
   @Override
@@ -149,6 +164,12 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.button_move;
+      MaterialButton buttonMove = ViewBindings.findChildViewById(rootView, id);
+      if (buttonMove == null) {
+        break missingId;
+      }
+
       id = R.id.button_open_cart;
       MaterialButton buttonOpenCart = ViewBindings.findChildViewById(rootView, id);
       if (buttonOpenCart == null) {
@@ -170,6 +191,12 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
       id = R.id.progress_bar;
       ProgressBar progressBar = ViewBindings.findChildViewById(rootView, id);
       if (progressBar == null) {
+        break missingId;
+      }
+
+      id = R.id.recycler_movements;
+      RecyclerView recyclerMovements = ViewBindings.findChildViewById(rootView, id);
+      if (recyclerMovements == null) {
         break missingId;
       }
 
@@ -221,11 +248,17 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.text_movements_empty;
+      TextView textMovementsEmpty = ViewBindings.findChildViewById(rootView, id);
+      if (textMovementsEmpty == null) {
+        break missingId;
+      }
+
       return new ActivityEquipmentDetailBinding((FrameLayout) rootView, buttonAddToCart,
-          buttonBookOne, buttonDelete, buttonEdit, buttonOpenCart, buttonQrCode, contentContainer,
-          progressBar, textEquipmentAvailable, textEquipmentCategory, textEquipmentDescription,
-          textEquipmentLocation, textEquipmentName, textEquipmentQr, textEquipmentQuantity,
-          textEquipmentStatus);
+          buttonBookOne, buttonDelete, buttonEdit, buttonMove, buttonOpenCart, buttonQrCode,
+          contentContainer, progressBar, recyclerMovements, textEquipmentAvailable,
+          textEquipmentCategory, textEquipmentDescription, textEquipmentLocation, textEquipmentName,
+          textEquipmentQr, textEquipmentQuantity, textEquipmentStatus, textMovementsEmpty);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

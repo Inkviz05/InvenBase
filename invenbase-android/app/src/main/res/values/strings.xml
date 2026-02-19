@@ -22,6 +22,7 @@
     <string name="admin_panel">Управление</string>
     <string name="admin_panel_subtitle">Отчёты, категории и пользователи</string>
     <string name="admin_categories_desc">Добавление и редактирование категорий</string>
+    <string name="admin_squads_desc">Сквады (кабинеты), оборудование и перенос</string>
     <string name="admin_users_desc">Управление учётными записями и ролями</string>
     <string name="admin_logs_desc">Журнал действий в системе</string>
     
@@ -218,4 +219,40 @@
     <string name="support_delete_confirm">Удалить закрытую заявку? Действие нельзя отменить.</string>
     <string name="support_deleted">Заявка удалена</string>
     <string name="support_delete_only_closed">Удалить можно только закрытую заявку</string>
+
+    <!-- Squads -->
+    <string name="squads">Сквады</string>
+    <string name="squad_detail">Сквад</string>
+    <string name="add_squad">Добавить сквад</string>
+    <string name="edit_squad">Редактировать сквад</string>
+    <string name="no_squads">Нет сквадов</string>
+    <string name="squad_name">Название сквада</string>
+    <string name="squad_location">Кабинет / Локация</string>
+    <string name="squad_responsible">Ответственный</string>
+    <string name="squad_description">Описание</string>
+    <string name="squad_equipment">Оборудование</string>
+    <string name="squad_categories">Категории сквада</string>
+    <string name="squad_no_equipment">Нет оборудования в этом скваде</string>
+    <string name="squad_no_categories">Нет категорий, привязанных к этому скваду</string>
+    <string name="squad_saved">Сквад сохранён</string>
+    <string name="squad_deleted">Сквад удалён</string>
+    <string name="confirm_delete_squad">Для подтверждения введите точное название сквада</string>
+    <string name="not_assigned">Не назначен</string>
+    <string name="back_to_squads">К списку сквадов</string>
+
+    <!-- Equipment move -->
+    <string name="equipment_move">Перенос оборудования</string>
+    <string name="equipment_move_button">Перенести</string>
+    <string name="move_to_squad">Сквад (кабинет)</string>
+    <string name="move_to_location">Местоположение</string>
+    <string name="move_comment">Комментарий</string>
+    <string name="move_comment_hint">Причина или детали перемещения (необязательно)</string>
+    <string name="movements_history">История перемещений</string>
+    <string name="movements_empty">Перемещения ещё не зарегистрированы</string>
+    <string name="move_when">Когда</string>
+    <string name="move_from">Откуда</string>
+    <string name="move_to">Куда</string>
+    <string name="move_by">Кто</string>
+    <string name="move_success">Оборудование перенесено</string>
+    <string name="no_squad">Без сквада</string>
 </resources>

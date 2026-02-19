@@ -32,6 +32,9 @@ public final class FragmentAdminBinding implements ViewBinding {
   public final MaterialCardView cardReports;
 
   @NonNull
+  public final MaterialCardView cardSquads;
+
+  @NonNull
   public final MaterialCardView cardSupport;
 
   @NonNull
@@ -40,12 +43,14 @@ public final class FragmentAdminBinding implements ViewBinding {
   private FragmentAdminBinding(@NonNull NestedScrollView rootView,
       @NonNull MaterialCardView cardAddEquipment, @NonNull MaterialCardView cardCategories,
       @NonNull MaterialCardView cardLogs, @NonNull MaterialCardView cardReports,
-      @NonNull MaterialCardView cardSupport, @NonNull MaterialCardView cardUsers) {
+      @NonNull MaterialCardView cardSquads, @NonNull MaterialCardView cardSupport,
+      @NonNull MaterialCardView cardUsers) {
     this.rootView = rootView;
     this.cardAddEquipment = cardAddEquipment;
     this.cardCategories = cardCategories;
     this.cardLogs = cardLogs;
     this.cardReports = cardReports;
+    this.cardSquads = cardSquads;
     this.cardSupport = cardSupport;
     this.cardUsers = cardUsers;
   }
@@ -101,6 +106,12 @@ public final class FragmentAdminBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.card_squads;
+      MaterialCardView cardSquads = ViewBindings.findChildViewById(rootView, id);
+      if (cardSquads == null) {
+        break missingId;
+      }
+
       id = R.id.card_support;
       MaterialCardView cardSupport = ViewBindings.findChildViewById(rootView, id);
       if (cardSupport == null) {
@@ -114,7 +125,7 @@ public final class FragmentAdminBinding implements ViewBinding {
       }
 
       return new FragmentAdminBinding((NestedScrollView) rootView, cardAddEquipment, cardCategories,
-          cardLogs, cardReports, cardSupport, cardUsers);
+          cardLogs, cardReports, cardSquads, cardSupport, cardUsers);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

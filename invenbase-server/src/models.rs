@@ -254,6 +254,7 @@ pub struct BookingWithDetails {
     pub id: Uuid,
     pub user_id: Uuid,
     pub username: Option<String>,
+    pub full_name: Option<String>,
     pub equipment_id: Option<Uuid>,
     pub equipment_name: Option<String>,
     pub group_id: Option<Uuid>,
@@ -385,6 +386,33 @@ pub struct EquipmentReport {
 pub struct BookingReportQuery {
     pub from: Option<NaiveDate>,
     pub to: Option<NaiveDate>,
+}
+
+/// Запись единого журнала учёта (аудит): действие пользователя с подстановкой ФИО/имени и наименования объекта.
+#[derive(Debug, Serialize, FromRow)]
+pub struct AuditReportEntry {
+    pub id: Uuid,
+    pub user_id: Option<Uuid>,
+    pub username: Option<String>,
+    pub full_name: Option<String>,
+    pub action: String,
+    pub entity_type: String,
+    pub entity_id: Option<Uuid>,
+    /// Наименование объекта (оборудование, пользователь, бронирование) вместо UUID.
+    pub entity_name: Option<String>,
+    pub details: Option<serde_json::Value>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AuditReportQuery {
+    pub from: Option<NaiveDate>,
+    pub to: Option<NaiveDate>,
+    pub action: Option<String>,
+    pub entity_type: Option<String>,
+    pub user_id: Option<Uuid>,
+    pub limit: Option<u32>,
+    pub offset: Option<u32>,
 }
 
 #[derive(Debug, Serialize, FromRow)]

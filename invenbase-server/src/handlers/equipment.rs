@@ -351,7 +351,7 @@ pub async fn move_equipment(
     // Получаем текущее состояние оборудования и ответственного сквада
     let row = sqlx::query!(
         r#"
-        SELECT e.squad_id, e.location, s.responsible_user_id
+        SELECT e.name as equipment_name, e.squad_id, e.location, s.responsible_user_id
         FROM equipment e
         LEFT JOIN squads s ON e.squad_id = s.id
         WHERE e.id = $1
@@ -381,8 +381,9 @@ pub async fn move_equipment(
         }
     }
 
+    let equipment_name = row.equipment_name.clone();
     let from_squad_id = row.squad_id;
-    let from_location = row.location;
+    let from_location = row.location.clone();
 
     // Обновляем оборудование
     sqlx::query::<sqlx::Postgres>(
@@ -421,12 +422,48 @@ pub async fn move_equipment(
     .bind(equipment_id)
     .bind(from_squad_id)
     .bind(&req.to_squad_id)
-    .bind(from_location)
+    .bind(&from_location)
     .bind(&req.to_location)
     .bind(user_id)
     .bind(&req.comment)
     .execute(&state.db.pool)
     .await?;
+
+    // Названия сквадов для отчёта (без ID в логе)
+    let squad_ids: Vec<Uuid> = [from_squad_id, req.to_squad_id].into_iter().flatten().collect();
+    let squad_names: std::collections::HashMap<Uuid, String> = if squad_ids.is_empty() {
+        std::collections::HashMap::new()
+    } else {
+        sqlx::query_as::<_, (Uuid, String)>("SELECT id, name FROM squads WHERE id = ANY($1)")
+            .bind(&squad_ids)
+            .fetch_all(&state.db.pool)
+            .await
+            .ok()
+            .unwrap_or_default()
+            .into_iter()
+            .map(|(id, name)| (id, name))
+            .collect()
+    };
+    let from_squad_name = from_squad_id.and_then(|id| squad_names.get(&id).cloned());
+    let to_squad_name = req.to_squad_id.and_then(|id| squad_names.get(&id).cloned());
+
+    let details = serde_json::json!({
+        "from_location": from_location,
+        "to_location": req.to_location,
+        "from_squad_name": from_squad_name,
+        "to_squad_name": to_squad_name,
+        "equipment_name": equipment_name,
+        "comment": req.comment
+    });
+    let _ = sqlx::query::<sqlx::Postgres>(
+        "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
+         VALUES ($1, 'equipment_move', 'equipment', $2, $3)"
+    )
+    .bind(user_id)
+    .bind(equipment_id)
+    .bind(details)
+    .execute(&state.db.pool)
+    .await;
 
     let movement: EquipmentMovement = sqlx::query_as::<sqlx::Postgres, _>(
         r#"

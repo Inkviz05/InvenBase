@@ -378,9 +378,15 @@ const EquipmentList = () => {
                 <div style={{ marginTop: '8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
                   <span className="material-icons" style={{ fontSize: '18px', verticalAlign: 'middle' }}>groups</span>
                   {' '}
-                  <Link to={`/squads/${eq.squad_id}`} onClick={(e) => e.stopPropagation()} style={{ color: 'var(--primary-color)' }}>
+                  <span
+                    role="link"
+                    tabIndex={0}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/squads/${eq.squad_id}`); }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/squads/${eq.squad_id}`); } }}
+                    style={{ color: 'var(--primary-color)', cursor: 'pointer', textDecoration: 'underline' }}
+                  >
                     {eq.squad_name}
-                  </Link>
+                  </span>
                 </div>
               )}
             </Link>

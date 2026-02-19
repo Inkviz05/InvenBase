@@ -124,6 +124,14 @@
             android:exported="false"
             android:theme="@style/Theme.InvenBase" />
         <activity
+            android:name="com.invenbase.app.SquadsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.InvenBase" />
+        <activity
+            android:name="com.invenbase.app.SquadDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.InvenBase" />
+        <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:clearTaskOnLaunch="true"
             android:screenOrientation="sensorLandscape"

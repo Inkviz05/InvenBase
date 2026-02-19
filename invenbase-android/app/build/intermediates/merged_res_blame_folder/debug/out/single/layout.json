@@ -12,16 +12,24 @@
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\fragment_dashboard.xml"
     },
     {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\activity_squads.xml",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\activity_squads.xml"
+    },
+    {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\item_squad.xml",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_squad.xml"
+    },
+    {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\notification_expanded.xml",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\notification_expanded.xml"
     },
     {
-        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\item_category.xml",
-        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_category.xml"
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\dialog_squad.xml",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\dialog_squad.xml"
     },
     {
-        "merged": "com.invenbase.app-mergeDebugResources-54:/layout/item_support_request.xml",
-        "source": "com.invenbase.app-main-57:/layout/item_support_request.xml"
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\item_category.xml",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_category.xml"
     },
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\drawer_header.xml",
@@ -54,6 +62,10 @@
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\activity_categories.xml",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\activity_categories.xml"
+    },
+    {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\activity_squad_detail.xml",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\activity_squad_detail.xml"
     },
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\activity_equipment_detail.xml",
@@ -92,12 +104,20 @@
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_stat_card.xml"
     },
     {
-        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\item_notification.xml",
-        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_notification.xml"
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\item_squad_equipment.xml",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_squad_equipment.xml"
+    },
+    {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\item_squad_category.xml",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_squad_category.xml"
     },
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\item_cart.xml",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_cart.xml"
+    },
+    {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\item_notification.xml",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_notification.xml"
     },
     {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\activity_login.xml",
@@ -120,6 +140,10 @@
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_equipment.xml"
     },
     {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\item_movement.xml",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_movement.xml"
+    },
+    {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\item_booking.xml",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_booking.xml"
     },
@@ -136,7 +160,15 @@
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\item_report_category.xml"
     },
     {
+        "merged": "com.invenbase.app-mergeDebugResources-54:/layout/activity_equipment_form.xml",
+        "source": "com.invenbase.app-main-57:/layout/activity_equipment_form.xml"
+    },
+    {
         "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\fragment_admin.xml",
         "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\fragment_admin.xml"
+    },
+    {
+        "merged": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-mergeDebugResources-54:\\layout\\dialog_equipment_move.xml",
+        "source": "C:\\Users\\Inkvi\\.gradle\\daemon\\8.2\\com.invenbase.app-main-57:\\layout\\dialog_equipment_move.xml"
     }
 ]

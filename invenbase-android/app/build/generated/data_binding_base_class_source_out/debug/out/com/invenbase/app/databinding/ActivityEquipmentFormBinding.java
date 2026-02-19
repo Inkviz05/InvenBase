@@ -55,6 +55,9 @@ public final class ActivityEquipmentFormBinding implements ViewBinding {
   public final Spinner spinnerCategory;
 
   @NonNull
+  public final Spinner spinnerSquad;
+
+  @NonNull
   public final Spinner spinnerStatus;
 
   private ActivityEquipmentFormBinding(@NonNull FrameLayout rootView,
@@ -62,7 +65,8 @@ public final class ActivityEquipmentFormBinding implements ViewBinding {
       @NonNull EditText editAvailableQuantity, @NonNull EditText editDescription,
       @NonNull EditText editLocation, @NonNull EditText editName, @NonNull EditText editQuantity,
       @NonNull ProgressBar progressBar, @NonNull LinearLayout quantityRow,
-      @NonNull Spinner spinnerCategory, @NonNull Spinner spinnerStatus) {
+      @NonNull Spinner spinnerCategory, @NonNull Spinner spinnerSquad,
+      @NonNull Spinner spinnerStatus) {
     this.rootView = rootView;
     this.buttonSave = buttonSave;
     this.checkUnique = checkUnique;
@@ -74,6 +78,7 @@ public final class ActivityEquipmentFormBinding implements ViewBinding {
     this.progressBar = progressBar;
     this.quantityRow = quantityRow;
     this.spinnerCategory = spinnerCategory;
+    this.spinnerSquad = spinnerSquad;
     this.spinnerStatus = spinnerStatus;
   }
 
@@ -164,6 +169,12 @@ public final class ActivityEquipmentFormBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.spinner_squad;
+      Spinner spinnerSquad = ViewBindings.findChildViewById(rootView, id);
+      if (spinnerSquad == null) {
+        break missingId;
+      }
+
       id = R.id.spinner_status;
       Spinner spinnerStatus = ViewBindings.findChildViewById(rootView, id);
       if (spinnerStatus == null) {
@@ -172,7 +183,7 @@ public final class ActivityEquipmentFormBinding implements ViewBinding {
 
       return new ActivityEquipmentFormBinding((FrameLayout) rootView, buttonSave, checkUnique,
           editAvailableQuantity, editDescription, editLocation, editName, editQuantity, progressBar,
-          quantityRow, spinnerCategory, spinnerStatus);
+          quantityRow, spinnerCategory, spinnerSquad, spinnerStatus);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

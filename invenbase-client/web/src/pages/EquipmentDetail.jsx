@@ -355,7 +355,9 @@ const EquipmentDetail = () => {
         ) : movements.length === 0 ? (
           <p style={{ color: 'var(--text-secondary)' }}>Перемещения ещё не зарегистрированы.</p>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+          <>
+            <div className="table-responsive">
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--divider)', color: 'var(--text-secondary)' }}>
                 <th style={{ padding: '8px', textAlign: 'left' }}>Когда</th>
@@ -386,7 +388,9 @@ const EquipmentDetail = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

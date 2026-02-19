@@ -72,7 +72,7 @@ const Layout = () => {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header - одинаковый для веб и Android */}
-      <header style={{
+      <header className="app-header" style={{
         background: 'var(--surface)',
         color: 'var(--text-primary)',
         padding: '16px 24px',
@@ -82,8 +82,8 @@ const Layout = () => {
         zIndex: 1000,
         borderBottom: '1px solid var(--divider)'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="app-header-inner">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
               style={{
@@ -101,7 +101,7 @@ const Layout = () => {
             </button>
             <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)' }}>InvenBase</h1>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div className="app-header-right">
               <Link
                 to="/notifications"
                 style={{
@@ -180,7 +180,7 @@ const Layout = () => {
                 }}
               >
                 <span className="material-icons">account_circle</span>
-                <span>{user?.username || 'Пользователь'}</span>
+                <span className="app-header-username">{user?.username || 'Пользователь'}</span>
                 <span className="material-icons">{showMenu ? 'expand_less' : 'expand_more'}</span>
               </button>
               {showMenu && (
@@ -228,7 +228,7 @@ const Layout = () => {
         </div>
       </header>
 
-      <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
+      <div className="layout-body" style={{ display: 'flex', flex: 1, position: 'relative', minWidth: 0, overflowX: 'hidden' }}>
         {/* Mobile Menu Overlay */}
         {showMobileMenu && isMobile && (
           <div
@@ -618,7 +618,7 @@ const Layout = () => {
         </nav>
 
         {/* Main Content */}
-        <main className="main-content" style={{ flex: 1, padding: '24px', overflow: 'auto', background: 'var(--background)' }}>
+        <main className="main-content" style={{ flex: 1, minWidth: 0, padding: '24px', overflowX: 'hidden', overflowY: 'auto', background: 'var(--background)', boxSizing: 'border-box' }}>
           <Outlet />
         </main>
       </div>

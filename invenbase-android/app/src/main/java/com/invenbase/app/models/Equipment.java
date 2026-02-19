@@ -27,6 +27,9 @@ public class Equipment {
     @SerializedName("is_unique")
     private boolean isUnique;
 
+    @SerializedName("squad_id")
+    private String squadId;
+
     @SerializedName("location")
     private String location;
     
@@ -106,6 +109,14 @@ public class Equipment {
 
     public void setUnique(boolean unique) {
         isUnique = unique;
+    }
+
+    public String getSquadId() {
+        return squadId;
+    }
+
+    public void setSquadId(String squadId) {
+        this.squadId = squadId;
     }
 
     public String getLocation() {

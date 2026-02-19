@@ -20,6 +20,8 @@ import com.invenbase.app.models.Category;
 import com.invenbase.app.models.Equipment;
 import com.invenbase.app.utils.AuthManager;
 
+import android.widget.AdapterView;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,11 +35,13 @@ public class EquipmentFormActivity extends BaseActivity {
 
     public static final String EXTRA_EQUIPMENT_ID = "equipment_id";
     public static final String EXTRA_IS_EDIT = "is_edit";
+    public static final String EXTRA_SQUAD_ID = "squad_id";
 
     private ApiService apiService;
     private AuthManager authManager;
     private EditText editName;
     private EditText editDescription;
+    private Spinner spinnerSquad;
     private Spinner spinnerCategory;
     private EditText editQuantity;
     private EditText editAvailableQuantity;
@@ -48,6 +52,8 @@ public class EquipmentFormActivity extends BaseActivity {
     private Button buttonSave;
     private ProgressBar progressBar;
     private List<Category> categories = new ArrayList<>();
+    private List<Map<String, Object>> squadsList = new ArrayList<>();
+    private List<String> squadIds = new ArrayList<>();
     private String equipmentId;
 
     @Override
@@ -69,6 +75,7 @@ public class EquipmentFormActivity extends BaseActivity {
 
         editName = findViewById(R.id.edit_name);
         editDescription = findViewById(R.id.edit_description);
+        spinnerSquad = findViewById(R.id.spinner_squad);
         spinnerCategory = findViewById(R.id.spinner_category);
         editQuantity = findViewById(R.id.edit_quantity);
         editAvailableQuantity = findViewById(R.id.edit_available_quantity);
@@ -100,15 +107,86 @@ public class EquipmentFormActivity extends BaseActivity {
 
         buttonSave.setOnClickListener(v -> save());
 
+        spinnerSquad.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String squadId = position > 0 && position <= squadIds.size() ? squadIds.get(position - 1) : null;
+                loadCategories(squadId, null);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
         setTitle(isEdit ? R.string.edit_equipment : R.string.add_equipment);
-        loadCategories();
-        if (isEdit && equipmentId != null) {
-            loadEquipment();
-        }
+        loadSquads();
     }
 
-    private void loadCategories() {
-        apiService.getCategories().enqueue(new Callback<List<Category>>() {
+    private static String str(Object o) {
+        return o == null ? "" : String.valueOf(o);
+    }
+
+    private void loadSquads() {
+        apiService.getSquads().enqueue(new Callback<List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    squadsList.clear();
+                    squadsList.addAll(response.body());
+                    squadIds.clear();
+                    squadIds.add("");
+                    List<String> squadNames = new ArrayList<>();
+                    squadNames.add(getString(R.string.no_squad));
+                    for (Map<String, Object> s : squadsList) {
+                        squadNames.add(str(s.get("name")));
+                        squadIds.add(str(s.get("id")));
+                    }
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                            EquipmentFormActivity.this,
+                            android.R.layout.simple_spinner_item,
+                            squadNames);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinnerSquad.setAdapter(adapter);
+
+                    if (equipmentId != null) {
+                        loadEquipment();
+                    } else {
+                        loadCategories(null, null);
+                        String presetSquadId = getIntent().getStringExtra(EXTRA_SQUAD_ID);
+                        if (presetSquadId != null && !presetSquadId.isEmpty()) {
+                            for (int i = 0; i < squadIds.size(); i++) {
+                                if (presetSquadId.equals(squadIds.get(i))) {
+                                    spinnerSquad.setSelection(i);
+                                    loadCategories(presetSquadId, null);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
+                squadIds.clear();
+                squadIds.add("");
+                List<String> fallback = new ArrayList<>();
+                fallback.add(getString(R.string.no_squad));
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                        EquipmentFormActivity.this,
+                        android.R.layout.simple_spinner_item,
+                        fallback);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerSquad.setAdapter(adapter);
+                loadCategories(null, null);
+                if (equipmentId != null) loadEquipment();
+            }
+        });
+    }
+
+    private void loadCategories(@Nullable String squadId, @Nullable String selectCategoryId) {
+        Call<List<Category>> call = (squadId != null && !squadId.isEmpty())
+                ? apiService.getCategoriesBySquad(squadId)
+                : apiService.getCategories();
+        call.enqueue(new Callback<List<Category>>() {
             @Override
             public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -124,12 +202,18 @@ public class EquipmentFormActivity extends BaseActivity {
                             categoryNames);
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     spinnerCategory.setAdapter(adapter);
+                    if (selectCategoryId != null && !selectCategoryId.isEmpty()) {
+                        for (int i = 0; i < categories.size(); i++) {
+                            if (selectCategoryId.equals(categories.get(i).getId())) {
+                                spinnerCategory.setSelection(i + 1);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
-
             @Override
-            public void onFailure(Call<List<Category>> call, Throwable t) {
-            }
+            public void onFailure(Call<List<Category>> call, Throwable t) {}
         });
     }
 
@@ -154,14 +238,16 @@ public class EquipmentFormActivity extends BaseActivity {
                     } else {
                         quantityRow.setVisibility(View.VISIBLE);
                     }
-                    if (eq.getCategoryId() != null) {
-                        for (int i = 0; i < categories.size(); i++) {
-                            if (categories.get(i).getId().equals(eq.getCategoryId())) {
-                                spinnerCategory.setSelection(i + 1);
+                    String squadId = eq.getSquadId();
+                    if (squadId != null && !squadId.isEmpty()) {
+                        for (int i = 0; i < squadIds.size(); i++) {
+                            if (squadId.equals(squadIds.get(i))) {
+                                spinnerSquad.setSelection(i);
                                 break;
                             }
                         }
                     }
+                    loadCategories(squadId, eq.getCategoryId());
                     String status = eq.getStatus();
                     if (status != null) {
                         int pos = status.equals("available") ? 0 : status.equals("maintenance") ? 1 : 2;
@@ -169,7 +255,6 @@ public class EquipmentFormActivity extends BaseActivity {
                     }
                 }
             }
-
             @Override
             public void onFailure(Call<Equipment> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
@@ -196,8 +281,15 @@ public class EquipmentFormActivity extends BaseActivity {
         Map<String, Object> data = new HashMap<>();
         data.put("name", name);
         data.put("description", editDescription.getText().toString().trim());
+        int squadPos = spinnerSquad.getSelectedItemPosition();
+        if (squadPos >= 0 && squadPos < squadIds.size()) {
+            String sid = squadIds.get(squadPos);
+            if (sid != null && !sid.isEmpty()) {
+                data.put("squad_id", sid);
+            }
+        }
         int catPos = spinnerCategory.getSelectedItemPosition();
-        if (catPos > 0) {
+        if (catPos > 0 && catPos <= categories.size()) {
             data.put("category_id", categories.get(catPos - 1).getId());
         }
         data.put("is_unique", isUnique);

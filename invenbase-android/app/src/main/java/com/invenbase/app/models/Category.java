@@ -11,6 +11,9 @@ public class Category {
     
     @SerializedName("description")
     private String description;
+
+    @SerializedName("squad_id")
+    private String squadId;
     
     @SerializedName("created_at")
     private String createdAt;
@@ -48,6 +51,14 @@ public class Category {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getSquadId() {
+        return squadId;
+    }
+
+    public void setSquadId(String squadId) {
+        this.squadId = squadId;
     }
 
     public String getCreatedAt() {

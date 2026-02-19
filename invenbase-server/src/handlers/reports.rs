@@ -1,6 +1,6 @@
 use actix_web::{web, HttpResponse};
 
-use crate::models::{EquipmentReport, CategoryStatistics, BookingWithDetails, BookingReportQuery};
+use crate::models::{EquipmentReport, CategoryStatistics, BookingWithDetails, BookingReportQuery, AuditReportEntry, AuditReportQuery};
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
 use crate::app_state::AppState;
@@ -149,5 +149,58 @@ pub async fn get_booking_detailed_report(
     .await?;
 
     Ok(HttpResponse::Ok().json(bookings))
+}
+
+/// Единый журнал учёта: все действия (оборудование, бронирования, пользователи, вход, перемещения) с фильтрами и выгрузкой.
+pub async fn get_audit_report(
+    state: web::Data<AppState>,
+    claims: Claims,
+    query: web::Query<AuditReportQuery>,
+) -> Result<HttpResponse, AppError> {
+    AuthService::require_any_role(&claims, &["admin", "responsible"])?;
+
+    let limit = query.limit.unwrap_or(500).min(5000);
+    let offset = query.offset.unwrap_or(0);
+
+    let logs: Vec<AuditReportEntry> = sqlx::query_as::<sqlx::Postgres, _>(
+        r#"
+        SELECT
+            l.id,
+            l.user_id,
+            u.username,
+            u.full_name,
+            l.action,
+            l.entity_type,
+            l.entity_id,
+            CASE
+                WHEN l.entity_type = 'equipment' THEN (SELECT name FROM equipment WHERE id = l.entity_id LIMIT 1)
+                WHEN l.entity_type = 'user' THEN (SELECT COALESCE(TRIM(NULLIF(full_name, '')), username) FROM users WHERE id = l.entity_id LIMIT 1)
+                WHEN l.entity_type = 'booking' THEN (SELECT COALESCE(e.name, 'Бронирование') FROM bookings b LEFT JOIN equipment e ON e.id = b.equipment_id WHERE b.id = l.entity_id LIMIT 1)
+                ELSE NULL
+            END AS entity_name,
+            l.details,
+            l.created_at
+        FROM activity_logs l
+        LEFT JOIN users u ON l.user_id = u.id
+        WHERE ($1::date IS NULL OR (l.created_at AT TIME ZONE 'UTC')::date >= $1)
+          AND ($2::date IS NULL OR (l.created_at AT TIME ZONE 'UTC')::date <= $2)
+          AND ($3::text IS NULL OR l.action = $3)
+          AND ($4::text IS NULL OR l.entity_type = $4)
+          AND ($5::uuid IS NULL OR l.user_id = $5)
+        ORDER BY l.created_at DESC
+        LIMIT $6 OFFSET $7
+        "#
+    )
+    .bind(query.from)
+    .bind(query.to)
+    .bind(&query.action)
+    .bind(&query.entity_type)
+    .bind(query.user_id)
+    .bind(limit as i64)
+    .bind(offset as i64)
+    .fetch_all(&state.db.pool)
+    .await?;
+
+    Ok(HttpResponse::Ok().json(logs))
 }
 

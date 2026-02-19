@@ -35,6 +35,12 @@ public interface ApiService {
     
     @GET("/api/equipment/{id}")
     Call<Equipment> getEquipmentById(@Path("id") String id);
+
+    @GET("/api/equipment/{id}/movements")
+    Call<List<Map<String, Object>>> getEquipmentMovements(@Path("id") String id);
+
+    @POST("/api/equipment/{id}/move")
+    Call<Map<String, Object>> moveEquipment(@Path("id") String id, @Body Map<String, Object> data);
     
     @GET("/api/equipment/qr/{qrCode}")
     Call<Equipment> getEquipmentByQR(@Path("qrCode") String qrCode);
@@ -77,6 +83,9 @@ public interface ApiService {
     // Categories
     @GET("/api/categories")
     Call<List<Category>> getCategories();
+
+    @GET("/api/categories")
+    Call<List<Category>> getCategoriesBySquad(@Query("squad_id") String squadId);
     
     @GET("/api/categories/{id}")
     Call<Category> getCategoryById(@Path("id") String id);
@@ -153,4 +162,23 @@ public interface ApiService {
 
     @DELETE("/api/support/requests/{id}")
     Call<Void> deleteSupportRequest(@Path("id") String id);
+
+    // Squads (сквады)
+    @GET("/api/squads")
+    Call<List<Map<String, Object>>> getSquads();
+
+    @GET("/api/squads/{id}")
+    Call<Map<String, Object>> getSquad(@Path("id") String id);
+
+    @GET("/api/squads/{id}/equipment")
+    Call<List<Equipment>> getSquadEquipment(@Path("id") String id);
+
+    @POST("/api/squads")
+    Call<Map<String, Object>> createSquad(@Body Map<String, Object> data);
+
+    @PUT("/api/squads/{id}")
+    Call<Map<String, Object>> updateSquad(@Path("id") String id, @Body Map<String, Object> data);
+
+    @DELETE("/api/squads/{id}")
+    Call<Void> deleteSquad(@Path("id") String id);
 }

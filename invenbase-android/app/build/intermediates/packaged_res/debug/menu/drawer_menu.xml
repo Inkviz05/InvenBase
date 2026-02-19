@@ -30,6 +30,10 @@
             android:icon="@android:drawable/ic_menu_sort_by_size"
             android:title="@string/categories" />
         <item
+            android:id="@+id/drawer_squads"
+            android:icon="@android:drawable/ic_menu_my_calendar"
+            android:title="@string/squads" />
+        <item
             android:id="@+id/drawer_reports"
             android:icon="@android:drawable/ic_menu_info_details"
             android:title="@string/reports" />

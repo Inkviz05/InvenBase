@@ -307,6 +307,10 @@ impl Database {
             .execute(&self.pool)
             .await?;
 
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON activity_logs(created_at)")
+            .execute(&self.pool)
+            .await?;
+
         sqlx::query("CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id)")
             .execute(&self.pool)
             .await?;

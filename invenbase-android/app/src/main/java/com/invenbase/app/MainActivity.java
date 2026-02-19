@@ -170,6 +170,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         menu.findItem(R.id.drawer_reports).setVisible(isAdmin || isResponsible);
         menu.findItem(R.id.drawer_logs).setVisible(isAdmin || isResponsible);
         menu.findItem(R.id.drawer_users).setVisible(isAdmin);
+        menu.findItem(R.id.drawer_squads).setVisible(isAdmin || isResponsible);
     }
 
     private void setupBottomNavVisibility() {
@@ -243,6 +244,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             bottomNavigation.setSelectedItemId(R.id.nav_admin);
         } else if (itemId == R.id.drawer_categories) {
             startActivity(new Intent(this, CategoriesActivity.class));
+        } else if (itemId == R.id.drawer_squads) {
+            startActivity(new Intent(this, SquadsActivity.class));
         } else if (itemId == R.id.drawer_reports) {
             startActivity(new Intent(this, ReportsActivity.class));
         } else if (itemId == R.id.drawer_logs) {

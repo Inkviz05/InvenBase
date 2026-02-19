@@ -152,8 +152,9 @@ const Users = () => {
       </div>
 
       <div className="card">
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
+        <div className="table-responsive">
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
             <tr style={{ 
               borderBottom: '2px solid var(--divider)',
               background: 'var(--surface)'
@@ -164,8 +165,8 @@ const Users = () => {
               <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-primary)', fontWeight: 600, textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.5px' }}>Роль</th>
               <th style={{ padding: '12px', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 600, textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.5px' }}>Действия</th>
             </tr>
-          </thead>
-          <tbody>
+            </thead>
+            <tbody>
             {users.map((user) => (
               <tr key={user.id} style={{ borderBottom: '1px solid var(--divider)' }}>
                 <td style={{ padding: '12px', color: 'var(--text-primary)' }}>{user.username}</td>
@@ -229,8 +230,9 @@ const Users = () => {
                 </td>
               </tr>
             ))}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
 
         {users.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>

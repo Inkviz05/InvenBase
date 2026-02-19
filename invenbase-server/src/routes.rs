@@ -211,6 +211,9 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                 .route("/bookings/detailed", web::get().to(|state: web::Data<AppState>, auth: AdminOrResponsible, query: web::Query<_>| async move {
                     reports::get_booking_detailed_report(state, auth.claims(), query).await
                 }))
+                .route("/audit", web::get().to(|state: web::Data<AppState>, auth: AdminOrResponsible, query: web::Query<_>| async move {
+                    reports::get_audit_report(state, auth.claims(), query).await
+                }))
         )
         
         // QR-коды

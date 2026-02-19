@@ -156,7 +156,8 @@ const Categories = () => {
       </div>
 
       <div className="card">
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="table-responsive">
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ 
               borderBottom: '2px solid var(--divider)',
@@ -208,6 +209,7 @@ const Categories = () => {
             ))}
           </tbody>
         </table>
+        </div>
 
         {filteredCategories.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
