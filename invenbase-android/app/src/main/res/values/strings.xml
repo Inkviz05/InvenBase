@@ -167,7 +167,31 @@
     <string name="report_cancelled">Отменены</string>
     <string name="report_completed">Завершены</string>
     <string name="report_category_total">Всего: %1$d</string>
-    
+    <string name="report_equipment_subtitle">Наличие и использование.</string>
+    <string name="report_booking_subtitle">Статистика и топ за период (период задаётся ниже).</string>
+    <string name="report_tops_title">Топы за период</string>
+    <string name="report_top_equipment_title">Топ оборудования по количеству бронирований</string>
+    <string name="report_top_category_title">Топ категорий по бронированиям</string>
+    <string name="report_equipment_table_title">Оборудование: остатки и доступность</string>
+    <string name="report_by_category_title">По категориям</string>
+    <string name="period_all">За всё время</string>
+    <string name="period_today">Сегодня</string>
+    <string name="period_yesterday">Вчера</string>
+    <string name="period_week">Последние 7 дней</string>
+    <string name="period_month">Текущий месяц</string>
+    <string name="period_from">Период с</string>
+    <string name="period_to">по</string>
+    <string name="equipment_status_available">Доступно</string>
+    <string name="equipment_status_maintenance">На обслуживании</string>
+    <string name="report_bookings_count">Бронирований</string>
+    <string name="report_percent">%% от всех</string>
+    <string name="report_total_qty">Общий объём (шт.)</string>
+    <string name="report_total">Итого</string>
+    <string name="report_col_num">#</string>
+    <string name="report_col_name">Название</string>
+    <string name="report_col_equipment">Оборудование</string>
+    <string name="report_col_bookings">Бронирований</string>
+
     <!-- Logs -->
     <string name="no_logs">Нет записей в журнале</string>
     
@@ -243,10 +267,17 @@
     <!-- Equipment move -->
     <string name="equipment_move">Перенос оборудования</string>
     <string name="equipment_move_button">Перенести</string>
-    <string name="move_to_squad">Сквад (кабинет)</string>
-    <string name="move_to_location">Местоположение</string>
-    <string name="move_comment">Комментарий</string>
-    <string name="move_comment_hint">Причина или детали перемещения (необязательно)</string>
+    <string name="move_dialog_intro">Укажите новое местоположение оборудования. Запись о перемещении сохранится в истории.</string>
+    <string name="move_current_title">Сейчас:</string>
+    <string name="move_current_squad">Сквад: %1$s</string>
+    <string name="move_current_location">Местоположение: %1$s</string>
+    <string name="move_new_title">Куда переносим:</string>
+    <string name="move_to_squad">Сквад (кабинет / подразделение)</string>
+    <string name="move_squad_hint">Выберите сквад или «Без сквада»</string>
+    <string name="move_to_location">Местоположение (адрес в помещении)</string>
+    <string name="move_location_hint">Например: Кабинет 227, полка 3, стол 5</string>
+    <string name="move_comment">Комментарий (необязательно)</string>
+    <string name="move_comment_hint">Причина или детали перемещения</string>
     <string name="movements_history">История перемещений</string>
     <string name="movements_empty">Перемещения ещё не зарегистрированы</string>
     <string name="move_when">Когда</string>

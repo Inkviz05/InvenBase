@@ -51,6 +51,8 @@ public class EquipmentDetailActivity extends BaseActivity {
     private TextView textName;
     private TextView textDescription;
     private TextView textCategory;
+    private TextView textSquad;
+    private View labelEquipSquad;
     private TextView textQuantity;
     private TextView textAvailable;
     private TextView textLocation;
@@ -89,6 +91,8 @@ public class EquipmentDetailActivity extends BaseActivity {
         textName = findViewById(R.id.text_equipment_name);
         textDescription = findViewById(R.id.text_equipment_description);
         textCategory = findViewById(R.id.text_equipment_category);
+        textSquad = findViewById(R.id.text_equipment_squad);
+        labelEquipSquad = findViewById(R.id.label_equipment_squad);
         textQuantity = findViewById(R.id.text_equipment_quantity);
         textAvailable = findViewById(R.id.text_equipment_available);
         textLocation = findViewById(R.id.text_equipment_location);
@@ -161,6 +165,27 @@ public class EquipmentDetailActivity extends BaseActivity {
         textName.setText(equipment.getName());
         textDescription.setText(equipment.getDescription() != null ? equipment.getDescription() : getString(R.string.no_data));
         textCategory.setText(equipment.getCategoryName() != null ? equipment.getCategoryName() : getString(R.string.no_data));
+
+        boolean canEdit = authManager.isAdmin() || authManager.isResponsible();
+        String squadName = equipment.getSquadName();
+        if (squadName == null || squadName.trim().isEmpty()) {
+            if (equipment.getSquadId() != null && !equipment.getSquadId().isEmpty()) {
+                for (Map<String, Object> s : squadsList) {
+                    if (equipment.getSquadId().equals(str(s.get("id")))) {
+                        squadName = str(s.get("name"));
+                        break;
+                    }
+                }
+            }
+        }
+        if (canEdit) {
+            labelEquipSquad.setVisibility(View.VISIBLE);
+            textSquad.setVisibility(View.VISIBLE);
+            textSquad.setText((squadName != null && !squadName.trim().isEmpty()) ? squadName.trim() : getString(R.string.no_squad));
+        } else {
+            labelEquipSquad.setVisibility(View.GONE);
+            textSquad.setVisibility(View.GONE);
+        }
         textQuantity.setText(String.valueOf(equipment.getQuantity()));
         textAvailable.setText(String.valueOf(equipment.getAvailableQuantity()));
         textLocation.setText(equipment.getLocation() != null ? equipment.getLocation() : getString(R.string.no_data));
@@ -172,7 +197,6 @@ public class EquipmentDetailActivity extends BaseActivity {
         buttonAddToCart.setEnabled(!inCart);
         buttonBookOne.setEnabled(equipment.getAvailableQuantity() > 0);
 
-        boolean canEdit = authManager.isAdmin() || authManager.isResponsible();
         buttonMove.setVisibility(canEdit ? View.VISIBLE : View.GONE);
         buttonEdit.setVisibility(canEdit ? View.VISIBLE : View.GONE);
         buttonQrCode.setVisibility(canEdit ? View.VISIBLE : View.GONE);
@@ -215,9 +239,29 @@ public class EquipmentDetailActivity extends BaseActivity {
     private void openMoveDialog() {
         if (equipment == null) return;
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_equipment_move, null, false);
+        TextView textEquipmentName = view.findViewById(R.id.text_move_equipment_name);
+        TextView textCurrentSquad = view.findViewById(R.id.text_move_current_squad);
+        TextView textCurrentLocation = view.findViewById(R.id.text_move_current_location);
         Spinner spinnerSquad = view.findViewById(R.id.spinner_move_squad);
         EditText editLocation = view.findViewById(R.id.edit_move_location);
         EditText editComment = view.findViewById(R.id.edit_move_comment);
+
+        String currentSquadName = equipment.getSquadName();
+        if (currentSquadName == null || currentSquadName.trim().isEmpty()) {
+            for (Map<String, Object> s : squadsList) {
+                if (equipment.getSquadId() != null && equipment.getSquadId().equals(str(s.get("id")))) {
+                    currentSquadName = str(s.get("name"));
+                    break;
+                }
+            }
+        }
+        if (currentSquadName == null || currentSquadName.trim().isEmpty()) {
+            currentSquadName = getString(R.string.no_squad);
+        }
+        textEquipmentName.setText(equipment.getName() != null ? equipment.getName() : "—");
+        String currentLoc = equipment.getLocation();
+        textCurrentSquad.setText(getString(R.string.move_current_squad, currentSquadName.isEmpty() ? getString(R.string.no_squad) : currentSquadName));
+        textCurrentLocation.setText(getString(R.string.move_current_location, (currentLoc != null && !currentLoc.trim().isEmpty()) ? currentLoc.trim() : "—"));
 
         List<String> squadNames = new ArrayList<>();
         squadNames.add(getString(R.string.no_squad));

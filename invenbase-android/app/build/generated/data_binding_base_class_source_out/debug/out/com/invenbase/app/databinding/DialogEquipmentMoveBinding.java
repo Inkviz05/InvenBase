@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
@@ -29,13 +30,26 @@ public final class DialogEquipmentMoveBinding implements ViewBinding {
   @NonNull
   public final Spinner spinnerMoveSquad;
 
+  @NonNull
+  public final TextView textMoveCurrentLocation;
+
+  @NonNull
+  public final TextView textMoveCurrentSquad;
+
+  @NonNull
+  public final TextView textMoveEquipmentName;
+
   private DialogEquipmentMoveBinding(@NonNull LinearLayout rootView,
       @NonNull EditText editMoveComment, @NonNull EditText editMoveLocation,
-      @NonNull Spinner spinnerMoveSquad) {
+      @NonNull Spinner spinnerMoveSquad, @NonNull TextView textMoveCurrentLocation,
+      @NonNull TextView textMoveCurrentSquad, @NonNull TextView textMoveEquipmentName) {
     this.rootView = rootView;
     this.editMoveComment = editMoveComment;
     this.editMoveLocation = editMoveLocation;
     this.spinnerMoveSquad = spinnerMoveSquad;
+    this.textMoveCurrentLocation = textMoveCurrentLocation;
+    this.textMoveCurrentSquad = textMoveCurrentSquad;
+    this.textMoveEquipmentName = textMoveEquipmentName;
   }
 
   @Override
@@ -83,8 +97,27 @@ public final class DialogEquipmentMoveBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.text_move_current_location;
+      TextView textMoveCurrentLocation = ViewBindings.findChildViewById(rootView, id);
+      if (textMoveCurrentLocation == null) {
+        break missingId;
+      }
+
+      id = R.id.text_move_current_squad;
+      TextView textMoveCurrentSquad = ViewBindings.findChildViewById(rootView, id);
+      if (textMoveCurrentSquad == null) {
+        break missingId;
+      }
+
+      id = R.id.text_move_equipment_name;
+      TextView textMoveEquipmentName = ViewBindings.findChildViewById(rootView, id);
+      if (textMoveEquipmentName == null) {
+        break missingId;
+      }
+
       return new DialogEquipmentMoveBinding((LinearLayout) rootView, editMoveComment,
-          editMoveLocation, spinnerMoveSquad);
+          editMoveLocation, spinnerMoveSquad, textMoveCurrentLocation, textMoveCurrentSquad,
+          textMoveEquipmentName);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

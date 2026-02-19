@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
@@ -25,11 +26,15 @@ public final class DialogCategoryBinding implements ViewBinding {
   @NonNull
   public final EditText editName;
 
+  @NonNull
+  public final Spinner spinnerSquad;
+
   private DialogCategoryBinding(@NonNull LinearLayout rootView, @NonNull EditText editDescription,
-      @NonNull EditText editName) {
+      @NonNull EditText editName, @NonNull Spinner spinnerSquad) {
     this.rootView = rootView;
     this.editDescription = editDescription;
     this.editName = editName;
+    this.spinnerSquad = spinnerSquad;
   }
 
   @Override
@@ -71,7 +76,14 @@ public final class DialogCategoryBinding implements ViewBinding {
         break missingId;
       }
 
-      return new DialogCategoryBinding((LinearLayout) rootView, editDescription, editName);
+      id = R.id.spinner_squad;
+      Spinner spinnerSquad = ViewBindings.findChildViewById(rootView, id);
+      if (spinnerSquad == null) {
+        break missingId;
+      }
+
+      return new DialogCategoryBinding((LinearLayout) rootView, editDescription, editName,
+          spinnerSquad);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

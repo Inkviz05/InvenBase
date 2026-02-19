@@ -5,9 +5,11 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +24,7 @@ import com.invenbase.app.api.ApiService;
 import com.invenbase.app.models.Category;
 import com.invenbase.app.utils.AuthManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +41,8 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
     private ProgressBar progressBar;
     private TextView emptyView;
     private CategoriesAdapter adapter;
+    private List<Map<String, Object>> squadsList = new ArrayList<>();
+    private List<String> squadIds = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,7 +70,26 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
         buttonAdd.setOnClickListener(v -> showCategoryDialog(null));
 
         setTitle(R.string.categories);
+        loadSquads();
         loadCategories();
+    }
+
+    private void loadSquads() {
+        apiService.getSquads().enqueue(new Callback<List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    squadsList.clear();
+                    squadsList.addAll(response.body());
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
+        });
+    }
+
+    private static String str(Object o) {
+        return o != null ? String.valueOf(o) : "";
     }
 
     private void loadCategories() {
@@ -95,10 +119,33 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_category, null, false);
         EditText editName = view.findViewById(R.id.edit_name);
         EditText editDescription = view.findViewById(R.id.edit_description);
+        Spinner spinnerSquad = view.findViewById(R.id.spinner_squad);
+
+        // Spinner: "Без сквада" + список сквадов
+        List<String> squadNames = new ArrayList<>();
+        squadNames.add(getString(R.string.no_squad));
+        squadIds.clear();
+        squadIds.add("");
+        for (Map<String, Object> s : squadsList) {
+            squadNames.add(str(s.get("name")));
+            squadIds.add(str(s.get("id")));
+        }
+        ArrayAdapter<String> squadAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, squadNames);
+        squadAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSquad.setAdapter(squadAdapter);
 
         if (category != null) {
             editName.setText(category.getName());
             editDescription.setText(category.getDescription());
+            String catSquadId = category.getSquadId();
+            if (catSquadId != null && !catSquadId.isEmpty()) {
+                for (int i = 0; i < squadIds.size(); i++) {
+                    if (catSquadId.equals(squadIds.get(i))) {
+                        spinnerSquad.setSelection(i);
+                        break;
+                    }
+                }
+            }
         }
 
         new AlertDialog.Builder(this)
@@ -115,6 +162,13 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
                     Map<String, Object> data = new HashMap<>();
                     data.put("name", name);
                     data.put("description", desc.isEmpty() ? null : desc);
+                    int squadPos = spinnerSquad.getSelectedItemPosition();
+                    if (squadPos >= 0 && squadPos < squadIds.size()) {
+                        String sid = squadIds.get(squadPos);
+                        if (sid != null && !sid.isEmpty()) {
+                            data.put("squad_id", sid);
+                        }
+                    }
                     if (category == null) {
                         createCategory(data);
                     } else {

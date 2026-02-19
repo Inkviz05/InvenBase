@@ -5,7 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,6 +23,9 @@ public final class ActivityReportsBinding implements ViewBinding {
   private final FrameLayout rootView;
 
   @NonNull
+  public final LinearLayout periodChips;
+
+  @NonNull
   public final ProgressBar progressBar;
 
   @NonNull
@@ -32,14 +37,38 @@ public final class ActivityReportsBinding implements ViewBinding {
   @NonNull
   public final RecyclerView recyclerEquipmentStats;
 
-  private ActivityReportsBinding(@NonNull FrameLayout rootView, @NonNull ProgressBar progressBar,
-      @NonNull RecyclerView recyclerBookingStats, @NonNull RecyclerView recyclerCategoryStats,
-      @NonNull RecyclerView recyclerEquipmentStats) {
+  @NonNull
+  public final RecyclerView recyclerEquipmentTable;
+
+  @NonNull
+  public final RecyclerView recyclerTopCategories;
+
+  @NonNull
+  public final RecyclerView recyclerTopEquipment;
+
+  @NonNull
+  public final TextView textDateFrom;
+
+  @NonNull
+  public final TextView textDateTo;
+
+  private ActivityReportsBinding(@NonNull FrameLayout rootView, @NonNull LinearLayout periodChips,
+      @NonNull ProgressBar progressBar, @NonNull RecyclerView recyclerBookingStats,
+      @NonNull RecyclerView recyclerCategoryStats, @NonNull RecyclerView recyclerEquipmentStats,
+      @NonNull RecyclerView recyclerEquipmentTable, @NonNull RecyclerView recyclerTopCategories,
+      @NonNull RecyclerView recyclerTopEquipment, @NonNull TextView textDateFrom,
+      @NonNull TextView textDateTo) {
     this.rootView = rootView;
+    this.periodChips = periodChips;
     this.progressBar = progressBar;
     this.recyclerBookingStats = recyclerBookingStats;
     this.recyclerCategoryStats = recyclerCategoryStats;
     this.recyclerEquipmentStats = recyclerEquipmentStats;
+    this.recyclerEquipmentTable = recyclerEquipmentTable;
+    this.recyclerTopCategories = recyclerTopCategories;
+    this.recyclerTopEquipment = recyclerTopEquipment;
+    this.textDateFrom = textDateFrom;
+    this.textDateTo = textDateTo;
   }
 
   @Override
@@ -69,6 +98,12 @@ public final class ActivityReportsBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.period_chips;
+      LinearLayout periodChips = ViewBindings.findChildViewById(rootView, id);
+      if (periodChips == null) {
+        break missingId;
+      }
+
       id = R.id.progress_bar;
       ProgressBar progressBar = ViewBindings.findChildViewById(rootView, id);
       if (progressBar == null) {
@@ -93,8 +128,40 @@ public final class ActivityReportsBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityReportsBinding((FrameLayout) rootView, progressBar, recyclerBookingStats,
-          recyclerCategoryStats, recyclerEquipmentStats);
+      id = R.id.recycler_equipment_table;
+      RecyclerView recyclerEquipmentTable = ViewBindings.findChildViewById(rootView, id);
+      if (recyclerEquipmentTable == null) {
+        break missingId;
+      }
+
+      id = R.id.recycler_top_categories;
+      RecyclerView recyclerTopCategories = ViewBindings.findChildViewById(rootView, id);
+      if (recyclerTopCategories == null) {
+        break missingId;
+      }
+
+      id = R.id.recycler_top_equipment;
+      RecyclerView recyclerTopEquipment = ViewBindings.findChildViewById(rootView, id);
+      if (recyclerTopEquipment == null) {
+        break missingId;
+      }
+
+      id = R.id.text_date_from;
+      TextView textDateFrom = ViewBindings.findChildViewById(rootView, id);
+      if (textDateFrom == null) {
+        break missingId;
+      }
+
+      id = R.id.text_date_to;
+      TextView textDateTo = ViewBindings.findChildViewById(rootView, id);
+      if (textDateTo == null) {
+        break missingId;
+      }
+
+      return new ActivityReportsBinding((FrameLayout) rootView, periodChips, progressBar,
+          recyclerBookingStats, recyclerCategoryStats, recyclerEquipmentStats,
+          recyclerEquipmentTable, recyclerTopCategories, recyclerTopEquipment, textDateFrom,
+          textDateTo);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

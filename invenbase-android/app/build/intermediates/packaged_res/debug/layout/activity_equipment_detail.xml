@@ -55,6 +55,24 @@
                     android:layout_marginBottom="12dp" />
 
                 <TextView
+                    android:id="@+id/label_equipment_squad"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/squad_detail"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_size_small"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/text_equipment_squad"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_primary"
+                    android:textSize="@dimen/text_size_normal"
+                    android:layout_marginBottom="12dp"
+                    android:visibility="gone" />
+
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/category"

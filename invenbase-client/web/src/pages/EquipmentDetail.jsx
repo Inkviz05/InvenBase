@@ -586,7 +586,7 @@ const EquipmentDetail = () => {
       )}
 
       {/* Модальное окно переноса оборудования */}
-      {showMoveModal && (
+      {showMoveModal && equipment && (
         <div
           style={{
             position: 'fixed',
@@ -612,10 +612,22 @@ const EquipmentDetail = () => {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Перенос оборудования</h3>
+            <h3 style={{ marginTop: 0, marginBottom: '8px' }}>Перенос оборудования</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '12px', marginBottom: '12px' }}>
+              <strong style={{ color: 'var(--text-primary)' }}>{equipment.name}</strong>
+            </p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '16px', lineHeight: 1.4 }}>
+              Укажите новое местоположение. Запись о перемещении сохранится в истории.
+            </p>
+            <div style={{ background: 'var(--surface)', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '6px', fontWeight: 600 }}>Сейчас:</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-primary)' }}>Сквад: {equipment.squad_name || 'Без сквада'}</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-primary)' }}>Местоположение: {equipment.location || '—'}</div>
+            </div>
             <form onSubmit={handleMoveSubmit}>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 600 }}>Куда переносим:</div>
               <div style={{ marginBottom: '12px' }}>
-                <label className="label">Сквад</label>
+                <label className="label">Сквад (кабинет / подразделение)</label>
                 <select
                   className="input"
                   value={moveForm.to_squad_id}
@@ -628,23 +640,23 @@ const EquipmentDetail = () => {
                 </select>
               </div>
               <div style={{ marginBottom: '12px' }}>
-                <label className="label">Местоположение</label>
+                <label className="label">Местоположение (адрес в помещении)</label>
                 <input
                   type="text"
                   className="input"
                   value={moveForm.to_location}
                   onChange={(e) => setMoveForm({ ...moveForm, to_location: e.target.value })}
-                  placeholder="Например: Кабинет 227"
+                  placeholder="Например: Кабинет 227, полка 3, стол 5"
                 />
               </div>
               <div style={{ marginBottom: '16px' }}>
-                <label className="label">Комментарий</label>
+                <label className="label">Комментарий (необязательно)</label>
                 <textarea
                   className="input"
-                  rows={3}
+                  rows={2}
                   value={moveForm.comment}
                   onChange={(e) => setMoveForm({ ...moveForm, comment: e.target.value })}
-                  placeholder="Причина или детали перемещения (необязательно)"
+                  placeholder="Причина или детали перемещения"
                 />
               </div>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
@@ -656,7 +668,7 @@ const EquipmentDetail = () => {
                   Отмена
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  Сохранить
+                  Перенести
                 </button>
               </div>
             </form>

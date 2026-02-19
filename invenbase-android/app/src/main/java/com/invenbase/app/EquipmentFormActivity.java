@@ -110,8 +110,8 @@ public class EquipmentFormActivity extends BaseActivity {
         spinnerSquad.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String squadId = position > 0 && position <= squadIds.size() ? squadIds.get(position - 1) : null;
-                loadCategories(squadId, null);
+                String squadId = (position >= 0 && position < squadIds.size()) ? squadIds.get(position) : null;
+                loadCategories((squadId != null && !squadId.isEmpty()) ? squadId : null, null);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}

@@ -48,6 +48,9 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
   public final LinearLayout contentContainer;
 
   @NonNull
+  public final TextView labelEquipmentSquad;
+
+  @NonNull
   public final ProgressBar progressBar;
 
   @NonNull
@@ -75,6 +78,9 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
   public final TextView textEquipmentQuantity;
 
   @NonNull
+  public final TextView textEquipmentSquad;
+
+  @NonNull
   public final TextView textEquipmentStatus;
 
   @NonNull
@@ -85,11 +91,12 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
       @NonNull MaterialButton buttonDelete, @NonNull MaterialButton buttonEdit,
       @NonNull MaterialButton buttonMove, @NonNull MaterialButton buttonOpenCart,
       @NonNull MaterialButton buttonQrCode, @NonNull LinearLayout contentContainer,
-      @NonNull ProgressBar progressBar, @NonNull RecyclerView recyclerMovements,
-      @NonNull TextView textEquipmentAvailable, @NonNull TextView textEquipmentCategory,
-      @NonNull TextView textEquipmentDescription, @NonNull TextView textEquipmentLocation,
-      @NonNull TextView textEquipmentName, @NonNull TextView textEquipmentQr,
-      @NonNull TextView textEquipmentQuantity, @NonNull TextView textEquipmentStatus,
+      @NonNull TextView labelEquipmentSquad, @NonNull ProgressBar progressBar,
+      @NonNull RecyclerView recyclerMovements, @NonNull TextView textEquipmentAvailable,
+      @NonNull TextView textEquipmentCategory, @NonNull TextView textEquipmentDescription,
+      @NonNull TextView textEquipmentLocation, @NonNull TextView textEquipmentName,
+      @NonNull TextView textEquipmentQr, @NonNull TextView textEquipmentQuantity,
+      @NonNull TextView textEquipmentSquad, @NonNull TextView textEquipmentStatus,
       @NonNull TextView textMovementsEmpty) {
     this.rootView = rootView;
     this.buttonAddToCart = buttonAddToCart;
@@ -100,6 +107,7 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
     this.buttonOpenCart = buttonOpenCart;
     this.buttonQrCode = buttonQrCode;
     this.contentContainer = contentContainer;
+    this.labelEquipmentSquad = labelEquipmentSquad;
     this.progressBar = progressBar;
     this.recyclerMovements = recyclerMovements;
     this.textEquipmentAvailable = textEquipmentAvailable;
@@ -109,6 +117,7 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
     this.textEquipmentName = textEquipmentName;
     this.textEquipmentQr = textEquipmentQr;
     this.textEquipmentQuantity = textEquipmentQuantity;
+    this.textEquipmentSquad = textEquipmentSquad;
     this.textEquipmentStatus = textEquipmentStatus;
     this.textMovementsEmpty = textMovementsEmpty;
   }
@@ -188,6 +197,12 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.label_equipment_squad;
+      TextView labelEquipmentSquad = ViewBindings.findChildViewById(rootView, id);
+      if (labelEquipmentSquad == null) {
+        break missingId;
+      }
+
       id = R.id.progress_bar;
       ProgressBar progressBar = ViewBindings.findChildViewById(rootView, id);
       if (progressBar == null) {
@@ -242,6 +257,12 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.text_equipment_squad;
+      TextView textEquipmentSquad = ViewBindings.findChildViewById(rootView, id);
+      if (textEquipmentSquad == null) {
+        break missingId;
+      }
+
       id = R.id.text_equipment_status;
       TextView textEquipmentStatus = ViewBindings.findChildViewById(rootView, id);
       if (textEquipmentStatus == null) {
@@ -256,9 +277,10 @@ public final class ActivityEquipmentDetailBinding implements ViewBinding {
 
       return new ActivityEquipmentDetailBinding((FrameLayout) rootView, buttonAddToCart,
           buttonBookOne, buttonDelete, buttonEdit, buttonMove, buttonOpenCart, buttonQrCode,
-          contentContainer, progressBar, recyclerMovements, textEquipmentAvailable,
-          textEquipmentCategory, textEquipmentDescription, textEquipmentLocation, textEquipmentName,
-          textEquipmentQr, textEquipmentQuantity, textEquipmentStatus, textMovementsEmpty);
+          contentContainer, labelEquipmentSquad, progressBar, recyclerMovements,
+          textEquipmentAvailable, textEquipmentCategory, textEquipmentDescription,
+          textEquipmentLocation, textEquipmentName, textEquipmentQr, textEquipmentQuantity,
+          textEquipmentSquad, textEquipmentStatus, textMovementsEmpty);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

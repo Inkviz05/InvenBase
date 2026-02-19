@@ -30,6 +30,9 @@ public class Equipment {
     @SerializedName("squad_id")
     private String squadId;
 
+    @SerializedName("squad_name")
+    private String squadName;
+
     @SerializedName("location")
     private String location;
     
@@ -117,6 +120,14 @@ public class Equipment {
 
     public void setSquadId(String squadId) {
         this.squadId = squadId;
+    }
+
+    public String getSquadName() {
+        return squadName;
+    }
+
+    public void setSquadName(String squadName) {
+        this.squadName = squadName;
     }
 
     public String getLocation() {
