@@ -60,6 +60,7 @@ public class DashboardFragment extends Fragment {
 
     @Nullable
     @Override
+    // Метод onCreateView: обрабатывает соответствующее событие приложения.
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
         
@@ -106,6 +107,7 @@ public class DashboardFragment extends Fragment {
         return view;
     }
 
+    // Метод loadStats: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadStats() {
         progressBar.setVisibility(View.VISIBLE);
         if (authManager.isAdmin() || authManager.isResponsible()) {
@@ -115,19 +117,23 @@ public class DashboardFragment extends Fragment {
         }
     }
 
+    // Метод loadAdminStats: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadAdminStats() {
         apiService.getEquipmentReport().enqueue(new Callback<Map<String, Object>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Map<String, Object> equipmentReport = response.body();
                     apiService.getBookingReport().enqueue(new Callback<Map<String, Object>>() {
                         @Override
+                        // Метод onResponse: обрабатывает соответствующее событие приложения.
                         public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> bookingResponse) {
                             if (bookingResponse.isSuccessful() && bookingResponse.body() != null) {
                                 Map<String, Object> bookingReport = bookingResponse.body();
                                 apiService.getUnreadCount().enqueue(new Callback<Map<String, Integer>>() {
                                     @Override
+                                    // Метод onResponse: обрабатывает соответствующее событие приложения.
                                     public void onResponse(Call<Map<String, Integer>> call, Response<Map<String, Integer>> notifResponse) {
                                         int unread = 0;
                                         if (notifResponse.isSuccessful() && notifResponse.body() != null && notifResponse.body().get("count") != null) {
@@ -137,6 +143,7 @@ public class DashboardFragment extends Fragment {
                                     }
 
                                     @Override
+                                    // Метод onFailure: обрабатывает соответствующее событие приложения.
                                     public void onFailure(Call<Map<String, Integer>> call, Throwable t) {
                                         showAdminStats(equipmentReport, bookingReport, 0);
                                     }
@@ -147,6 +154,7 @@ public class DashboardFragment extends Fragment {
                         }
 
                         @Override
+                        // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                             showAdminStats(equipmentReport, null, 0);
                         }
@@ -157,23 +165,28 @@ public class DashboardFragment extends Fragment {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 showAdminStats(null, null, 0);
             }
         });
     }
 
+    // Метод loadUserStats: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadUserStats() {
         apiService.getEquipment().enqueue(new Callback<List<Equipment>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Equipment>> call, Response<List<Equipment>> response) {
                 List<Equipment> equipment = response.isSuccessful() && response.body() != null ? response.body() : new ArrayList<>();
                 apiService.getBookings().enqueue(new Callback<List<Booking>>() {
                     @Override
+                    // Метод onResponse: обрабатывает соответствующее событие приложения.
                     public void onResponse(Call<List<Booking>> call, Response<List<Booking>> response) {
                         List<Booking> bookings = response.isSuccessful() && response.body() != null ? response.body() : new ArrayList<>();
                         apiService.getUnreadCount().enqueue(new Callback<Map<String, Integer>>() {
                             @Override
+                            // Метод onResponse: обрабатывает соответствующее событие приложения.
                             public void onResponse(Call<Map<String, Integer>> call, Response<Map<String, Integer>> notifResponse) {
                                 int unread = 0;
                                 if (notifResponse.isSuccessful() && notifResponse.body() != null && notifResponse.body().get("count") != null) {
@@ -183,6 +196,7 @@ public class DashboardFragment extends Fragment {
                             }
 
                             @Override
+                            // Метод onFailure: обрабатывает соответствующее событие приложения.
                             public void onFailure(Call<Map<String, Integer>> call, Throwable t) {
                                 showUserStats(equipment, bookings, 0);
                             }
@@ -190,6 +204,7 @@ public class DashboardFragment extends Fragment {
                     }
 
                     @Override
+                    // Метод onFailure: обрабатывает соответствующее событие приложения.
                     public void onFailure(Call<List<Booking>> call, Throwable t) {
                         showUserStats(equipment, new ArrayList<>(), 0);
                     }
@@ -197,12 +212,14 @@ public class DashboardFragment extends Fragment {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Equipment>> call, Throwable t) {
                 showUserStats(new ArrayList<>(), new ArrayList<>(), 0);
             }
         });
     }
 
+    // Метод setupQuickActions: устанавливает или обновляет значение данных.
     private void setupQuickActions() {
         // Обновляем видимость кнопки корзины
         updateCartButton();
@@ -257,6 +274,7 @@ public class DashboardFragment extends Fragment {
         });
     }
     
+    // Метод updateCartButton: выполняет основную бизнес- или UI-логику данного участка кода.
     private void updateCartButton() {
         int cartCount = cartManager.getItems().size();
         if (cartCount > 0) {
@@ -284,6 +302,7 @@ public class DashboardFragment extends Fragment {
         }
     }
 
+    // Метод showManualInputDialog: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showManualInputDialog() {
         if (getContext() == null) return;
 
@@ -303,6 +322,7 @@ public class DashboardFragment extends Fragment {
                 // Ищем оборудование по введённому коду
                 apiService.getEquipmentByQR(code).enqueue(new Callback<Equipment>() {
                     @Override
+                    // Метод onResponse: обрабатывает соответствующее событие приложения.
                     public void onResponse(Call<Equipment> call, Response<Equipment> response) {
                         if (response.isSuccessful() && response.body() != null && getActivity() != null) {
                             Equipment equipment = response.body();
@@ -315,6 +335,7 @@ public class DashboardFragment extends Fragment {
                     }
 
                     @Override
+                    // Метод onFailure: обрабатывает соответствующее событие приложения.
                     public void onFailure(Call<Equipment> call, Throwable t) {
                         String errorMsg = t.getMessage();
                         if (errorMsg == null || errorMsg.isEmpty()) {
@@ -330,6 +351,7 @@ public class DashboardFragment extends Fragment {
             .show();
     }
 
+    // Метод showUserStats: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showUserStats(List<Equipment> equipment, List<Booking> bookings, int unread) {
         String userId = authManager.getUser() != null ? authManager.getUser().getId() : null;
         int myBookings = 0;
@@ -358,6 +380,7 @@ public class DashboardFragment extends Fragment {
         progressBar.setVisibility(View.GONE);
     }
     
+    // Метод showAdminStats: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showAdminStats(Map<String, Object> equipmentReport, Map<String, Object> bookingReport, int unread) {
         List<StatItem> items = new ArrayList<>();
         int totalEquipment = getInt(equipmentReport, "total_equipment");
@@ -379,6 +402,7 @@ public class DashboardFragment extends Fragment {
         progressBar.setVisibility(View.GONE);
     }
     
+    // Метод updateNotificationsInfo: выполняет основную бизнес- или UI-логику данного участка кода.
     private void updateNotificationsInfo(int unread) {
         if (unread > 0) {
             textNotificationsInfo.setText(getString(R.string.unread_notifications, unread));
@@ -389,6 +413,7 @@ public class DashboardFragment extends Fragment {
         }
     }
 
+    // Метод getInt: возвращает нужное значение для текущего контекста.
     private int getInt(Map<String, Object> map, String key) {
         if (map == null || map.get(key) == null) {
             return 0;
@@ -401,6 +426,7 @@ public class DashboardFragment extends Fragment {
     }
     
     @Override
+    // Метод onResume: обрабатывает соответствующее событие приложения.
     public void onResume() {
         super.onResume();
         updateCartButton();

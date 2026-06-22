@@ -9,6 +9,7 @@ public class EquipmentReportRow {
     public final int booked;
     public final String status;
 
+    // Конструктор EquipmentReportRow: инициализирует объект и его зависимости.
     public EquipmentReportRow(int index, String name, String category, int total, int available, int booked, String status) {
         this.index = index;
         this.name = name != null ? name : "—";

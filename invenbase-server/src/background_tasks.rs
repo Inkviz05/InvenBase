@@ -6,10 +6,10 @@ use tokio::time::{interval, Duration};
 
 /// Фоновая задача для проверки истечения времени бронирований
 pub async fn start_booking_expiration_checker(state: Arc<AppState>) {
-    // Проверяем каждые 5 минут для более быстрой реакции на истекшие бронирования
-    let mut interval = interval(Duration::from_secs(60)); // 5 минут
+    // Проверяем каждые 2 минуты для более быстрой реакции на истекшие бронирования
+    let mut interval = interval(Duration::from_secs(120)); // 2 минуты
     
-    log::info!("Запущена фоновая задача проверки истечения времени бронирований (интервал: 5 минут)");
+    log::info!("Запущена фоновая задача проверки истечения времени бронирований (интервал: 2 минуты)");
     
     // Выполняем первую проверку сразу при запуске
     if let Err(e) = check_expired_bookings(&state).await {

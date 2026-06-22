@@ -42,6 +42,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
     private LinearLayout sectionRequests;
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_support);
@@ -78,6 +79,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
             tabs.addTab(tabs.newTab().setText(R.string.support_tab_requests));
             tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
                 @Override
+                // Метод onTabSelected: обрабатывает соответствующее событие приложения.
                 public void onTabSelected(TabLayout.Tab tab) {
                     boolean showCreate = (tab.getPosition() == 0);
                     sectionCreate.setVisibility(showCreate ? View.VISIBLE : View.GONE);
@@ -88,9 +90,11 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
                 }
 
                 @Override
+                // Метод onTabUnselected: обрабатывает соответствующее событие приложения.
                 public void onTabUnselected(TabLayout.Tab tab) {}
 
                 @Override
+                // Метод onTabReselected: обрабатывает соответствующее событие приложения.
                 public void onTabReselected(TabLayout.Tab tab) {}
             });
         }
@@ -107,15 +111,18 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
     }
 
     @Override
+    // Метод onSupportNavigateUp: обрабатывает соответствующее событие приложения.
     public boolean onSupportNavigateUp() {
         finish();
         return true;
     }
 
+    // Метод loadRequests: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadRequests() {
         progressBar.setVisibility(View.VISIBLE);
         apiService.getSupportRequests().enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
@@ -128,6 +135,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(SupportActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -135,6 +143,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
         });
     }
 
+    // Метод submitTicket: выполняет основную бизнес- или UI-логику данного участка кода.
     private void submitTicket() {
         String subject = editSubject.getText() != null ? editSubject.getText().toString().trim() : "";
         String message = editMessage.getText() != null ? editMessage.getText().toString().trim() : "";
@@ -148,6 +157,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
         progressBar.setVisibility(View.VISIBLE);
         apiService.createSupportRequest(data).enqueue(new Callback<Map<String, Object>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
@@ -165,6 +175,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(SupportActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -173,6 +184,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
     }
 
     @Override
+    // Метод onAddMessageClick: обрабатывает соответствующее событие приложения.
     public void onAddMessageClick(String requestId) {
         EditText input = new EditText(this);
         input.setHint(R.string.support_message_hint);
@@ -192,6 +204,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
                     progressBar.setVisibility(View.VISIBLE);
                     apiService.addSupportMessage(requestId, data).enqueue(new Callback<Map<String, Object>>() {
                         @Override
+                        // Метод onResponse: обрабатывает соответствующее событие приложения.
                         public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                             progressBar.setVisibility(View.GONE);
                             if (response.isSuccessful()) {
@@ -203,6 +216,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
                         }
 
                         @Override
+                        // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(SupportActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -214,6 +228,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
     }
 
     @Override
+    // Метод onDeleteRequest: обрабатывает соответствующее событие приложения.
     public void onDeleteRequest(String requestId) {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.support_delete_request)
@@ -222,6 +237,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
                     progressBar.setVisibility(View.VISIBLE);
                     apiService.deleteSupportRequest(requestId).enqueue(new Callback<Void>() {
                         @Override
+                        // Метод onResponse: обрабатывает соответствующее событие приложения.
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             progressBar.setVisibility(View.GONE);
                             if (response.isSuccessful()) {
@@ -233,6 +249,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
                         }
 
                         @Override
+                        // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Void> call, Throwable t) {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(SupportActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -244,6 +261,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
     }
 
     @Override
+    // Метод onSendReply: обрабатывает соответствующее событие приложения.
     public void onSendReply(String requestId, String status, String comment) {
         Map<String, Object> data = new HashMap<>();
         data.put("status", status);
@@ -253,6 +271,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
         progressBar.setVisibility(View.VISIBLE);
         apiService.updateSupportRequest(requestId, data).enqueue(new Callback<Map<String, Object>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
@@ -264,6 +283,7 @@ public class SupportActivity extends BaseActivity implements SupportAdapter.Supp
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(SupportActivity.this, R.string.error, Toast.LENGTH_SHORT).show();

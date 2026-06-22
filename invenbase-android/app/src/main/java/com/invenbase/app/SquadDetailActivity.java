@@ -44,6 +44,7 @@ public class SquadDetailActivity extends BaseActivity {
     private CategoryListAdapter categoryAdapter;
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_squad_detail);
@@ -84,15 +85,18 @@ public class SquadDetailActivity extends BaseActivity {
     }
 
     @Override
+    // Метод onSupportNavigateUp: обрабатывает соответствующее событие приложения.
     public boolean onSupportNavigateUp() {
         finish();
         return true;
     }
 
+    // Метод loadSquad: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadSquad() {
         progressBar.setVisibility(View.VISIBLE);
         apiService.getSquad(squadId).enqueue(new Callback<Map<String, Object>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Map<String, Object> squad = response.body();
@@ -122,15 +126,18 @@ public class SquadDetailActivity extends BaseActivity {
                 progressBar.setVisibility(View.GONE);
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
             }
         });
     }
 
+    // Метод loadEquipment: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadEquipment() {
         apiService.getSquadEquipment(squadId).enqueue(new Callback<List<Equipment>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Equipment>> call, Response<List<Equipment>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Equipment> list = response.body();
@@ -139,13 +146,16 @@ public class SquadDetailActivity extends BaseActivity {
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Equipment>> call, Throwable t) {}
         });
     }
 
+    // Метод loadCategories: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadCategories() {
         apiService.getCategoriesBySquad(squadId).enqueue(new Callback<List<Category>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Category> list = response.body();
@@ -160,10 +170,12 @@ public class SquadDetailActivity extends BaseActivity {
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Category>> call, Throwable t) {}
         });
     }
 
+    // Метод str: выполняет основную бизнес- или UI-логику данного участка кода.
     private static String str(Object o) {
         return o == null ? "" : String.valueOf(o);
     }
@@ -173,6 +185,7 @@ public class SquadDetailActivity extends BaseActivity {
         private final OnEquipmentClickListener listener;
 
         interface OnEquipmentClickListener {
+            // Метод onEquipmentClick: обрабатывает соответствующее событие приложения.
             void onEquipmentClick(Equipment equipment);
         }
 
@@ -180,6 +193,7 @@ public class SquadDetailActivity extends BaseActivity {
             this.listener = listener;
         }
 
+        // Метод setItems: устанавливает или обновляет значение данных.
         void setItems(List<Equipment> list) {
             items.clear();
             if (list != null) items.addAll(list);
@@ -188,12 +202,14 @@ public class SquadDetailActivity extends BaseActivity {
 
         @NonNull
         @Override
+        // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
         public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_squad_equipment, parent, false);
             return new VH(v);
         }
 
         @Override
+        // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
         public void onBindViewHolder(@NonNull VH holder, int position) {
             Equipment eq = items.get(position);
             holder.name.setText(eq.getName());
@@ -202,6 +218,7 @@ public class SquadDetailActivity extends BaseActivity {
         }
 
         @Override
+        // Метод getItemCount: возвращает нужное значение для текущего контекста.
         public int getItemCount() {
             return items.size();
         }
@@ -221,6 +238,7 @@ public class SquadDetailActivity extends BaseActivity {
     private static class CategoryListAdapter extends RecyclerView.Adapter<CategoryListAdapter.VH> {
         private final List<Category> items = new ArrayList<>();
 
+        // Метод setItems: устанавливает или обновляет значение данных.
         void setItems(List<Category> list) {
             items.clear();
             if (list != null) items.addAll(list);
@@ -229,12 +247,14 @@ public class SquadDetailActivity extends BaseActivity {
 
         @NonNull
         @Override
+        // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
         public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_squad_category, parent, false);
             return new VH(v);
         }
 
         @Override
+        // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
         public void onBindViewHolder(@NonNull VH holder, int position) {
             Category c = items.get(position);
             holder.name.setText(c.getName());
@@ -247,6 +267,7 @@ public class SquadDetailActivity extends BaseActivity {
         }
 
         @Override
+        // Метод getItemCount: возвращает нужное значение для текущего контекста.
         public int getItemCount() {
             return items.size();
         }

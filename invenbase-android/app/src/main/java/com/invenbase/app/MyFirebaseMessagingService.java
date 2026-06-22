@@ -20,12 +20,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String CHANNEL_ID = "invenbase_notifications";
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
     }
 
     @Override
+    // Метод onMessageReceived: обрабатывает соответствующее событие приложения.
     public void onMessageReceived(RemoteMessage remoteMessage) {
         android.util.Log.d("FCM", "=== onMessageReceived called ===");
         android.util.Log.d("FCM", "Message ID: " + remoteMessage.getMessageId());
@@ -78,6 +80,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     @Override
+    // Метод onNewToken: обрабатывает соответствующее событие приложения.
     public void onNewToken(String token) {
         android.util.Log.d("FCM", "=== onNewToken called ===");
         android.util.Log.d("FCM", "Refreshed token: " + (token != null ? token.substring(0, Math.min(30, token.length())) + "..." : "null"));
@@ -90,6 +93,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
+    // Метод createNotificationChannel: выполняет основную бизнес- или UI-логику данного участка кода.
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
@@ -113,6 +117,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
+    // Метод sendNotification: выполняет основную бизнес- или UI-логику данного участка кода.
     private void sendNotification(String title, String messageBody, java.util.Map<String, String> data) {
         Intent intent = new Intent(this, MainActivity.class);
         

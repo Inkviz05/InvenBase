@@ -7,6 +7,7 @@ public class ApiError {
     @SerializedName("message")
     private String message;
 
+    // Метод getMessage: возвращает нужное значение для текущего контекста.
     public String getMessage() {
         return message;
     }

@@ -26,6 +26,7 @@ public class AdminFragment extends Fragment {
     private AuthManager authManager;
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         authManager = AuthManager.getInstance(requireContext());
@@ -33,11 +34,13 @@ public class AdminFragment extends Fragment {
 
     @Nullable
     @Override
+    // Метод onCreateView: обрабатывает соответствующее событие приложения.
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_admin, container, false);
     }
 
     @Override
+    // Метод onViewCreated: обрабатывает соответствующее событие приложения.
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 

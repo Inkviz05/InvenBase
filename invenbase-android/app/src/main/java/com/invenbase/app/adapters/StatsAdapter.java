@@ -57,6 +57,7 @@ public class StatsAdapter extends RecyclerView.Adapter<StatsAdapter.StatViewHold
         }
     }
 
+    // Метод setItems: устанавливает или обновляет значение данных.
     public void setItems(List<StatItem> items) {
         this.items = items != null ? items : new ArrayList<>();
         notifyDataSetChanged();
@@ -64,6 +65,7 @@ public class StatsAdapter extends RecyclerView.Adapter<StatsAdapter.StatViewHold
 
     @NonNull
     @Override
+    // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
     public StatViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.item_stat, parent, false);
@@ -71,11 +73,13 @@ public class StatsAdapter extends RecyclerView.Adapter<StatsAdapter.StatViewHold
     }
 
     @Override
+    // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
     public void onBindViewHolder(@NonNull StatViewHolder holder, int position) {
         holder.bind(items.get(position));
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return items.size();
     }
@@ -94,6 +98,7 @@ public class StatsAdapter extends RecyclerView.Adapter<StatsAdapter.StatViewHold
             iconContainer = itemView.findViewById(R.id.icon_container);
         }
 
+        // Метод bind: выполняет основную бизнес- или UI-логику данного участка кода.
         void bind(StatItem item) {
             textTitle.setText(item.getTitle());
             textValue.setText(item.getValue());

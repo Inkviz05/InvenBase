@@ -45,6 +45,7 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
     private List<User> usersForResponsible = new ArrayList<>();
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_squads);
@@ -81,15 +82,18 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
     }
 
     @Override
+    // Метод onSupportNavigateUp: обрабатывает соответствующее событие приложения.
     public boolean onSupportNavigateUp() {
         finish();
         return true;
     }
 
+    // Метод loadUsers: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadUsers() {
         if (!authManager.isAdmin()) return;
         apiService.getUsers().enqueue(new Callback<List<User>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     usersForResponsible.clear();
@@ -101,14 +105,17 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<User>> call, Throwable t) {}
         });
     }
 
+    // Метод loadSquads: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadSquads() {
         progressBar.setVisibility(View.VISIBLE);
         apiService.getSquads().enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
@@ -120,6 +127,7 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(SquadsActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -127,6 +135,7 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
         });
     }
 
+    // Метод showSquadDialog: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showSquadDialog(@Nullable Map<String, Object> squad) {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_squad, null, false);
         EditText editName = view.findViewById(R.id.edit_squad_name);
@@ -193,14 +202,17 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
         dialog.show();
     }
 
+    // Метод str: выполняет основную бизнес- или UI-логику данного участка кода.
     private static String str(Object o) {
         return o == null ? "" : String.valueOf(o);
     }
 
+    // Метод createSquad: выполняет основную бизнес- или UI-логику данного участка кода.
     private void createSquad(Map<String, Object> data) {
         progressBar.setVisibility(View.VISIBLE);
         apiService.createSquad(data).enqueue(new Callback<Map<String, Object>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
@@ -211,6 +223,7 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(SquadsActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -218,10 +231,12 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
         });
     }
 
+    // Метод updateSquad: выполняет основную бизнес- или UI-логику данного участка кода.
     private void updateSquad(String id, Map<String, Object> data) {
         progressBar.setVisibility(View.VISIBLE);
         apiService.updateSquad(id, data).enqueue(new Callback<Map<String, Object>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
@@ -232,6 +247,7 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(SquadsActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -240,6 +256,7 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
     }
 
     @Override
+    // Метод onSquadClick: обрабатывает соответствующее событие приложения.
     public void onSquadClick(Map<String, Object> squad) {
         String id = str(squad.get("id"));
         if (id.isEmpty()) return;
@@ -247,11 +264,13 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
     }
 
     @Override
+    // Метод onEditClick: обрабатывает соответствующее событие приложения.
     public void onEditClick(Map<String, Object> squad) {
         showSquadDialog(squad);
     }
 
     @Override
+    // Метод onDeleteClick: обрабатывает соответствующее событие приложения.
     public void onDeleteClick(Map<String, Object> squad) {
         String name = str(squad.get("name"));
         EditText input = new EditText(this);
@@ -271,6 +290,7 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
                     progressBar.setVisibility(View.VISIBLE);
                     apiService.deleteSquad(id).enqueue(new Callback<Void>() {
                         @Override
+                        // Метод onResponse: обрабатывает соответствующее событие приложения.
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             progressBar.setVisibility(View.GONE);
                             if (response.isSuccessful()) {
@@ -281,6 +301,7 @@ public class SquadsActivity extends BaseActivity implements SquadsAdapter.OnSqua
                             }
                         }
                         @Override
+                        // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Void> call, Throwable t) {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(SquadsActivity.this, R.string.error, Toast.LENGTH_SHORT).show();

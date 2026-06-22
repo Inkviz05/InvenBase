@@ -19,20 +19,24 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     private OnCartActionListener listener;
 
     public interface OnCartActionListener {
+        // Метод onRemove: обрабатывает соответствующее событие приложения.
         void onRemove(CartItem item);
     }
 
+    // Метод setItems: устанавливает или обновляет значение данных.
     public void setItems(List<CartItem> items) {
         this.items = items != null ? items : new ArrayList<>();
         notifyDataSetChanged();
     }
 
+    // Метод setOnCartActionListener: устанавливает или обновляет значение данных.
     public void setOnCartActionListener(OnCartActionListener listener) {
         this.listener = listener;
     }
 
     @NonNull
     @Override
+    // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
     public CartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.item_cart, parent, false);
@@ -40,11 +44,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     }
 
     @Override
+    // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
     public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
         holder.bind(items.get(position));
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return items.size();
     }
@@ -61,6 +67,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             buttonRemove = itemView.findViewById(R.id.button_cart_remove);
         }
 
+        // Метод bind: выполняет основную бизнес- или UI-логику данного участка кода.
         void bind(CartItem item) {
             textName.setText(item.getEquipmentName());
             textQuantity.setText(itemView.getContext().getString(R.string.cart_quantity, item.getQuantity()));

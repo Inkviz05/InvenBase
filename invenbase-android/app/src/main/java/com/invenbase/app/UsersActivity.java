@@ -42,6 +42,7 @@ public class UsersActivity extends BaseActivity implements UsersAdapter.OnUserAc
     private UsersAdapter adapter;
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_users);
@@ -70,10 +71,12 @@ public class UsersActivity extends BaseActivity implements UsersAdapter.OnUserAc
         loadUsers();
     }
 
+    // Метод loadUsers: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadUsers() {
         progressBar.setVisibility(View.VISIBLE);
         apiService.getUsers().enqueue(new Callback<List<User>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
@@ -86,6 +89,7 @@ public class UsersActivity extends BaseActivity implements UsersAdapter.OnUserAc
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<User>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(UsersActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -93,6 +97,7 @@ public class UsersActivity extends BaseActivity implements UsersAdapter.OnUserAc
         });
     }
 
+    // Метод showUserDialog: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showUserDialog(@Nullable User user) {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_user, null, false);
         EditText editUsername = view.findViewById(R.id.edit_username);
@@ -149,10 +154,12 @@ public class UsersActivity extends BaseActivity implements UsersAdapter.OnUserAc
                 .show();
     }
 
+    // Метод createUser: выполняет основную бизнес- или UI-логику данного участка кода.
     private void createUser(Map<String, Object> data) {
         progressBar.setVisibility(View.VISIBLE);
         apiService.createUser(data).enqueue(new Callback<User>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<User> call, Response<User> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
@@ -164,6 +171,7 @@ public class UsersActivity extends BaseActivity implements UsersAdapter.OnUserAc
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<User> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(UsersActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -171,10 +179,12 @@ public class UsersActivity extends BaseActivity implements UsersAdapter.OnUserAc
         });
     }
 
+    // Метод updateUser: выполняет основную бизнес- или UI-логику данного участка кода.
     private void updateUser(String id, Map<String, Object> data) {
         progressBar.setVisibility(View.VISIBLE);
         apiService.updateUser(id, data).enqueue(new Callback<User>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<User> call, Response<User> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
@@ -186,6 +196,7 @@ public class UsersActivity extends BaseActivity implements UsersAdapter.OnUserAc
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<User> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(UsersActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -193,6 +204,7 @@ public class UsersActivity extends BaseActivity implements UsersAdapter.OnUserAc
         });
     }
 
+    // Метод deleteUser: выполняет основную бизнес- или UI-логику данного участка кода.
     private void deleteUser(String id) {
         new AlertDialog.Builder(this)
                 .setMessage(R.string.confirm_delete_user)
@@ -201,6 +213,7 @@ public class UsersActivity extends BaseActivity implements UsersAdapter.OnUserAc
                     progressBar.setVisibility(View.VISIBLE);
                     apiService.deleteUser(id).enqueue(new Callback<Void>() {
                         @Override
+                        // Метод onResponse: обрабатывает соответствующее событие приложения.
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             progressBar.setVisibility(View.GONE);
                             if (response.isSuccessful()) {
@@ -212,6 +225,7 @@ public class UsersActivity extends BaseActivity implements UsersAdapter.OnUserAc
                         }
 
                         @Override
+                        // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Void> call, Throwable t) {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(UsersActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -222,11 +236,13 @@ public class UsersActivity extends BaseActivity implements UsersAdapter.OnUserAc
     }
 
     @Override
+    // Метод onEdit: обрабатывает соответствующее событие приложения.
     public void onEdit(User user) {
         showUserDialog(user);
     }
 
     @Override
+    // Метод onDelete: обрабатывает соответствующее событие приложения.
     public void onDelete(User user) {
         if (user.getId().equals(authManager.getUser().getId())) {
             Toast.makeText(this, R.string.cannot_delete_self, Toast.LENGTH_SHORT).show();

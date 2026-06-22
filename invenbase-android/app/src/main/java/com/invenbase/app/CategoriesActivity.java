@@ -45,6 +45,7 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
     private List<String> squadIds = new ArrayList<>();
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_categories);
@@ -74,9 +75,11 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
         loadCategories();
     }
 
+    // Метод loadSquads: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadSquads() {
         apiService.getSquads().enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     squadsList.clear();
@@ -84,18 +87,22 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
         });
     }
 
+    // Метод str: выполняет основную бизнес- или UI-логику данного участка кода.
     private static String str(Object o) {
         return o != null ? String.valueOf(o) : "";
     }
 
+    // Метод loadCategories: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadCategories() {
         progressBar.setVisibility(View.VISIBLE);
         apiService.getCategories().enqueue(new Callback<List<Category>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
@@ -108,6 +115,7 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Category>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(CategoriesActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -115,6 +123,7 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
         });
     }
 
+    // Метод showCategoryDialog: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showCategoryDialog(@Nullable Category category) {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_category, null, false);
         EditText editName = view.findViewById(R.id.edit_name);
@@ -178,10 +187,12 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
                 .show();
     }
 
+    // Метод createCategory: выполняет основную бизнес- или UI-логику данного участка кода.
     private void createCategory(Map<String, Object> data) {
         progressBar.setVisibility(View.VISIBLE);
         apiService.createCategory(data).enqueue(new Callback<Category>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Category> call, Response<Category> response) {
                 progressBar.setVisibility(View.GONE);
                 if (!response.isSuccessful()) {
@@ -191,6 +202,7 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Category> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(CategoriesActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -198,10 +210,12 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
         });
     }
 
+    // Метод updateCategory: выполняет основную бизнес- или UI-логику данного участка кода.
     private void updateCategory(String id, Map<String, Object> data) {
         progressBar.setVisibility(View.VISIBLE);
         apiService.updateCategory(id, data).enqueue(new Callback<Category>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Category> call, Response<Category> response) {
                 progressBar.setVisibility(View.GONE);
                 if (!response.isSuccessful()) {
@@ -211,6 +225,7 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Category> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(CategoriesActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -218,6 +233,7 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
         });
     }
 
+    // Метод deleteCategory: выполняет основную бизнес- или UI-логику данного участка кода.
     private void deleteCategory(Category target) {
         final EditText input = new EditText(this);
         input.setHint(target.getName());
@@ -244,6 +260,7 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
                     progressBar.setVisibility(View.VISIBLE);
                     apiService.deleteCategory(target.getId()).enqueue(new Callback<Void>() {
                         @Override
+                        // Метод onResponse: обрабатывает соответствующее событие приложения.
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             progressBar.setVisibility(View.GONE);
                             if (!response.isSuccessful()) {
@@ -253,6 +270,7 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
                         }
 
                         @Override
+                        // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Void> call, Throwable t) {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(CategoriesActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -263,11 +281,13 @@ public class CategoriesActivity extends BaseActivity implements CategoriesAdapte
     }
 
     @Override
+    // Метод onEdit: обрабатывает соответствующее событие приложения.
     public void onEdit(Category category) {
         showCategoryDialog(category);
     }
 
     @Override
+    // Метод onDelete: обрабатывает соответствующее событие приложения.
     public void onDelete(Category category) {
         if (!authManager.isAdmin() && !authManager.isResponsible()) {
             Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();

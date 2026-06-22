@@ -22,22 +22,26 @@ public class TopEquipmentAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final Context context;
     private List<TopEquipmentRow> items = new ArrayList<>();
 
+    // Конструктор TopEquipmentAdapter: инициализирует объект и его зависимости.
     public TopEquipmentAdapter(Context context) {
         this.context = context;
     }
 
+    // Метод setItems: устанавливает или обновляет значение данных.
     public void setItems(List<TopEquipmentRow> items) {
         this.items = items != null ? items : new ArrayList<>();
         notifyDataSetChanged();
     }
 
     @Override
+    // Метод getItemViewType: возвращает нужное значение для текущего контекста.
     public int getItemViewType(int position) {
         return position == 0 ? TYPE_HEADER : TYPE_ROW;
     }
 
     @NonNull
     @Override
+    // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_HEADER) {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_top_equipment_header, parent, false);
@@ -48,6 +52,7 @@ public class TopEquipmentAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     @Override
+    // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof HeaderVH) {
             HeaderVH h = (HeaderVH) holder;
@@ -70,6 +75,7 @@ public class TopEquipmentAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return 1 + items.size();
     }

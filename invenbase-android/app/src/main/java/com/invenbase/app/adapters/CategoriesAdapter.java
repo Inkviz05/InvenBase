@@ -18,7 +18,9 @@ import java.util.List;
 public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.CategoryViewHolder> {
 
     public interface OnCategoryActionListener {
+        // Метод onEdit: обрабатывает соответствующее событие приложения.
         void onEdit(Category category);
+        // Метод onDelete: обрабатывает соответствующее событие приложения.
         void onDelete(Category category);
     }
 
@@ -26,11 +28,13 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Ca
     private final boolean canDelete;
     private List<Category> items = new ArrayList<>();
 
+    // Конструктор CategoriesAdapter: инициализирует объект и его зависимости.
     public CategoriesAdapter(OnCategoryActionListener listener, boolean canDelete) {
         this.listener = listener;
         this.canDelete = canDelete;
     }
 
+    // Метод setItems: устанавливает или обновляет значение данных.
     public void setItems(List<Category> items) {
         this.items = items != null ? items : new ArrayList<>();
         notifyDataSetChanged();
@@ -38,6 +42,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Ca
 
     @NonNull
     @Override
+    // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
     public CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_category, parent, false);
@@ -45,11 +50,13 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Ca
     }
 
     @Override
+    // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
     public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
         holder.bind(items.get(position));
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return items.size();
     }
@@ -68,6 +75,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Ca
             buttonDelete = itemView.findViewById(R.id.button_delete);
         }
 
+        // Метод bind: выполняет основную бизнес- или UI-логику данного участка кода.
         void bind(Category category) {
             textName.setText(category.getName());
             textDescription.setText(category.getDescription() == null || category.getDescription().isEmpty()

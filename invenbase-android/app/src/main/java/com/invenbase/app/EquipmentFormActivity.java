@@ -57,6 +57,7 @@ public class EquipmentFormActivity extends BaseActivity {
     private String equipmentId;
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_equipment_form);
@@ -109,11 +110,13 @@ public class EquipmentFormActivity extends BaseActivity {
 
         spinnerSquad.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
+            // Метод onItemSelected: обрабатывает соответствующее событие приложения.
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String squadId = (position >= 0 && position < squadIds.size()) ? squadIds.get(position) : null;
                 loadCategories((squadId != null && !squadId.isEmpty()) ? squadId : null, null);
             }
             @Override
+            // Метод onNothingSelected: обрабатывает соответствующее событие приложения.
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
@@ -121,13 +124,16 @@ public class EquipmentFormActivity extends BaseActivity {
         loadSquads();
     }
 
+    // Метод str: выполняет основную бизнес- или UI-логику данного участка кода.
     private static String str(Object o) {
         return o == null ? "" : String.valueOf(o);
     }
 
+    // Метод loadSquads: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadSquads() {
         apiService.getSquads().enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     squadsList.clear();
@@ -165,6 +171,7 @@ public class EquipmentFormActivity extends BaseActivity {
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
                 squadIds.clear();
                 squadIds.add("");
@@ -182,12 +189,14 @@ public class EquipmentFormActivity extends BaseActivity {
         });
     }
 
+    // Метод loadCategories: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadCategories(@Nullable String squadId, @Nullable String selectCategoryId) {
         Call<List<Category>> call = (squadId != null && !squadId.isEmpty())
                 ? apiService.getCategoriesBySquad(squadId)
                 : apiService.getCategories();
         call.enqueue(new Callback<List<Category>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     categories = response.body();
@@ -213,14 +222,17 @@ public class EquipmentFormActivity extends BaseActivity {
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Category>> call, Throwable t) {}
         });
     }
 
+    // Метод loadEquipment: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadEquipment() {
         progressBar.setVisibility(View.VISIBLE);
         apiService.getEquipmentById(equipmentId).enqueue(new Callback<Equipment>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Equipment> call, Response<Equipment> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
@@ -256,6 +268,7 @@ public class EquipmentFormActivity extends BaseActivity {
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Equipment> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(EquipmentFormActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -263,6 +276,7 @@ public class EquipmentFormActivity extends BaseActivity {
         });
     }
 
+    // Метод save: выполняет основную бизнес- или UI-логику данного участка кода.
     private void save() {
         String name = editName.getText().toString().trim();
         boolean isUnique = checkUnique.isChecked();
@@ -315,6 +329,7 @@ public class EquipmentFormActivity extends BaseActivity {
 
         call.enqueue(new Callback<Equipment>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Equipment> call, Response<Equipment> response) {
                 progressBar.setVisibility(View.GONE);
                 buttonSave.setEnabled(true);
@@ -327,6 +342,7 @@ public class EquipmentFormActivity extends BaseActivity {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Equipment> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 buttonSave.setEnabled(true);

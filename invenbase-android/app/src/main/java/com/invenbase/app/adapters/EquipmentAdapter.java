@@ -19,24 +19,29 @@ public class EquipmentAdapter extends RecyclerView.Adapter<EquipmentAdapter.Equi
     private OnEquipmentClickListener listener;
 
     public interface OnEquipmentClickListener {
+        // Метод onEquipmentClick: обрабатывает соответствующее событие приложения.
         void onEquipmentClick(Equipment equipment);
     }
 
+    // Конструктор EquipmentAdapter: инициализирует объект и его зависимости.
     public EquipmentAdapter() {
         this.equipmentList = new ArrayList<>();
     }
 
+    // Метод setEquipmentList: устанавливает или обновляет значение данных.
     public void setEquipmentList(List<Equipment> equipmentList) {
         this.equipmentList = equipmentList;
         notifyDataSetChanged();
     }
 
+    // Метод setOnEquipmentClickListener: устанавливает или обновляет значение данных.
     public void setOnEquipmentClickListener(OnEquipmentClickListener listener) {
         this.listener = listener;
     }
 
     @NonNull
     @Override
+    // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
     public EquipmentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.item_equipment, parent, false);
@@ -44,12 +49,14 @@ public class EquipmentAdapter extends RecyclerView.Adapter<EquipmentAdapter.Equi
     }
 
     @Override
+    // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
     public void onBindViewHolder(@NonNull EquipmentViewHolder holder, int position) {
         Equipment equipment = equipmentList.get(position);
         holder.bind(equipment);
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return equipmentList.size();
     }
@@ -61,6 +68,7 @@ public class EquipmentAdapter extends RecyclerView.Adapter<EquipmentAdapter.Equi
         private TextView textTotal;
         private TextView textQrIndicator;
 
+        // Конструктор EquipmentViewHolder: инициализирует объект и его зависимости.
         public EquipmentViewHolder(@NonNull View itemView) {
             super(itemView);
             textName = itemView.findViewById(R.id.text_name);
@@ -76,6 +84,7 @@ public class EquipmentAdapter extends RecyclerView.Adapter<EquipmentAdapter.Equi
             });
         }
 
+        // Метод bind: выполняет основную бизнес- или UI-логику данного участка кода.
         public void bind(Equipment equipment) {
             textName.setText(equipment.getName());
             textDescription.setText(equipment.getDescription() != null ? 

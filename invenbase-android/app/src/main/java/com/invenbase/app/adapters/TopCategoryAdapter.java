@@ -22,22 +22,26 @@ public class TopCategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private final Context context;
     private List<TopCategoryRow> items = new ArrayList<>();
 
+    // Конструктор TopCategoryAdapter: инициализирует объект и его зависимости.
     public TopCategoryAdapter(Context context) {
         this.context = context;
     }
 
+    // Метод setItems: устанавливает или обновляет значение данных.
     public void setItems(List<TopCategoryRow> items) {
         this.items = items != null ? items : new ArrayList<>();
         notifyDataSetChanged();
     }
 
     @Override
+    // Метод getItemViewType: возвращает нужное значение для текущего контекста.
     public int getItemViewType(int position) {
         return position == 0 ? TYPE_HEADER : TYPE_ROW;
     }
 
     @NonNull
     @Override
+    // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_HEADER) {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_top_category_header, parent, false);
@@ -48,6 +52,7 @@ public class TopCategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     @Override
+    // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof HeaderVH) {
             HeaderVH h = (HeaderVH) holder;
@@ -66,6 +71,7 @@ public class TopCategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return 1 + items.size();
     }

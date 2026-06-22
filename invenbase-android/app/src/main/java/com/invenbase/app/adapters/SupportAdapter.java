@@ -26,8 +26,11 @@ import java.util.Map;
 public class SupportAdapter extends RecyclerView.Adapter<SupportAdapter.RequestViewHolder> {
 
     public interface SupportListener {
+        // Метод onAddMessageClick: обрабатывает соответствующее событие приложения.
         void onAddMessageClick(String requestId);
+        // Метод onSendReply: обрабатывает соответствующее событие приложения.
         void onSendReply(String requestId, String status, String comment);
+        // Метод onDeleteRequest: обрабатывает соответствующее событие приложения.
         void onDeleteRequest(String requestId);
     }
 
@@ -45,12 +48,14 @@ public class SupportAdapter extends RecyclerView.Adapter<SupportAdapter.RequestV
             R.string.support_status_closed
     };
 
+    // Конструктор SupportAdapter: инициализирует объект и его зависимости.
     public SupportAdapter(SupportListener listener, boolean isAdmin, String currentUserId) {
         this.listener = listener;
         this.isAdmin = isAdmin;
         this.currentUserId = currentUserId;
     }
 
+    // Метод setItems: устанавливает или обновляет значение данных.
     public void setItems(List<Map<String, Object>> items) {
         this.items = items != null ? items : new ArrayList<>();
         expandedReplyPosition = -1;
@@ -59,6 +64,7 @@ public class SupportAdapter extends RecyclerView.Adapter<SupportAdapter.RequestV
 
     @NonNull
     @Override
+    // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
     public RequestViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_support_request, parent, false);
@@ -66,11 +72,13 @@ public class SupportAdapter extends RecyclerView.Adapter<SupportAdapter.RequestV
     }
 
     @Override
+    // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
     public void onBindViewHolder(@NonNull RequestViewHolder holder, int position) {
         holder.bind(items.get(position), position);
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return items.size();
     }
@@ -107,6 +115,7 @@ public class SupportAdapter extends RecyclerView.Adapter<SupportAdapter.RequestV
             buttonDeleteRequest = itemView.findViewById(R.id.button_delete_request);
         }
 
+        // Метод bind: выполняет основную бизнес- или UI-логику данного участка кода.
         void bind(Map<String, Object> req, int position) {
             String id = safeStr(req.get("id"));
             String subject = safeStr(req.get("subject"));
@@ -201,6 +210,7 @@ public class SupportAdapter extends RecyclerView.Adapter<SupportAdapter.RequestV
             }
         }
 
+        // Метод addMessageBubble: выполняет основную бизнес- или UI-логику данного участка кода.
         private void addMessageBubble(LinearLayout parent, String text, String date, boolean isStaff) {
             View bubble = LayoutInflater.from(itemView.getContext())
                     .inflate(android.R.layout.simple_list_item_2, parent, false);
@@ -230,6 +240,7 @@ public class SupportAdapter extends RecyclerView.Adapter<SupportAdapter.RequestV
             parent.addView(bubble);
         }
 
+        // Метод setupSpinner: устанавливает или обновляет значение данных.
         private void setupSpinner(String currentStatus) {
             if (spinnerStatus.getAdapter() == null) {
                 String[] labels = new String[STATUS_LABELS.length];
@@ -248,6 +259,7 @@ public class SupportAdapter extends RecyclerView.Adapter<SupportAdapter.RequestV
             }
         }
 
+        // Метод getStatusLabel: возвращает нужное значение для текущего контекста.
         private String getStatusLabel(String status) {
             if (status == null) return "";
             for (int i = 0; i < STATUS_VALUES.length; i++) {
@@ -259,6 +271,7 @@ public class SupportAdapter extends RecyclerView.Adapter<SupportAdapter.RequestV
         }
 
         @SuppressWarnings("unchecked")
+        // Метод getMessagesList: возвращает нужное значение для текущего контекста.
         private List<Map<String, Object>> getMessagesList(Map<String, Object> req) {
             Object m = req.get("messages");
             if (m instanceof List) {
@@ -267,10 +280,12 @@ public class SupportAdapter extends RecyclerView.Adapter<SupportAdapter.RequestV
             return null;
         }
 
+        // Метод safeStr: выполняет основную бизнес- или UI-логику данного участка кода.
         private String safeStr(Object o) {
             return o == null ? "" : String.valueOf(o);
         }
 
+        // Метод formatDate: выполняет основную бизнес- или UI-логику данного участка кода.
         private String formatDate(String iso) {
             if (iso == null || iso.isEmpty()) return "";
             try {

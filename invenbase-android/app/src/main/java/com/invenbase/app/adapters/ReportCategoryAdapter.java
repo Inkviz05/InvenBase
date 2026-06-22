@@ -18,6 +18,7 @@ public class ReportCategoryAdapter extends RecyclerView.Adapter<ReportCategoryAd
 
     private List<ReportCategoryItem> items = new ArrayList<>();
 
+    // Метод setItems: устанавливает или обновляет значение данных.
     public void setItems(List<ReportCategoryItem> items) {
         this.items = items != null ? items : new ArrayList<>();
         notifyDataSetChanged();
@@ -25,6 +26,7 @@ public class ReportCategoryAdapter extends RecyclerView.Adapter<ReportCategoryAd
 
     @NonNull
     @Override
+    // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_report_category, parent, false);
@@ -32,6 +34,7 @@ public class ReportCategoryAdapter extends RecyclerView.Adapter<ReportCategoryAd
     }
 
     @Override
+    // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ReportCategoryItem item = items.get(position);
         holder.textCategoryName.setText(item.getCategoryName().isEmpty() ? holder.itemView.getContext().getString(R.string.no_category) : item.getCategoryName());
@@ -41,6 +44,7 @@ public class ReportCategoryAdapter extends RecyclerView.Adapter<ReportCategoryAd
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return items.size();
     }

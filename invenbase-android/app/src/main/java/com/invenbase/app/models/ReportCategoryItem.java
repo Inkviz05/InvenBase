@@ -9,6 +9,7 @@ public class ReportCategoryItem {
     private final long available;
     private final long booked;
 
+    // Конструктор ReportCategoryItem: инициализирует объект и его зависимости.
     public ReportCategoryItem(String categoryName, long total, long available, long booked) {
         this.categoryName = categoryName != null ? categoryName : "";
         this.total = total;
@@ -16,18 +17,22 @@ public class ReportCategoryItem {
         this.booked = booked;
     }
 
+    // Метод getCategoryName: возвращает нужное значение для текущего контекста.
     public String getCategoryName() {
         return categoryName;
     }
 
+    // Метод getTotal: возвращает нужное значение для текущего контекста.
     public long getTotal() {
         return total;
     }
 
+    // Метод getAvailable: возвращает нужное значение для текущего контекста.
     public long getAvailable() {
         return available;
     }
 
+    // Метод getBooked: возвращает нужное значение для текущего контекста.
     public long getBooked() {
         return booked;
     }

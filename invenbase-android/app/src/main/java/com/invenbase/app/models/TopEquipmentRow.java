@@ -8,6 +8,7 @@ public class TopEquipmentRow {
     public final String percent;
     public final int totalQuantity;
 
+    // Конструктор TopEquipmentRow: инициализирует объект и его зависимости.
     public TopEquipmentRow(int index, String equipmentName, String categoryName, int bookingsCount, String percent, int totalQuantity) {
         this.index = index;
         this.equipmentName = equipmentName != null ? equipmentName : "—";

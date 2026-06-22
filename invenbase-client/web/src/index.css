@@ -293,6 +293,8 @@ h3 {
 .form-actions .btn {
   flex: 1;
   min-width: 120px;
+  justify-content: center;
+  text-align: center;
 }
 
 /* Таблицы в отчётах */

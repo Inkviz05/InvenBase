@@ -52,6 +52,7 @@ public class BookingFormActivity extends BaseActivity {
     private final Calendar endCalendar = Calendar.getInstance();
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_booking_form);
@@ -92,6 +93,7 @@ public class BookingFormActivity extends BaseActivity {
         setTitle(R.string.create_booking);
     }
 
+    // Метод pickDateTime: выполняет основную бизнес- или UI-логику данного участка кода.
     private void pickDateTime(Calendar calendar, EditText target) {
         Calendar now = Calendar.getInstance();
         DatePickerDialog datePicker = new DatePickerDialog(
@@ -120,10 +122,12 @@ public class BookingFormActivity extends BaseActivity {
         datePicker.show();
     }
 
+    // Метод loadEquipment: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadEquipment(String equipmentId) {
         progressBar.setVisibility(View.VISIBLE);
         apiService.getEquipmentById(equipmentId).enqueue(new Callback<Equipment>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Equipment> call, Response<Equipment> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
@@ -138,6 +142,7 @@ public class BookingFormActivity extends BaseActivity {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Equipment> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 textEquipmentInfo.setText(R.string.error);
@@ -145,6 +150,7 @@ public class BookingFormActivity extends BaseActivity {
         });
     }
 
+    // Метод submit: выполняет основную бизнес- или UI-логику данного участка кода.
     private void submit() {
         if (equipment == null) {
             Toast.makeText(this, R.string.equipment_not_found, Toast.LENGTH_SHORT).show();
@@ -187,6 +193,7 @@ public class BookingFormActivity extends BaseActivity {
 
         apiService.createBooking(data).enqueue(new Callback<Booking>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Booking> call, Response<Booking> response) {
                 progressBar.setVisibility(View.GONE);
                 buttonCreate.setEnabled(true);
@@ -199,6 +206,7 @@ public class BookingFormActivity extends BaseActivity {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Booking> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 buttonCreate.setEnabled(true);
@@ -207,11 +215,13 @@ public class BookingFormActivity extends BaseActivity {
         });
     }
 
+    // Метод formatLocal: выполняет основную бизнес- или UI-логику данного участка кода.
     private String formatLocal(Calendar calendar) {
         SimpleDateFormat fmt = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
         return fmt.format(calendar.getTime());
     }
 
+    // Метод buildIso: выполняет основную бизнес- или UI-логику данного участка кода.
     private String buildIso(Calendar calendar) {
         SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
         fmt.setTimeZone(TimeZone.getTimeZone("UTC"));

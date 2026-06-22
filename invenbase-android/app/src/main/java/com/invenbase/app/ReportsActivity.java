@@ -70,6 +70,7 @@ public class ReportsActivity extends BaseActivity {
     private static final String[] PRESET_KEYS = {"all", "today", "yesterday", "week", "month"};
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reports);
@@ -110,6 +111,7 @@ public class ReportsActivity extends BaseActivity {
         loadReports();
     }
 
+    // Метод setupPeriodChips: устанавливает или обновляет значение данных.
     private void setupPeriodChips() {
         int[] labels = {R.string.period_all, R.string.period_today, R.string.period_yesterday, R.string.period_week, R.string.period_month};
         for (int i = 0; i < PRESET_KEYS.length; i++) {
@@ -125,11 +127,13 @@ public class ReportsActivity extends BaseActivity {
         }
     }
 
+    // Метод setupDatePickers: устанавливает или обновляет значение данных.
     private void setupDatePickers() {
         textDateFrom.setOnClickListener(v -> showDatePicker(true));
         textDateTo.setOnClickListener(v -> showDatePicker(false));
     }
 
+    // Метод showDatePicker: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showDatePicker(boolean isFrom) {
         Calendar c = Calendar.getInstance();
         String cur = isFrom ? fromDate : toDate;
@@ -141,6 +145,7 @@ public class ReportsActivity extends BaseActivity {
                 c.set(y, m, d);
             } catch (Exception ignored) {}
         }
+        // Метод DatePickerDialog: выполняет основную бизнес- или UI-логику данного участка кода.
         new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
             String date = String.format(Locale.US, "%04d-%02d-%02d", year, month + 1, dayOfMonth);
             if (isFrom) {
@@ -155,6 +160,7 @@ public class ReportsActivity extends BaseActivity {
         }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
     }
 
+    // Метод applyPeriodPreset: выполняет основную бизнес- или UI-логику данного участка кода.
     private void applyPeriodPreset(String preset) {
         periodPreset = preset;
         Calendar today = Calendar.getInstance();
@@ -184,14 +190,17 @@ public class ReportsActivity extends BaseActivity {
         refreshBookingSection();
     }
 
+    // Метод formatDate: выполняет основную бизнес- или UI-логику данного участка кода.
     private String formatDate(int year, int month, int day) {
         return String.format(Locale.US, "%04d-%02d-%02d", year, month + 1, day);
     }
 
+    // Метод loadReports: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadReports() {
         progressBar.setVisibility(View.VISIBLE);
         apiService.getEquipmentReport().enqueue(new Callback<Map<String, Object>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     equipmentReport = response.body();
@@ -199,6 +208,7 @@ public class ReportsActivity extends BaseActivity {
                 loadNext();
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(ReportsActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -206,6 +216,7 @@ public class ReportsActivity extends BaseActivity {
         });
         apiService.getBookingReport().enqueue(new Callback<Map<String, Object>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     bookingReport = response.body();
@@ -213,12 +224,14 @@ public class ReportsActivity extends BaseActivity {
                 loadNext();
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 loadNext();
             }
         });
         apiService.getEquipment().enqueue(new Callback<List<Equipment>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Equipment>> call, Response<List<Equipment>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     allEquipment = response.body();
@@ -226,12 +239,14 @@ public class ReportsActivity extends BaseActivity {
                 loadNext();
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Equipment>> call, Throwable t) {
                 loadNext();
             }
         });
         apiService.getBookings().enqueue(new Callback<List<Booking>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Booking>> call, Response<List<Booking>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     allBookings = response.body();
@@ -239,6 +254,7 @@ public class ReportsActivity extends BaseActivity {
                 loadNext();
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Booking>> call, Throwable t) {
                 loadNext();
             }
@@ -248,6 +264,7 @@ public class ReportsActivity extends BaseActivity {
     private int loadCount = 0;
     private static final int LOAD_TOTAL = 4;
 
+    // Метод loadNext: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadNext() {
         loadCount++;
         if (loadCount >= LOAD_TOTAL) {
@@ -257,11 +274,13 @@ public class ReportsActivity extends BaseActivity {
         }
     }
 
+    // Метод showAllReports: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showAllReports() {
         showEquipmentSection();
         showBookingSection();
     }
 
+    // Метод showEquipmentSection: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showEquipmentSection() {
         if (equipmentReport == null) return;
 
@@ -317,6 +336,7 @@ public class ReportsActivity extends BaseActivity {
         recyclerEquipmentTable.setAdapter(equipmentTableAdapter);
     }
 
+    // Метод getFilteredBookings: возвращает нужное значение для текущего контекста.
     private List<Booking> getFilteredBookings() {
         List<Booking> result = new ArrayList<>();
         for (Booking b : allBookings) {
@@ -337,6 +357,7 @@ public class ReportsActivity extends BaseActivity {
         int totalQuantity;
     }
 
+    // Метод computeUsageStats: выполняет основную бизнес- или UI-логику данного участка кода.
     private void computeUsageStats() {
         List<Booking> filtered = getFilteredBookings();
 
@@ -411,6 +432,7 @@ public class ReportsActivity extends BaseActivity {
         recyclerTopCategories.setAdapter(topCatAdapter);
     }
 
+    // Метод showBookingSection: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showBookingSection() {
         if (bookingReport == null) return;
 
@@ -430,22 +452,26 @@ public class ReportsActivity extends BaseActivity {
         computeUsageStats();
     }
 
+    // Метод refreshBookingSection: выполняет основную бизнес- или UI-логику данного участка кода.
     private void refreshBookingSection() {
         if (bookingReport != null) showBookingSection();
     }
 
+    // Метод getInt: возвращает нужное значение для текущего контекста.
     private int getInt(Map<String, Object> map, String key) {
         if (map == null || map.get(key) == null) return 0;
         Object v = map.get(key);
         return v instanceof Number ? ((Number) v).intValue() : 0;
     }
 
+    // Метод getLong: возвращает нужное значение для текущего контекста.
     private long getLong(Map<String, Object> map, String key) {
         if (map == null || map.get(key) == null) return 0;
         Object v = map.get(key);
         return v instanceof Number ? ((Number) v).longValue() : 0;
     }
 
+    // Метод str: выполняет основную бизнес- или UI-логику данного участка кода.
     private static String str(Object o) {
         return o != null ? String.valueOf(o) : "";
     }

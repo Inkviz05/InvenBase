@@ -18,8 +18,11 @@ import java.util.Map;
 public class SquadsAdapter extends RecyclerView.Adapter<SquadsAdapter.SquadViewHolder> {
 
     public interface OnSquadClickListener {
+        // Метод onSquadClick: обрабатывает соответствующее событие приложения.
         void onSquadClick(Map<String, Object> squad);
+        // Метод onEditClick: обрабатывает соответствующее событие приложения.
         void onEditClick(Map<String, Object> squad);
+        // Метод onDeleteClick: обрабатывает соответствующее событие приложения.
         void onDeleteClick(Map<String, Object> squad);
     }
 
@@ -27,28 +30,33 @@ public class SquadsAdapter extends RecyclerView.Adapter<SquadsAdapter.SquadViewH
     private final boolean canEdit;
     private List<Map<String, Object>> items = new ArrayList<>();
 
+    // Конструктор SquadsAdapter: инициализирует объект и его зависимости.
     public SquadsAdapter(OnSquadClickListener listener, boolean canEdit) {
         this.listener = listener;
         this.canEdit = canEdit;
     }
 
+    // Метод setItems: устанавливает или обновляет значение данных.
     public void setItems(List<Map<String, Object>> items) {
         this.items = items != null ? items : new ArrayList<>();
         notifyDataSetChanged();
     }
 
+    // Метод str: выполняет основную бизнес- или UI-логику данного участка кода.
     private static String str(Object o) {
         return o == null ? "" : String.valueOf(o);
     }
 
     @NonNull
     @Override
+    // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
     public SquadViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_squad, parent, false);
         return new SquadViewHolder(view);
     }
 
     @Override
+    // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
     public void onBindViewHolder(@NonNull SquadViewHolder holder, int position) {
         Map<String, Object> squad = items.get(position);
         holder.textName.setText(str(squad.get("name")));
@@ -68,6 +76,7 @@ public class SquadsAdapter extends RecyclerView.Adapter<SquadsAdapter.SquadViewH
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return items.size();
     }

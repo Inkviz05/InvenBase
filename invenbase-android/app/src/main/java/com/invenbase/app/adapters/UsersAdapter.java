@@ -18,7 +18,9 @@ import java.util.List;
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder> {
 
     public interface OnUserActionListener {
+        // Метод onEdit: обрабатывает соответствующее событие приложения.
         void onEdit(User user);
+        // Метод onDelete: обрабатывает соответствующее событие приложения.
         void onDelete(User user);
     }
 
@@ -26,11 +28,13 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     private final User currentUser;
     private List<User> items = new ArrayList<>();
 
+    // Конструктор UsersAdapter: инициализирует объект и его зависимости.
     public UsersAdapter(OnUserActionListener listener, User currentUser) {
         this.listener = listener;
         this.currentUser = currentUser;
     }
 
+    // Метод setItems: устанавливает или обновляет значение данных.
     public void setItems(List<User> items) {
         this.items = items != null ? items : new ArrayList<>();
         notifyDataSetChanged();
@@ -38,6 +42,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
 
     @NonNull
     @Override
+    // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_user, parent, false);
@@ -45,11 +50,13 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     }
 
     @Override
+    // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         holder.bind(items.get(position));
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return items.size();
     }
@@ -74,6 +81,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             textYou = itemView.findViewById(R.id.text_you);
         }
 
+        // Метод bind: выполняет основную бизнес- или UI-логику данного участка кода.
         void bind(User user) {
             textUsername.setText(user.getUsername());
             textFullName.setText(user.getFullName() == null || user.getFullName().isEmpty()

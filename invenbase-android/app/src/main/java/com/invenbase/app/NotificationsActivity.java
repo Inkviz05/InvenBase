@@ -31,6 +31,7 @@ public class NotificationsActivity extends BaseActivity implements Notifications
     private NotificationsAdapter adapter;
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications);
@@ -49,10 +50,12 @@ public class NotificationsActivity extends BaseActivity implements Notifications
         loadNotifications();
     }
 
+    // Метод loadNotifications: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadNotifications() {
         progressBar.setVisibility(View.VISIBLE);
         apiService.getNotifications().enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
@@ -65,6 +68,7 @@ public class NotificationsActivity extends BaseActivity implements Notifications
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(NotificationsActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -73,14 +77,17 @@ public class NotificationsActivity extends BaseActivity implements Notifications
     }
 
     @Override
+    // Метод onMarkAsRead: обрабатывает соответствующее событие приложения.
     public void onMarkAsRead(String id) {
         apiService.markAsRead(id).enqueue(new Callback<Void>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Void> call, Response<Void> response) {
                 loadNotifications();
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(NotificationsActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
             }

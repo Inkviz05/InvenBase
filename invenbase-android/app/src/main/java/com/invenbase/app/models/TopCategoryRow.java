@@ -6,6 +6,7 @@ public class TopCategoryRow {
     public final int bookingsCount;
     public final String percent;
 
+    // Конструктор TopCategoryRow: инициализирует объект и его зависимости.
     public TopCategoryRow(int index, String categoryName, int bookingsCount, String percent) {
         this.index = index;
         this.categoryName = categoryName != null ? categoryName : "—";

@@ -61,6 +61,7 @@ public class ScannerFragment extends Fragment {
 
     @Nullable
     @Override
+    // Метод onCreateView: обрабатывает соответствующее событие приложения.
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_scanner, container, false);
         
@@ -95,6 +96,7 @@ public class ScannerFragment extends Fragment {
         return view;
     }
     
+    // Метод setupScannerSettings: устанавливает или обновляет значение данных.
     private void setupScannerSettings() {
         // Настройка для более быстрого сканирования - только QR-коды
         Collection<com.google.zxing.BarcodeFormat> formats = Arrays.asList(
@@ -106,6 +108,7 @@ public class ScannerFragment extends Fragment {
         // Фонарик выключен по умолчанию через настройки DecoratedBarcodeView
     }
 
+    // Метод startScanning: выполняет основную бизнес- или UI-логику данного участка кода.
     private void startScanning() {
         if (barcodeView == null) return;
         
@@ -117,6 +120,7 @@ public class ScannerFragment extends Fragment {
         
         barcodeView.decodeContinuous(new BarcodeCallback() {
             @Override
+            // Метод barcodeResult: выполняет основную бизнес- или UI-логику данного участка кода.
             public void barcodeResult(BarcodeResult result) {
                 if (result.getText() != null && !isHandlingResult) {
                     long currentTime = System.currentTimeMillis();
@@ -146,6 +150,7 @@ public class ScannerFragment extends Fragment {
             }
 
             @Override
+            // Метод possibleResultPoints: выполняет основную бизнес- или UI-логику данного участка кода.
             public void possibleResultPoints(java.util.List<com.google.zxing.ResultPoint> resultPoints) {
                 // Визуальная обратная связь при обнаружении QR-кода
                 if (!isHandlingResult && resultPoints != null && !resultPoints.isEmpty()) {
@@ -158,6 +163,7 @@ public class ScannerFragment extends Fragment {
         startTimeout();
     }
     
+    // Метод startTimeout: выполняет основную бизнес- или UI-логику данного участка кода.
     private void startTimeout() {
         cancelTimeout();
         timeoutRunnable = () -> {
@@ -172,6 +178,7 @@ public class ScannerFragment extends Fragment {
         handler.postDelayed(timeoutRunnable, SCAN_TIMEOUT_MS);
     }
     
+    // Метод restartScanner: выполняет основную бизнес- или UI-логику данного участка кода.
     private void restartScanner() {
         if (barcodeView != null && isScanning) {
             barcodeView.pause();
@@ -186,6 +193,7 @@ public class ScannerFragment extends Fragment {
         }
     }
     
+    // Метод cancelTimeout: выполняет основную бизнес- или UI-логику данного участка кода.
     private void cancelTimeout() {
         if (timeoutRunnable != null) {
             handler.removeCallbacks(timeoutRunnable);
@@ -193,6 +201,7 @@ public class ScannerFragment extends Fragment {
         }
     }
     
+    // Метод updateScanStatus: выполняет основную бизнес- или UI-логику данного участка кода.
     private void updateScanStatus(String status, boolean showProgress) {
         if (statusText != null) {
             statusText.setText(status);
@@ -202,6 +211,7 @@ public class ScannerFragment extends Fragment {
         }
     }
     
+    // Метод stopScanning: выполняет основную бизнес- или UI-логику данного участка кода.
     private void stopScanning() {
         cancelTimeout();
         isScanning = false;
@@ -213,6 +223,7 @@ public class ScannerFragment extends Fragment {
         showStartScreen();
     }
     
+    // Метод showStartScreen: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showStartScreen() {
         if (startScanContainer != null) {
             startScanContainer.setVisibility(View.VISIBLE);
@@ -228,6 +239,7 @@ public class ScannerFragment extends Fragment {
         }
     }
     
+    // Метод showScanningScreen: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showScanningScreen() {
         if (startScanContainer != null) {
             startScanContainer.setVisibility(View.GONE);
@@ -244,6 +256,7 @@ public class ScannerFragment extends Fragment {
     }
 
     @Override
+    // Метод onRequestPermissionsResult: обрабатывает соответствующее событие приложения.
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == CAMERA_PERMISSION_REQUEST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -255,6 +268,7 @@ public class ScannerFragment extends Fragment {
     }
 
     @Override
+    // Метод onResume: обрабатывает соответствующее событие приложения.
     public void onResume() {
         super.onResume();
         // Возобновляем сканирование только если оно было активно
@@ -271,6 +285,7 @@ public class ScannerFragment extends Fragment {
     }
 
     @Override
+    // Метод onPause: обрабатывает соответствующее событие приложения.
     public void onPause() {
         super.onPause();
         cancelTimeout();
@@ -281,6 +296,7 @@ public class ScannerFragment extends Fragment {
     }
     
     @Override
+    // Метод onDestroyView: обрабатывает соответствующее событие приложения.
     public void onDestroyView() {
         super.onDestroyView();
         cancelTimeout();
@@ -289,6 +305,7 @@ public class ScannerFragment extends Fragment {
         }
     }
 
+    // Метод handleQrCode: выполняет основную бизнес- или UI-логику данного участка кода.
     private void handleQrCode(String qrCode) {
         android.util.Log.d("ScannerFragment", "Processing QR code: " + qrCode);
         updateScanStatus(getString(R.string.searching_equipment), true);
@@ -296,6 +313,7 @@ public class ScannerFragment extends Fragment {
         Call<Equipment> call = apiService.getEquipmentByQR(qrCode);
         call.enqueue(new Callback<Equipment>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Equipment> call, Response<Equipment> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Equipment equipment = response.body();
@@ -331,6 +349,7 @@ public class ScannerFragment extends Fragment {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Equipment> call, Throwable t) {
                 android.util.Log.e("ScannerFragment", "Error fetching equipment", t);
                 updateScanStatus(getString(R.string.error_occurred), false);
@@ -348,6 +367,7 @@ public class ScannerFragment extends Fragment {
         });
     }
 
+    // Метод openEquipmentDetails: выполняет основную бизнес- или UI-логику данного участка кода.
     private void openEquipmentDetails(String equipmentId) {
         // Останавливаем сканер перед переходом
         if (barcodeView != null) {
@@ -360,6 +380,7 @@ public class ScannerFragment extends Fragment {
         startActivity(intent);
     }
 
+    // Метод resumeScanning: выполняет основную бизнес- или UI-логику данного участка кода.
     private void resumeScanning() {
         handler.postDelayed(() -> {
             if (getContext() != null && !isHandlingResult && isScanning) {
@@ -375,6 +396,7 @@ public class ScannerFragment extends Fragment {
         }, RESUME_DELAY_MS);
     }
 
+    // Метод showManualInputDialog: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showManualInputDialog() {
         // Останавливаем сканирование только если оно активно
         if (isScanning && barcodeView != null) {

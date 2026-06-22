@@ -73,6 +73,7 @@ public class EquipmentDetailActivity extends BaseActivity {
     private List<Map<String, Object>> movementsList = new ArrayList<>();
     private List<Map<String, Object>> squadsList = new ArrayList<>();
 
+    // Метод open: выполняет основную бизнес- или UI-логику данного участка кода.
     public static void open(Context context, String equipmentId) {
         Intent intent = new Intent(context, EquipmentDetailActivity.class);
         intent.putExtra(EXTRA_EQUIPMENT_ID, equipmentId);
@@ -80,6 +81,7 @@ public class EquipmentDetailActivity extends BaseActivity {
     }
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_equipment_detail);
@@ -134,12 +136,14 @@ public class EquipmentDetailActivity extends BaseActivity {
         loadSquads();
     }
 
+    // Метод loadEquipment: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadEquipment(String equipmentId) {
         progressBar.setVisibility(View.VISIBLE);
         contentContainer.setVisibility(View.GONE);
 
         apiService.getEquipmentById(equipmentId).enqueue(new Callback<Equipment>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Equipment> call, Response<Equipment> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
@@ -152,6 +156,7 @@ public class EquipmentDetailActivity extends BaseActivity {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Equipment> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -160,6 +165,7 @@ public class EquipmentDetailActivity extends BaseActivity {
         });
     }
 
+    // Метод bindEquipment: выполняет основную бизнес- или UI-логику данного участка кода.
     private void bindEquipment() {
         contentContainer.setVisibility(View.VISIBLE);
         textName.setText(equipment.getName());
@@ -203,9 +209,11 @@ public class EquipmentDetailActivity extends BaseActivity {
         buttonDelete.setVisibility(canEdit ? View.VISIBLE : View.GONE);
     }
 
+    // Метод loadMovements: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadMovements(String equipmentId) {
         apiService.getEquipmentMovements(equipmentId).enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     movementsList.clear();
@@ -218,13 +226,16 @@ public class EquipmentDetailActivity extends BaseActivity {
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
         });
     }
 
+    // Метод loadSquads: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadSquads() {
         apiService.getSquads().enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     squadsList.clear();
@@ -232,10 +243,12 @@ public class EquipmentDetailActivity extends BaseActivity {
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
         });
     }
 
+    // Метод openMoveDialog: выполняет основную бизнес- или UI-логику данного участка кода.
     private void openMoveDialog() {
         if (equipment == null) return;
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_equipment_move, null, false);
@@ -309,14 +322,17 @@ public class EquipmentDetailActivity extends BaseActivity {
         dialog.show();
     }
 
+    // Метод str: выполняет основную бизнес- или UI-логику данного участка кода.
     private static String str(Object o) {
         return o == null ? "" : String.valueOf(o);
     }
 
+    // Метод submitMove: выполняет основную бизнес- или UI-логику данного участка кода.
     private void submitMove(String equipmentId, Map<String, Object> data) {
         progressBar.setVisibility(View.VISIBLE);
         apiService.moveEquipment(equipmentId, data).enqueue(new Callback<Map<String, Object>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
@@ -328,6 +344,7 @@ public class EquipmentDetailActivity extends BaseActivity {
                 }
             }
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -344,12 +361,14 @@ public class EquipmentDetailActivity extends BaseActivity {
 
         @NonNull
         @Override
+        // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
         public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_movement, parent, false);
             return new VH(v);
         }
 
         @Override
+        // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
         public void onBindViewHolder(@NonNull VH holder, int position) {
             Map<String, Object> m = items.get(position);
             String when = str(m.get("moved_at"));
@@ -376,6 +395,7 @@ public class EquipmentDetailActivity extends BaseActivity {
         }
 
         @Override
+        // Метод getItemCount: возвращает нужное значение для текущего контекста.
         public int getItemCount() {
             return items.size();
         }
@@ -393,6 +413,7 @@ public class EquipmentDetailActivity extends BaseActivity {
         }
     }
 
+    // Метод addToCart: выполняет основную бизнес- или UI-логику данного участка кода.
     private void addToCart() {
         if (equipment == null) {
             return;
@@ -402,6 +423,7 @@ public class EquipmentDetailActivity extends BaseActivity {
         bindEquipment();
     }
 
+    // Метод openBookingForm: выполняет основную бизнес- или UI-логику данного участка кода.
     private void openBookingForm() {
         if (equipment == null) {
             return;
@@ -415,6 +437,7 @@ public class EquipmentDetailActivity extends BaseActivity {
         startActivity(intent);
     }
 
+    // Метод openEditForm: выполняет основную бизнес- или UI-логику данного участка кода.
     private void openEditForm() {
         if (equipment == null) return;
         Intent intent = new Intent(this, EquipmentFormActivity.class);
@@ -423,6 +446,7 @@ public class EquipmentDetailActivity extends BaseActivity {
         startActivity(intent);
     }
 
+    // Метод deleteEquipment: выполняет основную бизнес- или UI-логику данного участка кода.
     private void deleteEquipment() {
         if (equipment == null) return;
         final android.widget.EditText input = new android.widget.EditText(this);
@@ -451,6 +475,7 @@ public class EquipmentDetailActivity extends BaseActivity {
                     progressBar.setVisibility(View.VISIBLE);
                     apiService.deleteEquipment(equipment.getId()).enqueue(new Callback<Void>() {
                         @Override
+                        // Метод onResponse: обрабатывает соответствующее событие приложения.
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             progressBar.setVisibility(View.GONE);
                             if (response.isSuccessful()) {
@@ -462,6 +487,7 @@ public class EquipmentDetailActivity extends BaseActivity {
                         }
 
                         @Override
+                        // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Void> call, Throwable t) {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(EquipmentDetailActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -471,6 +497,7 @@ public class EquipmentDetailActivity extends BaseActivity {
                 .show();
     }
 
+    // Метод generateQRCode: выполняет основную бизнес- или UI-логику данного участка кода.
     private void generateQRCode() {
         if (equipment == null) return;
         
@@ -479,6 +506,7 @@ public class EquipmentDetailActivity extends BaseActivity {
         // Сначала получаем данные QR-кода (код, название, описание)
         apiService.getQRCodeData(equipment.getId()).enqueue(new Callback<Map<String, Object>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Map<String, Object> data = response.body();
@@ -489,6 +517,7 @@ public class EquipmentDetailActivity extends BaseActivity {
 
                     apiService.generateQRCode(equipment.getId()).enqueue(new Callback<ResponseBody>() {
                         @Override
+                        // Метод onResponse: обрабатывает соответствующее событие приложения.
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                             if (response.isSuccessful() && response.body() != null) {
                                 try {
@@ -512,6 +541,7 @@ public class EquipmentDetailActivity extends BaseActivity {
                         }
 
                         @Override
+                        // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<ResponseBody> call, Throwable t) {
                             runOnUiThread(() -> {
                                 progressBar.setVisibility(View.GONE);
@@ -528,6 +558,7 @@ public class EquipmentDetailActivity extends BaseActivity {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
@@ -537,11 +568,13 @@ public class EquipmentDetailActivity extends BaseActivity {
         });
     }
 
+    // Метод trimTo: выполняет основную бизнес- или UI-логику данного участка кода.
     private static String trimTo(String s, int maxLen) {
         if (s == null) return "";
         return s.length() <= maxLen ? s : s.substring(0, maxLen - 1) + "…";
     }
 
+    // Метод buildQRLabelBitmap: выполняет основную бизнес- или UI-логику данного участка кода.
     private android.graphics.Bitmap buildQRLabelBitmap(android.graphics.Bitmap qrBitmap, String qrData, String name, String desc) {
         float density = getResources().getDisplayMetrics().density;
         int qrSize = Math.min(qrBitmap.getWidth(), qrBitmap.getHeight());
@@ -580,6 +613,7 @@ public class EquipmentDetailActivity extends BaseActivity {
         return label;
     }
 
+    // Метод showQRCodeDialog: выполняет основную бизнес- или UI-логику данного участка кода.
     private void showQRCodeDialog(byte[] qrBytes, String qrData, String qrName, String qrDesc) {
         try {
             android.graphics.Bitmap qrBitmap = android.graphics.BitmapFactory.decodeByteArray(qrBytes, 0, qrBytes.length);

@@ -31,6 +31,7 @@ public class ReportStatAdapter extends RecyclerView.Adapter<ReportStatAdapter.VH
         VALUE_COLORS.put("Завершены", R.color.success);
     }
 
+    // Метод setItems: устанавливает или обновляет значение данных.
     public void setItems(List<StatItem> items) {
         this.items = items != null ? items : new ArrayList<>();
         notifyDataSetChanged();
@@ -38,12 +39,14 @@ public class ReportStatAdapter extends RecyclerView.Adapter<ReportStatAdapter.VH
 
     @NonNull
     @Override
+    // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_stat_report, parent, false);
         return new VH(v);
     }
 
     @Override
+    // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
     public void onBindViewHolder(@NonNull VH holder, int position) {
         StatItem item = items.get(position);
         holder.textTitle.setText(item.getTitle());
@@ -55,6 +58,7 @@ public class ReportStatAdapter extends RecyclerView.Adapter<ReportStatAdapter.VH
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return items.size();
     }

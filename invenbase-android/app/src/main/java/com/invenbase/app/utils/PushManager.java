@@ -29,6 +29,7 @@ public class PushManager {
     private final ApiService apiService;
     private final AuthManager authManager;
 
+    // Конструктор PushManager: инициализирует объект и его зависимости.
     private PushManager(Context context) {
         Context appContext = context.getApplicationContext();
         this.prefs = appContext.getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE);
@@ -36,6 +37,7 @@ public class PushManager {
         this.authManager = AuthManager.getInstance(appContext);
     }
 
+    // Метод getInstance: возвращает нужное значение для текущего контекста.
     public static synchronized PushManager getInstance(Context context) {
         if (instance == null) {
             instance = new PushManager(context);
@@ -73,6 +75,7 @@ public class PushManager {
         }
     }
 
+    // Метод sendTokenToServer: выполняет основную бизнес- или UI-логику данного участка кода.
     private void sendTokenToServer(String token) {
         Map<String, String> body = new HashMap<>();
         body.put("token", token);
@@ -83,6 +86,7 @@ public class PushManager {
         
         apiService.registerPushToken(body).enqueue(new Callback<Void>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     Log.d("FCM", "Push token registered successfully on server (status: " + response.code() + ")");
@@ -100,6 +104,7 @@ public class PushManager {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Void> call, Throwable t) {
                 Log.e("FCM", "Error registering push token: " + t.getMessage(), t);
                 Log.e("FCM", "Request URL: " + (call.request() != null ? call.request().url() : "null"));

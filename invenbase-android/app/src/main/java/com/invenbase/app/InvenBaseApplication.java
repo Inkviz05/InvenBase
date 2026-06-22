@@ -7,6 +7,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 public class InvenBaseApplication extends Application {
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     public void onCreate() {
         super.onCreate();
         FirebaseApp.initializeApp(this);

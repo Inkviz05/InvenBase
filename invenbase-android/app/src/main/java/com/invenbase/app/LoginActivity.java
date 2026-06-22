@@ -29,6 +29,7 @@ public class LoginActivity extends BaseActivity {
     private AuthManager authManager;
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
@@ -53,6 +54,7 @@ public class LoginActivity extends BaseActivity {
         buttonLogin.setOnClickListener(v -> performLogin());
     }
 
+    // Метод getApiService: возвращает нужное значение для текущего контекста.
     private ApiService getApiService() {
         if (apiService == null) {
             apiService = ApiClient.getInstance(this).getApiService();
@@ -60,6 +62,7 @@ public class LoginActivity extends BaseActivity {
         return apiService;
     }
 
+    // Метод performLogin: выполняет основную бизнес- или UI-логику данного участка кода.
     private void performLogin() {
         String username = editUsername.getText().toString().trim();
         String password = editPassword.getText().toString();
@@ -77,6 +80,7 @@ public class LoginActivity extends BaseActivity {
 
         call.enqueue(new Callback<LoginResponse>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 buttonLogin.setEnabled(true);
                 progressBar.setVisibility(View.GONE);
@@ -114,6 +118,7 @@ public class LoginActivity extends BaseActivity {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 buttonLogin.setEnabled(true);
                 progressBar.setVisibility(View.GONE);

@@ -36,6 +36,7 @@ public class BookingsFragment extends Fragment {
 
     @Nullable
     @Override
+    // Метод onCreateView: обрабатывает соответствующее событие приложения.
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_bookings, container, false);
         
@@ -54,16 +55,19 @@ public class BookingsFragment extends Fragment {
         adapter.setAdminOrResponsible(isAdminOrResponsible);
         adapter.setOnBookingActionListener(new BookingAdapter.OnBookingActionListener() {
             @Override
+            // Метод onApprove: обрабатывает соответствующее событие приложения.
             public void onApprove(Booking booking) {
                 approveBooking(booking);
             }
 
             @Override
+            // Метод onReject: обрабатывает соответствующее событие приложения.
             public void onReject(Booking booking) {
                 rejectBooking(booking);
             }
 
             @Override
+            // Метод onDelete: обрабатывает соответствующее событие приложения.
             public void onDelete(Booking booking) {
                 deleteBooking(booking);
             }
@@ -74,12 +78,14 @@ public class BookingsFragment extends Fragment {
         return view;
     }
 
+    // Метод loadBookings: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadBookings() {
         progressBar.setVisibility(View.VISIBLE);
         
         Call<List<Booking>> call = apiService.getBookings();
         call.enqueue(new Callback<List<Booking>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Booking>> call, Response<List<Booking>> response) {
                 progressBar.setVisibility(View.GONE);
                 
@@ -91,6 +97,7 @@ public class BookingsFragment extends Fragment {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Booking>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(requireContext(), R.string.error + ": " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -98,6 +105,7 @@ public class BookingsFragment extends Fragment {
         });
     }
 
+    // Метод approveBooking: выполняет основную бизнес- или UI-логику данного участка кода.
     private void approveBooking(Booking booking) {
         new AlertDialog.Builder(requireContext())
                 .setMessage("Одобрить бронирование?")
@@ -106,6 +114,7 @@ public class BookingsFragment extends Fragment {
                     progressBar.setVisibility(View.VISIBLE);
                     apiService.approveBooking(booking.getId()).enqueue(new Callback<Booking>() {
                         @Override
+                        // Метод onResponse: обрабатывает соответствующее событие приложения.
                         public void onResponse(Call<Booking> call, Response<Booking> response) {
                             progressBar.setVisibility(View.GONE);
                             if (response.isSuccessful()) {
@@ -117,6 +126,7 @@ public class BookingsFragment extends Fragment {
                         }
 
                         @Override
+                        // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Booking> call, Throwable t) {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show();
@@ -126,6 +136,7 @@ public class BookingsFragment extends Fragment {
                 .show();
     }
 
+    // Метод rejectBooking: выполняет основную бизнес- или UI-логику данного участка кода.
     private void rejectBooking(Booking booking) {
         new AlertDialog.Builder(requireContext())
                 .setMessage("Отклонить бронирование?")
@@ -134,6 +145,7 @@ public class BookingsFragment extends Fragment {
                     progressBar.setVisibility(View.VISIBLE);
                     apiService.rejectBooking(booking.getId()).enqueue(new Callback<Booking>() {
                         @Override
+                        // Метод onResponse: обрабатывает соответствующее событие приложения.
                         public void onResponse(Call<Booking> call, Response<Booking> response) {
                             progressBar.setVisibility(View.GONE);
                             if (response.isSuccessful()) {
@@ -145,6 +157,7 @@ public class BookingsFragment extends Fragment {
                         }
 
                         @Override
+                        // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Booking> call, Throwable t) {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show();
@@ -154,6 +167,7 @@ public class BookingsFragment extends Fragment {
                 .show();
     }
 
+    // Метод deleteBooking: выполняет основную бизнес- или UI-логику данного участка кода.
     private void deleteBooking(Booking booking) {
         new AlertDialog.Builder(requireContext())
                 .setMessage(R.string.confirm_delete_booking)
@@ -162,6 +176,7 @@ public class BookingsFragment extends Fragment {
                     progressBar.setVisibility(View.VISIBLE);
                     apiService.deleteBooking(booking.getId()).enqueue(new Callback<Void>() {
                         @Override
+                        // Метод onResponse: обрабатывает соответствующее событие приложения.
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             progressBar.setVisibility(View.GONE);
                             if (response.isSuccessful()) {
@@ -173,6 +188,7 @@ public class BookingsFragment extends Fragment {
                         }
 
                         @Override
+                        // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Void> call, Throwable t) {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show();

@@ -18,11 +18,13 @@ public class CartManager {
     private final SharedPreferences prefs;
     private final Gson gson;
 
+    // Конструктор CartManager: инициализирует объект и его зависимости.
     public CartManager(Context context) {
         prefs = context.getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE);
         gson = new Gson();
     }
 
+    // Метод getItems: возвращает нужное значение для текущего контекста.
     public List<CartItem> getItems() {
         String json = prefs.getString(PREF_CART, null);
         if (json == null) {
@@ -33,6 +35,7 @@ public class CartManager {
         return items != null ? items : new ArrayList<>();
     }
 
+    // Метод addItem: выполняет основную бизнес- или UI-логику данного участка кода.
     public void addItem(Equipment equipment, int quantity) {
         List<CartItem> items = getItems();
         for (CartItem item : items) {
@@ -46,6 +49,7 @@ public class CartManager {
         saveItems(items);
     }
 
+    // Метод removeItem: выполняет основную бизнес- или UI-логику данного участка кода.
     public void removeItem(String equipmentId) {
         List<CartItem> items = getItems();
         for (int i = items.size() - 1; i >= 0; i--) {
@@ -56,10 +60,12 @@ public class CartManager {
         saveItems(items);
     }
 
+    // Метод clear: выполняет основную бизнес- или UI-логику данного участка кода.
     public void clear() {
         prefs.edit().remove(PREF_CART).apply();
     }
 
+    // Метод isInCart: проверяет условие и возвращает логический результат.
     public boolean isInCart(String equipmentId) {
         List<CartItem> items = getItems();
         for (CartItem item : items) {
@@ -70,6 +76,7 @@ public class CartManager {
         return false;
     }
 
+    // Метод saveItems: выполняет основную бизнес- или UI-логику данного участка кода.
     private void saveItems(List<CartItem> items) {
         prefs.edit().putString(PREF_CART, gson.toJson(items)).apply();
     }

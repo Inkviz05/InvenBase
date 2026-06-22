@@ -53,6 +53,7 @@ public class CartActivity extends BaseActivity {
     private final Calendar endCalendar = Calendar.getInstance();
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
@@ -85,6 +86,7 @@ public class CartActivity extends BaseActivity {
         loadCart();
     }
 
+    // Метод initPeriodCalendars: выполняет основную бизнес- или UI-логику данного участка кода.
     private void initPeriodCalendars() {
         // Инициализируем значения календарей, но поля оставляем пустыми —
         // пользователь должен сам выбрать период явно.
@@ -93,6 +95,7 @@ public class CartActivity extends BaseActivity {
         endCalendar.add(Calendar.DAY_OF_MONTH, 1);
     }
 
+    // Метод pickDateTime: выполняет основную бизнес- или UI-логику данного участка кода.
     private void pickDateTime(Calendar calendar, EditText target) {
         Calendar now = Calendar.getInstance();
         DatePickerDialog datePicker = new DatePickerDialog(
@@ -121,11 +124,13 @@ public class CartActivity extends BaseActivity {
         datePicker.show();
     }
 
+    // Метод formatLocal: выполняет основную бизнес- или UI-логику данного участка кода.
     private String formatLocal(Calendar calendar) {
         SimpleDateFormat fmt = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
         return fmt.format(calendar.getTime());
     }
 
+    // Метод loadCart: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadCart() {
         List<CartItem> items = cartManager.getItems();
         adapter.setItems(items);
@@ -136,6 +141,7 @@ public class CartActivity extends BaseActivity {
         cardPeriod.setVisibility(hasItems ? View.VISIBLE : View.GONE);
     }
 
+    // Метод createBulkBookings: выполняет основную бизнес- или UI-логику данного участка кода.
     private void createBulkBookings() {
         List<CartItem> items = cartManager.getItems();
         if (items.isEmpty()) {
@@ -170,6 +176,7 @@ public class CartActivity extends BaseActivity {
         buttonCreateBookings.setEnabled(false);
         apiService.createBulkBookings(body).enqueue(new Callback<List<Booking>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Booking>> call, Response<List<Booking>> response) {
                 progressBar.setVisibility(View.GONE);
                 buttonCreateBookings.setEnabled(true);
@@ -184,6 +191,7 @@ public class CartActivity extends BaseActivity {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Booking>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 buttonCreateBookings.setEnabled(true);
@@ -193,6 +201,7 @@ public class CartActivity extends BaseActivity {
         });
     }
 
+    // Метод getErrorMessage: возвращает нужное значение для текущего контекста.
     private String getErrorMessage(Response<?> response) {
         if (response.errorBody() == null) return getString(R.string.error);
         try {
@@ -205,6 +214,7 @@ public class CartActivity extends BaseActivity {
         return getString(R.string.error);
     }
 
+    // Метод buildIsoDate: выполняет основную бизнес- или UI-логику данного участка кода.
     private String buildIsoDate(Date date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));

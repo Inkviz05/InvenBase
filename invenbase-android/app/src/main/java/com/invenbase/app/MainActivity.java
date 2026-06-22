@@ -25,6 +25,7 @@ import com.invenbase.app.fragments.EquipmentFragment;
 import com.invenbase.app.fragments.ScannerFragment;
 import com.invenbase.app.utils.AuthManager;
 
+// ООП: класс-наследник BaseActivity и реализация интерфейса слушателя NavigationView.
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
     private BottomNavigationView bottomNavigation;
     private AuthManager authManager;
@@ -33,6 +34,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private static final int PERMISSIONS_REQUEST_CODE = 1001;
 
     @Override
+    // ООП (полиморфизм): конкретизируем onCreate для главного экрана.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -71,6 +73,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         requestInitialPermissionsIfNeeded();
     }
 
+    // ООП (инкапсуляция): изолируем логику первичного запроса разрешений в отдельный метод.
     private void requestInitialPermissionsIfNeeded() {
         // Проверяем, запрашивали ли уже
         android.content.SharedPreferences prefs =
@@ -107,6 +110,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         prefs.edit().putBoolean("initial_permissions_asked", true).apply();
     }
 
+    // ООП: объект-поведение (композиция + колбэк), передаётся в BottomNavigation как обработчик событий.
     private NavigationBarView.OnItemSelectedListener navListener =
         item -> {
             Fragment selectedFragment = null;
@@ -131,6 +135,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             return false;
         };
 
+    // ООП (абстракция): единая точка переключения фрагментов независимо от их конкретного типа.
     private void loadFragment(Fragment fragment) {
         getSupportFragmentManager()
             .beginTransaction()
@@ -138,6 +143,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             .commit();
     }
 
+    // Метод setupDrawerHeader: устанавливает или обновляет значение данных.
     private void setupDrawerHeader() {
         try {
             View header = navigationView.getHeaderView(0);
@@ -159,6 +165,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         } catch (Throwable ignored) { }
     }
 
+    // Метод setupDrawerVisibility: устанавливает или обновляет значение данных.
     private void setupDrawerVisibility() {
         Menu menu = navigationView.getMenu();
         boolean isAdmin = authManager.isAdmin();
@@ -173,6 +180,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         menu.findItem(R.id.drawer_squads).setVisible(isAdmin || isResponsible);
     }
 
+    // Метод setupBottomNavVisibility: устанавливает или обновляет значение данных.
     private void setupBottomNavVisibility() {
         boolean isAdmin = authManager.isAdmin();
         boolean isResponsible = authManager.isResponsible();
@@ -184,12 +192,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     @Override
+    // Метод onCreateOptionsMenu: обрабатывает соответствующее событие приложения.
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
 
     @Override
+    // Метод onOptionsItemSelected: обрабатывает соответствующее событие приложения.
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         
@@ -229,6 +239,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     @Override
+    // ООП (интерфейс): реализация контракта NavigationView.OnNavigationItemSelectedListener.
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
 

@@ -33,6 +33,7 @@ public class LogsActivity extends BaseActivity {
     private LogsAdapter adapter;
 
     @Override
+    // Метод onCreate: обрабатывает соответствующее событие приложения.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logs);
@@ -58,10 +59,12 @@ public class LogsActivity extends BaseActivity {
         loadLogs();
     }
 
+    // Метод loadLogs: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadLogs() {
         progressBar.setVisibility(View.VISIBLE);
         apiService.getLogs().enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
@@ -74,6 +77,7 @@ public class LogsActivity extends BaseActivity {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(LogsActivity.this, R.string.error, Toast.LENGTH_SHORT).show();

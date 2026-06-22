@@ -11,11 +11,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 /**
- * Базовая активность: без заголовка, тёмный фон, скрытие панели/логотипа.
+ * ООП: абстрактный базовый класс для всех экранов.
+ * Через наследование выносит общее поведение Activity в одно место,
+ * а дочерние классы переиспользуют его без дублирования.
  */
 public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
+    // ООП (полиморфизм): переопределяем жизненный цикл базового класса AppCompatActivity.
     protected void onCreate(Bundle savedInstanceState) {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
@@ -25,12 +28,14 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     @Override
+    // ООП (полиморфизм): расширяем поведение onPostCreate едиными шагами для всех наследников.
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         hideActionBarLogo();
         hideDecorActionBar();
     }
 
+    // ООП (инкапсуляция): скрываем детали работы ActionBar внутри базового класса.
     protected void hideActionBarLogo() {
         ActionBar ab = getSupportActionBar();
         if (ab != null) {
@@ -54,6 +59,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
+    // ООП (инкапсуляция): рекурсивный обход UI-дерева скрыт как внутренняя реализация.
     private void hideActionBarInView(ViewGroup root) {
         try {
             for (int i = 0; i < root.getChildCount(); i++) {

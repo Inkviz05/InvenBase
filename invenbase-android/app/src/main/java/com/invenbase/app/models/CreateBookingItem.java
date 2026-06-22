@@ -22,6 +22,7 @@ public class CreateBookingItem {
     @SerializedName("permission_type")
     private String permissionType;
 
+    // Конструктор CreateBookingItem: инициализирует объект и его зависимости.
     public CreateBookingItem(String equipmentId, int quantity, String startDate, String endDate, String purpose, String permissionType) {
         this.equipmentId = equipmentId;
         this.quantity = quantity;

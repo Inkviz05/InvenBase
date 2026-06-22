@@ -22,16 +22,19 @@ import java.util.Map;
 public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.NotificationViewHolder> {
 
     public interface OnNotificationActionListener {
+        // Метод onMarkAsRead: обрабатывает соответствующее событие приложения.
         void onMarkAsRead(String id);
     }
 
     private final OnNotificationActionListener listener;
     private List<Map<String, Object>> items = new ArrayList<>();
 
+    // Конструктор NotificationsAdapter: инициализирует объект и его зависимости.
     public NotificationsAdapter(OnNotificationActionListener listener) {
         this.listener = listener;
     }
 
+    // Метод setItems: устанавливает или обновляет значение данных.
     public void setItems(List<Map<String, Object>> items) {
         this.items = items != null ? items : new ArrayList<>();
         notifyDataSetChanged();
@@ -39,6 +42,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
 
     @NonNull
     @Override
+    // Метод onCreateViewHolder: обрабатывает соответствующее событие приложения.
     public NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_notification, parent, false);
@@ -46,11 +50,13 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     }
 
     @Override
+    // Метод onBindViewHolder: обрабатывает соответствующее событие приложения.
     public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
         holder.bind(items.get(position));
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return items.size();
     }
@@ -71,6 +77,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             buttonMarkRead = itemView.findViewById(R.id.button_mark_read);
         }
 
+        // Метод bind: выполняет основную бизнес- или UI-логику данного участка кода.
         void bind(Map<String, Object> data) {
             String id = String.valueOf(data.get("id"));
             String title = safeString(data.get("title"));
@@ -92,6 +99,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             });
         }
 
+        // Метод safeString: выполняет основную бизнес- или UI-логику данного участка кода.
         private String safeString(Object value) {
             return value == null ? "" : String.valueOf(value);
         }
@@ -104,6 +112,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             return s.isEmpty() ? "—" : s;
         }
 
+        // Метод formatDate: выполняет основную бизнес- или UI-логику данного участка кода.
         private String formatDate(String iso) {
             if (iso == null || iso.isEmpty()) return "";
             try {

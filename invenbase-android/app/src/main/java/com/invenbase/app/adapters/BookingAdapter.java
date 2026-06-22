@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+// ООП: наследование от RecyclerView.Adapter + композиция (список Booking и callback-интерфейсы).
 public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingViewHolder> {
     private List<Booking> bookingList;
     private OnBookingClickListener listener;
@@ -27,38 +28,48 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
     private boolean isAdminOrResponsible;
 
     public interface OnBookingClickListener {
+        // ООП (интерфейс): контракт обратного вызова при клике по элементу.
         void onBookingClick(Booking booking);
     }
 
     public interface OnBookingActionListener {
+        // ООП (интерфейс): контракты действий над бронированием, реализуются внешним слоем (Activity/Fragment).
         void onApprove(Booking booking);
+        // ООП (интерфейс): контракт отклонения бронирования.
         void onReject(Booking booking);
+        // ООП (интерфейс): контракт удаления бронирования.
         void onDelete(Booking booking);
     }
 
+    // Конструктор BookingAdapter: инициализирует объект и его зависимости.
     public BookingAdapter() {
         this.bookingList = new ArrayList<>();
     }
 
+    // Метод setBookingList: устанавливает или обновляет значение данных.
     public void setBookingList(List<Booking> bookingList) {
         this.bookingList = bookingList;
         notifyDataSetChanged();
     }
 
+    // Метод setOnBookingClickListener: устанавливает или обновляет значение данных.
     public void setOnBookingClickListener(OnBookingClickListener listener) {
         this.listener = listener;
     }
 
+    // Метод setOnBookingActionListener: устанавливает или обновляет значение данных.
     public void setOnBookingActionListener(OnBookingActionListener listener) {
         this.actionListener = listener;
     }
 
+    // Метод setAdminOrResponsible: устанавливает или обновляет значение данных.
     public void setAdminOrResponsible(boolean isAdminOrResponsible) {
         this.isAdminOrResponsible = isAdminOrResponsible;
     }
 
     @NonNull
     @Override
+    // ООП (полиморфизм): реализация обязательного метода базового Adapter для создания ViewHolder.
     public BookingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.item_booking, parent, false);
@@ -66,16 +77,19 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
     }
 
     @Override
+    // ООП (полиморфизм): связываем модель Booking с конкретным представлением ViewHolder.
     public void onBindViewHolder(@NonNull BookingViewHolder holder, int position) {
         Booking booking = bookingList.get(position);
         holder.bind(booking);
     }
 
     @Override
+    // Метод getItemCount: возвращает нужное значение для текущего контекста.
     public int getItemCount() {
         return bookingList.size();
     }
 
+    // ООП: внутренний класс инкапсулирует привязку UI-компонентов одного элемента списка.
     class BookingViewHolder extends RecyclerView.ViewHolder {
         private TextView textEquipmentName;
         private TextView textUser;
@@ -86,6 +100,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
         private Button buttonDelete;
         private View actionContainer;
 
+        // Конструктор BookingViewHolder: инициализирует объект и его зависимости.
         public BookingViewHolder(@NonNull View itemView) {
             super(itemView);
             textEquipmentName = itemView.findViewById(R.id.text_equipment_name);
@@ -128,6 +143,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
             }
         }
 
+        // Метод bind: выполняет основную бизнес- или UI-логику данного участка кода.
         public void bind(Booking booking) {
             String equipmentName = booking.getEquipmentName() != null ? 
                 booking.getEquipmentName() : 
@@ -164,6 +180,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
             }
         }
 
+        // Метод formatDate: выполняет основную бизнес- или UI-логику данного участка кода.
         private String formatDate(String dateString) {
             if (dateString == null) return "";
             try {
@@ -176,6 +193,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
             }
         }
 
+        // Метод getStatusText: возвращает нужное значение для текущего контекста.
         private String getStatusText(String status) {
             if (status == null) return "";
             switch (status) {
@@ -187,6 +205,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
             }
         }
 
+        // Метод getStatusColor: возвращает нужное значение для текущего контекста.
         private int getStatusColor(String status) {
             if (status == null) return R.color.text_secondary;
             switch (status) {

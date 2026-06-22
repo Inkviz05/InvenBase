@@ -46,6 +46,7 @@ public class EquipmentFragment extends Fragment {
 
     @Nullable
     @Override
+    // Метод onCreateView: обрабатывает соответствующее событие приложения.
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_equipment, container, false);
         
@@ -107,6 +108,7 @@ public class EquipmentFragment extends Fragment {
     }
 
     @Override
+    // Метод onResume: обрабатывает соответствующее событие приложения.
     public void onResume() {
         super.onResume();
         // Обновляем список только для админов и ответственных
@@ -115,12 +117,14 @@ public class EquipmentFragment extends Fragment {
         }
     }
 
+    // Метод loadEquipment: выполняет основную бизнес- или UI-логику данного участка кода.
     private void loadEquipment() {
         progressBar.setVisibility(View.VISIBLE);
         
         Call<List<Equipment>> call = apiService.getEquipment();
         call.enqueue(new Callback<List<Equipment>>() {
             @Override
+            // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<List<Equipment>> call, Response<List<Equipment>> response) {
                 progressBar.setVisibility(View.GONE);
                 
@@ -132,6 +136,7 @@ public class EquipmentFragment extends Fragment {
             }
 
             @Override
+            // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Equipment>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(requireContext(), R.string.error + ": " + t.getMessage(), Toast.LENGTH_SHORT).show();
