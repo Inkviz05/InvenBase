@@ -20,7 +20,7 @@
         android:roundIcon="@drawable/app_icon_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.InvenBase"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="false"
         tools:targetApi="31">
         
         <service

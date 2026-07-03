@@ -262,7 +262,7 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\In
 	android:dataExtractionRules
 		ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:16:9-65
 	android:usesCleartextTraffic
-		ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:23:9-44
+		ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:23:9-45
 	android:name
 		ADDED from C:\Users\Inkvi\OneDrive\Desktop\DIplomka v1.0\invenbase-android\app\src\main\AndroidManifest.xml:14:9-45
 service#com.invenbase.app.MyFirebaseMessagingService
