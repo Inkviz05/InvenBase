@@ -5,26 +5,35 @@
 }
 
 :root {
-  --primary-color: #A855F7;
-  --primary-dark: #9333EA;
-  --primary-light: #C084FC;
-  --secondary-color: #EC4899;
-  --sidebar-bg: #1F1928;
-  --sidebar-gradient-start: #9333EA;
-  --sidebar-gradient-end: #EC4899;
-  --sidebar-hover: #32283D;
-  --background: #211C2B;
-  --surface: #32283D;
-  --card-bg: #2A1F35;
-  --text-primary: #FFFFFF;
-  --text-secondary: #A0A0A0;
-  --divider: rgba(255, 255, 255, 0.1);
-  --error: #EF4444;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --accent-purple: #A855F7;
-  --accent-pink: #EC4899;
-  --accent-cyan: #22D3EE;
+  --ral-9001: #F4F0E6;
+  --ral-1013: #E9E5D2;
+  --ral-2011: #E85D0C;
+  --ral-2011-dark: #C84A08;
+  --ral-5015: #0077B8;
+  --ral-5015-dark: #005F93;
+  --primary-color: var(--ral-2011);
+  --primary-dark: var(--ral-2011-dark);
+  --primary-light: #FFB169;
+  --secondary-color: var(--ral-5015);
+  --sidebar-bg: #0B4E78;
+  --sidebar-gradient-start: #0077B8;
+  --sidebar-gradient-end: #0A5E91;
+  --sidebar-hover: rgba(255, 255, 255, 0.13);
+  --background: #F4F0E6;
+  --surface: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --text-primary: #1D2730;
+  --text-secondary: #66717B;
+  --divider: rgba(29, 39, 48, 0.12);
+  --error: #D92D20;
+  --success: #0E8F60;
+  --warning: #D97706;
+  --accent-purple: #6C4AB6;
+  --accent-pink: #C2417B;
+  --accent-cyan: #00A3D7;
+  --zone-blue-soft: #E6F4FB;
+  --zone-orange-soft: #FFF1E6;
+  --marker-surface: #FDFBF4;
 }
 
 body {
@@ -34,6 +43,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background);
+  background-image:
+    linear-gradient(90deg, rgba(0, 119, 184, 0.035) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(232, 93, 12, 0.025) 1px, transparent 1px);
+  background-size: 28px 28px;
   color: var(--text-primary);
   line-height: 1.5;
 }
@@ -102,24 +115,25 @@ body {
 
 .card {
   background: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(29, 39, 48, 0.08);
   padding: 20px;
   margin-bottom: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(29, 39, 48, 0.1);
+  border-top: 3px solid var(--secondary-color);
   transition: all 0.3s ease;
 }
 
 .card:hover {
-  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.2);
-  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: 0 16px 34px rgba(0, 95, 147, 0.13);
+  border-color: rgba(0, 119, 184, 0.28);
   transform: translateY(-2px);
 }
 
 .btn {
   padding: 12px 24px;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -128,19 +142,19 @@ body {
   align-items: center;
   gap: 8px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  background: var(--primary-color);
   color: white;
-  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+  box-shadow: 0 8px 18px rgba(232, 93, 12, 0.26);
   border: none;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-color) 100%);
-  box-shadow: 0 6px 16px rgba(168, 85, 247, 0.5);
+  background: var(--primary-dark);
+  box-shadow: 0 10px 22px rgba(232, 93, 12, 0.32);
   transform: translateY(-2px);
 }
 
@@ -151,9 +165,9 @@ body {
 }
 
 .btn-secondary:hover {
-  background: var(--sidebar-hover);
-  border-color: var(--primary-color);
-  color: var(--primary-light);
+  background: var(--zone-blue-soft);
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
 }
 
 .btn-danger {
@@ -188,7 +202,7 @@ body {
 .input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+  box-shadow: 0 0 0 3px rgba(232, 93, 12, 0.14);
 }
 
 .label {
@@ -272,11 +286,11 @@ h3 {
 
 .equipment-info {
   padding: 16px;
-  background: var(--surface);
+  background: var(--zone-blue-soft);
   border-radius: 8px;
   margin-bottom: 16px;
-  border-left: 4px solid var(--primary-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-left: 4px solid var(--secondary-color);
+  box-shadow: 0 8px 20px rgba(0, 95, 147, 0.08);
 }
 
 .qr-section {
@@ -300,10 +314,10 @@ h3 {
 /* Таблицы в отчётах */
 .table-report-wrap {
   overflow-x: auto;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  border: 1px solid var(--divider);
   background: var(--surface);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 24px rgba(29, 39, 48, 0.07);
 }
 
 .table-report {
@@ -313,8 +327,8 @@ h3 {
 }
 
 .table-report thead {
-  background: var(--card-bg);
-  border-bottom: 2px solid rgba(168, 85, 247, 0.35);
+  background: var(--zone-blue-soft);
+  border-bottom: 2px solid rgba(0, 119, 184, 0.24);
 }
 
 .table-report th {
@@ -329,11 +343,11 @@ h3 {
 .table-report td {
   padding: 12px 16px;
   color: var(--text-primary);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(29, 39, 48, 0.08);
 }
 
 .table-report tbody tr:hover {
-  background: rgba(168, 85, 247, 0.08);
+  background: rgba(0, 119, 184, 0.06);
 }
 
 .table-report tbody tr:last-child td {
@@ -353,7 +367,7 @@ h3 {
   font-weight: 600;
   color: var(--text-primary);
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--divider);
 }
 
 /* Страница отчётов: жёстко не вылезает за экран */
@@ -445,7 +459,7 @@ h3 {
 .report-tables-section .report-section-title {
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--divider);
 }
 
 .report-table-block {
@@ -467,8 +481,8 @@ h3 {
 
 .report-table-block .table-report-wrap {
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--divider);
+  background: var(--marker-surface);
 }
 
 .report-table-block .table-report {
@@ -476,7 +490,7 @@ h3 {
 }
 
 .report-table-block .table-report th {
-  background: rgba(168, 85, 247, 0.12);
+  background: rgba(0, 119, 184, 0.1);
   color: var(--text-primary);
   font-weight: 600;
   font-size: 12px;
@@ -489,15 +503,15 @@ h3 {
 
 .report-table-block .table-report td {
   padding: 10px 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(29, 39, 48, 0.08);
 }
 
 .report-table-block .table-report tbody tr:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(232, 93, 12, 0.05);
 }
 
 .report-table-block .table-report tfoot td {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--divider);
   padding-top: 12px;
   color: var(--text-primary);
 }

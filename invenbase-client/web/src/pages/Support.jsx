@@ -186,7 +186,7 @@ const Support = () => {
 
       {tab === TAB_CREATE && !isAdmin() && (
         <>
-          <section style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '24px', marginBottom: '24px', border: '1px solid var(--divider)' }}>
+          <section style={{ background: 'var(--card-bg)', borderRadius: '8px', padding: '24px', marginBottom: '24px', border: '1px solid var(--divider)' }}>
             <h2 style={{ margin: '0 0 12px', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span className="material-icons" style={{ fontSize: '22px', color: 'var(--primary-color)' }}>contact_support</span>
               Как получить помощь
@@ -195,7 +195,7 @@ const Support = () => {
               Опишите проблему в форме ниже — мы создадим заявку и ответим вам. В одной заявке можно вести переписку до её закрытия. Создавать новую заявку нужно только после того, как заявка получит статус «Закрыта».
             </p>
           </section>
-          <section style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '24px', border: '1px solid var(--divider)' }}>
+          <section style={{ background: 'var(--card-bg)', borderRadius: '8px', padding: '24px', border: '1px solid var(--divider)' }}>
             <h2 style={{ margin: '0 0 16px', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span className="material-icons" style={{ fontSize: '22px', color: 'var(--primary-color)' }}>edit_note</span>
               Оставить заявку
@@ -233,7 +233,7 @@ const Support = () => {
       )}
 
       {tab === TAB_REQUESTS && (
-        <section style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '24px', border: '1px solid var(--divider)' }}>
+        <section style={{ background: 'var(--card-bg)', borderRadius: '8px', padding: '24px', border: '1px solid var(--divider)' }}>
           {loading ? (
             <div className="loading"><div className="spinner"></div></div>
           ) : requests.length === 0 ? (
@@ -246,7 +246,7 @@ const Support = () => {
                   style={{
                     padding: '20px',
                     background: 'var(--background)',
-                    borderRadius: '12px',
+                    borderRadius: '8px',
                     border: '1px solid var(--divider)',
                   }}
                 >
@@ -346,7 +346,7 @@ const Support = () => {
                     </div>
                   )}
                   {isAdmin() && replyingTo === req.id && req.status !== 'closed' && (
-                    <form onSubmit={handleReplySubmit} style={{ marginTop: '20px', padding: '20px', background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--divider)' }}>
+                    <form onSubmit={handleReplySubmit} style={{ marginTop: '20px', padding: '20px', background: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--divider)' }}>
                       <div style={{ marginBottom: '14px' }}>
                         <label className="label">Статус заявки</label>
                         <select className="input" value={replyForm.status} onChange={(e) => setReplyForm((prev) => ({ ...prev, status: e.target.value }))} style={{ fontSize: '15px', padding: '10px' }}>

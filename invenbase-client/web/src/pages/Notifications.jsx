@@ -20,12 +20,12 @@ const Notifications = () => {
     try {
       const data = await notificationsAPI.getAll();
       setNotifications(data);
-      
+
       // Загружаем данные о бронированиях для уведомлений
       const bookingIds = data
         .filter(n => n.booking_id)
         .map(n => n.booking_id);
-      
+
       if (bookingIds.length > 0) {
         await fetchBookingsData(bookingIds);
       }
@@ -40,14 +40,14 @@ const Notifications = () => {
     try {
       const bookings = await bookingsAPI.getAll();
       const bookingsMap = {};
-      
+
       bookingIds.forEach(id => {
         const booking = bookings.find(b => b.id === id);
         if (booking) {
           bookingsMap[id] = booking;
         }
       });
-      
+
       setBookingsData(bookingsMap);
     } catch (error) {
       console.error('Failed to fetch bookings data:', error);
@@ -57,7 +57,7 @@ const Notifications = () => {
   const handleMarkAsRead = async (id) => {
     try {
       await notificationsAPI.markAsRead(id);
-      setNotifications(notifications.map(n => 
+      setNotifications(notifications.map(n =>
         n.id === id ? { ...n, is_read: true } : n
       ));
     } catch (error) {
@@ -76,7 +76,7 @@ const Notifications = () => {
 
   const handleApprove = async (notificationId, bookingId) => {
     if (processingIds.has(notificationId)) return;
-    
+
     setProcessingIds(prev => new Set([...prev, notificationId]));
     try {
       await bookingsAPI.approve(bookingId);
@@ -99,11 +99,11 @@ const Notifications = () => {
 
   const handleReject = async (notificationId, bookingId) => {
     if (processingIds.has(notificationId)) return;
-    
+
     if (!window.confirm('Вы уверены, что хотите отклонить это бронирование?')) {
       return;
     }
-    
+
     setProcessingIds(prev => new Set([...prev, notificationId]));
     try {
       await bookingsAPI.reject(bookingId);
@@ -157,7 +157,7 @@ const Notifications = () => {
             const isProcessing = processingIds.has(notification.id);
             const isBookingNotification = booking && canManageBookings && booking.status === 'pending';
             const isSupportNotification = notification.notification_type === 'support_new' || notification.notification_type === 'support_reply';
-            
+
             return (
               <div
                 key={notification.id}
@@ -165,18 +165,18 @@ const Notifications = () => {
                 style={{
                   borderLeft: notification.is_read ? 'none' : '4px solid var(--primary-color)',
                   opacity: notification.is_read ? 0.7 : 1,
-                  background: isBookingNotification && !notification.is_read 
-                    ? 'linear-gradient(to right, rgba(168, 85, 247, 0.1), transparent)' 
+                  background: isBookingNotification && !notification.is_read
+                    ? 'linear-gradient(to right, rgba(232, 93, 12, 0.12), transparent)'
                     : isSupportNotification && !notification.is_read
-                    ? 'linear-gradient(to right, rgba(56, 142, 60, 0.08), transparent)'
+                    ? 'linear-gradient(to right, rgba(0, 119, 184, 0.10), transparent)'
                     : 'var(--card-bg)'
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '16px' }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <span className="material-icons" style={{ 
-                        fontSize: '20px', 
+                      <span className="material-icons" style={{
+                        fontSize: '20px',
                         color: notification.is_read ? 'var(--text-secondary)' : 'var(--primary-color)'
                       }}>
                         {booking ? 'event' : isSupportNotification ? 'support_agent' : 'notifications'}
@@ -274,28 +274,28 @@ const Notifications = () => {
                           <span style={{
                             padding: '6px 12px',
                             borderRadius: '8px',
-                            background: booking.status === 'pending' ? 'rgba(245, 158, 11, 0.2)' : 
+                            background: booking.status === 'pending' ? 'rgba(245, 158, 11, 0.2)' :
                                        booking.status === 'approved' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                            color: booking.status === 'pending' ? 'var(--warning)' : 
+                            color: booking.status === 'pending' ? 'var(--warning)' :
                                    booking.status === 'approved' ? 'var(--success)' : 'var(--error)',
                             fontSize: '13px',
                             fontWeight: 600,
-                            border: `1px solid ${booking.status === 'pending' ? 'rgba(245, 158, 11, 0.3)' : 
+                            border: `1px solid ${booking.status === 'pending' ? 'rgba(245, 158, 11, 0.3)' :
                             booking.status === 'approved' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
                           }}>
-                            {booking.status === 'pending' ? 'Ожидает одобрения' : 
-                             booking.status === 'approved' ? 'Одобрено' : 
+                            {booking.status === 'pending' ? 'Ожидает одобрения' :
+                             booking.status === 'approved' ? 'Одобрено' :
                              booking.status === 'rejected' ? 'Отклонено' : booking.status}
                           </span>
                         </div>
                       </div>
                     )}
-                    
+
                     <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                       {format(new Date(notification.created_at), 'dd.MM.yyyy HH:mm')}
                     </div>
                   </div>
-                  
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
                     {isBookingNotification && (
                       <>
@@ -303,8 +303,8 @@ const Notifications = () => {
                           onClick={() => handleApprove(notification.id, booking.id)}
                           className="btn btn-primary"
                           disabled={isProcessing || notification.is_read}
-                          style={{ 
-                            fontSize: '12px', 
+                          style={{
+                            fontSize: '12px',
                             padding: '8px 16px',
                             minWidth: '120px'
                           }}
@@ -325,8 +325,8 @@ const Notifications = () => {
                           onClick={() => handleReject(notification.id, booking.id)}
                           className="btn btn-danger"
                           disabled={isProcessing || notification.is_read}
-                          style={{ 
-                            fontSize: '12px', 
+                          style={{
+                            fontSize: '12px',
                             padding: '8px 16px',
                             minWidth: '120px'
                           }}

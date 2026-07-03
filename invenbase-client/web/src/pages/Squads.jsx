@@ -248,8 +248,8 @@ const Squads = () => {
             style={{
               maxWidth: '400px',
               width: '90%',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 18px 44px rgba(29,39,48,0.18)',
+              border: '1px solid var(--divider)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -302,8 +302,8 @@ const Squads = () => {
               width: '90%',
               maxHeight: '90vh',
               overflow: 'auto',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 18px 44px rgba(29,39,48,0.18)',
+              border: '1px solid var(--divider)',
             }}
             onClick={(e) => e.stopPropagation()}
           >

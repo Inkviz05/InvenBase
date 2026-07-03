@@ -69,11 +69,11 @@ const Layout = () => {
         background: 'var(--surface)',
         color: 'var(--text-primary)',
         padding: '16px 24px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+        boxShadow: '0 2px 12px rgba(29,39,48,0.08)',
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        borderBottom: '1px solid var(--divider)'
+        borderBottom: '3px solid var(--secondary-color)'
       }}>
         <div className="app-header-inner">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
@@ -82,7 +82,7 @@ const Layout = () => {
               style={{
                 background: 'none',
                 border: 'none',
-                color: 'white',
+                color: 'var(--secondary-color)',
                 cursor: 'pointer',
                 display: isMobile ? 'flex' : 'none',
                 alignItems: 'center',
@@ -183,13 +183,13 @@ const Layout = () => {
                     top: '100%',
                     right: 0,
                     background: 'var(--card-bg)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                    borderRadius: '12px',
+                    boxShadow: '0 12px 28px rgba(29,39,48,0.16)',
+                    borderRadius: '8px',
                     marginTop: '8px',
                     minWidth: '200px',
                     zIndex: 1001,
                     overflow: 'hidden',
-                    border: '1px solid rgba(255,255,255,0.1)'
+                    border: '1px solid var(--divider)'
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -208,7 +208,7 @@ const Layout = () => {
                       gap: '8px',
                       transition: 'background 0.2s ease'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--sidebar-hover)'}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--zone-blue-soft)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
                   >
                     <span className="material-icons">logout</span>
@@ -271,8 +271,9 @@ const Layout = () => {
                   height: '64px',
                   borderRadius: '10px',
                   objectFit: 'contain',
-                  background: 'rgba(255,255,255,0.12)',
-                  padding: '6px',
+                  background: '#FFFFFF',
+                  padding: '7px',
+                  boxShadow: '0 6px 18px rgba(0,0,0,0.18)',
                   flexShrink: 0
                 }}
               />
@@ -347,8 +348,8 @@ const Layout = () => {
             {showUserDetails && (
               <div style={{ 
                 padding: '12px 20px 20px 20px', 
-                background: 'rgba(0,0,0,0.2)',
-                borderTop: '1px solid rgba(255,255,255,0.05)'
+                background: 'rgba(255,255,255,0.08)',
+                borderTop: '1px solid rgba(255,255,255,0.12)'
               }}>
                 {user?.email && (
                   <div style={{ 

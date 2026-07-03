@@ -18,7 +18,7 @@ const BookingBulkCreate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     if (cartItems.length === 0) {
       setError('Корзина пуста. Добавьте оборудование в корзину.');
       return;
@@ -88,14 +88,14 @@ const BookingBulkCreate = () => {
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 style={{ margin: 0, fontSize: '18px' }}>Оборудование в корзине</h2>
-            <span style={{ 
-              background: 'var(--primary-color)', 
-              color: 'white', 
-              borderRadius: '50%', 
-              width: '28px', 
-              height: '28px', 
-              display: 'flex', 
-              alignItems: 'center', 
+            <span style={{
+              background: 'var(--primary-color)',
+              color: 'white',
+              borderRadius: '50%',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               fontSize: '14px',
               fontWeight: 'bold'
@@ -103,11 +103,11 @@ const BookingBulkCreate = () => {
               {cartItems.length}
             </span>
           </div>
-          
+
           <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
             {cartItems.map((item) => (
-              <div 
-                key={item.equipment.id} 
+              <div
+                key={item.equipment.id}
                 className="cart-item"
                 style={{
                   padding: '12px',
@@ -148,8 +148,8 @@ const BookingBulkCreate = () => {
                     <button
                       onClick={() => updateQuantity(item.equipment.id, item.quantity - 1)}
                       className="btn btn-secondary"
-                      style={{ 
-                        padding: '4px 8px', 
+                      style={{
+                        padding: '4px 8px',
                         minWidth: '32px',
                         fontSize: '16px'
                       }}
@@ -178,8 +178,8 @@ const BookingBulkCreate = () => {
                     <button
                       onClick={() => updateQuantity(item.equipment.id, item.quantity + 1)}
                       className="btn btn-secondary"
-                      style={{ 
-                        padding: '4px 8px', 
+                      style={{
+                        padding: '4px 8px',
                         minWidth: '32px',
                         fontSize: '16px'
                       }}
@@ -193,11 +193,11 @@ const BookingBulkCreate = () => {
             ))}
           </div>
 
-          <div style={{ 
-            marginTop: '16px', 
-            padding: '12px', 
-            background: 'rgba(168, 85, 247, 0.1)',
-            border: '1px solid rgba(168, 85, 247, 0.3)', 
+          <div style={{
+            marginTop: '16px',
+            padding: '12px',
+            background: 'var(--zone-orange-soft)',
+            border: '1px solid rgba(232, 93, 12, 0.25)',
             borderRadius: '8px',
             display: 'flex',
             justifyContent: 'space-between',

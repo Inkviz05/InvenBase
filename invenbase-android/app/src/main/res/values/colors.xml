@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Primary colors -->
-    <color name="primary">#A855F7</color>
-    <color name="primary_dark">#9333EA</color>
-    <color name="primary_light">#C084FC</color>
-    <color name="secondary">#EC4899</color>
+    <color name="primary">#E85D0C</color>
+    <color name="primary_dark">#C84A08</color>
+    <color name="primary_light">#FFB169</color>
+    <color name="secondary">#0077B8</color>
     
     <!-- Background colors -->
-    <color name="background">#211C2B</color>
-    <color name="surface">#32283D</color>
-    <color name="card_bg">#2A1F35</color>
+    <color name="background">#F4F0E6</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="card_bg">#FFFFFF</color>
     
     <!-- Text colors -->
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#A0A0A0</color>
+    <color name="text_primary">#1D2730</color>
+    <color name="text_secondary">#66717B</color>
     
     <!-- Status colors -->
     <color name="success">#10B981</color>
@@ -21,14 +21,14 @@
     <color name="warning">#F59E0B</color>
     
     <!-- Accent colors -->
-    <color name="accent_purple">#A855F7</color>
-    <color name="accent_pink">#EC4899</color>
-    <color name="accent_cyan">#22D3EE</color>
+    <color name="accent_purple">#6D5DF6</color>
+    <color name="accent_pink">#D9487B</color>
+    <color name="accent_cyan">#00A3D7</color>
     
     <!-- Divider -->
-    <color name="divider">#1AFFFFFF</color>
+    <color name="divider">#1F1D2730</color>
 
     <!-- Material 3 roles (for ThemeOverlay.Material3) -->
-    <color name="secondary_container">#4C2A3D</color>
-    <color name="outline">#60FFFFFF</color>
+    <color name="secondary_container">#E6F4FB</color>
+    <color name="outline">#4D1D2730</color>
 </resources>

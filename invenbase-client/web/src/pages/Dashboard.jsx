@@ -101,16 +101,16 @@ const Dashboard = () => {
       }}>
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ 
-              width: '60px', 
-              height: '60px', 
-              borderRadius: '12px', 
-              background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%)', 
-              display: 'flex', 
-              alignItems: 'center', 
+            <div style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%)',
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
-              boxShadow: '0 4px 12px rgba(168, 85, 247, 0.4)'
+              boxShadow: '0 8px 18px rgba(232,93,12,0.24)'
             }}>
               <span className="material-icons" style={{ fontSize: '32px' }}>inventory</span>
             </div>
@@ -123,16 +123,16 @@ const Dashboard = () => {
 
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ 
-              width: '60px', 
-              height: '60px', 
-              borderRadius: '12px', 
-              background: 'linear-gradient(135deg, var(--success) 0%, #059669 100%)', 
-              display: 'flex', 
-              alignItems: 'center', 
+            <div style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, var(--success) 0%, #059669 100%)',
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
-              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)'
+              boxShadow: '0 8px 18px rgba(16,185,129,0.18)'
             }}>
               <span className="material-icons" style={{ fontSize: '32px' }}>check_circle</span>
             </div>
@@ -145,16 +145,16 @@ const Dashboard = () => {
 
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ 
-              width: '60px', 
-              height: '60px', 
-              borderRadius: '12px', 
-              background: 'linear-gradient(135deg, var(--accent-cyan) 0%, #06B6D4 100%)', 
-              display: 'flex', 
-              alignItems: 'center', 
+            <div style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-cyan) 100%)',
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
-              boxShadow: '0 4px 12px rgba(34, 211, 238, 0.4)'
+              boxShadow: '0 8px 18px rgba(0,119,184,0.18)'
             }}>
               <span className="material-icons" style={{ fontSize: '32px' }}>event</span>
             </div>
@@ -169,16 +169,16 @@ const Dashboard = () => {
           <>
             <div className="card">
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ 
-                  width: '60px', 
-                  height: '60px', 
-                  borderRadius: '12px', 
-                  background: 'linear-gradient(135deg, var(--warning) 0%, #D97706 100%)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '8px',
+                  background: 'linear-gradient(135deg, var(--warning) 0%, #D97706 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
-                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)'
+                  boxShadow: '0 8px 18px rgba(245,158,11,0.18)'
                 }}>
                   <span className="material-icons" style={{ fontSize: '32px' }}>pending</span>
                 </div>
@@ -190,16 +190,16 @@ const Dashboard = () => {
             </div>
             <div className="card">
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ 
-                  width: '60px', 
-                  height: '60px', 
-                  borderRadius: '12px', 
-                  background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '8px',
+                  background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
-                  boxShadow: '0 4px 12px rgba(168, 85, 247, 0.4)'
+                  boxShadow: '0 8px 18px rgba(0,119,184,0.20)'
                 }}>
                   <span className="material-icons" style={{ fontSize: '32px' }}>inventory</span>
                 </div>
@@ -222,30 +222,30 @@ const Dashboard = () => {
               <div style={{ display: 'grid', gap: '20px' }}>
                 {equipmentReport.by_category.map((cat, index) => (
                   <div key={index}>
-                    <div style={{ 
-                      fontSize: '14px', 
-                      color: 'var(--text-primary)', 
-                      marginBottom: '12px', 
-                      fontWeight: 600, 
-                      textTransform: 'uppercase', 
-                      letterSpacing: '0.5px' 
+                    <div style={{
+                      fontSize: '14px',
+                      color: 'var(--text-primary)',
+                      marginBottom: '12px',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
                     }}>
                       {cat.category_name || 'Без категории'}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-                      <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '12px', borderLeft: '4px solid var(--primary-color)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '8px', borderLeft: '4px solid var(--primary-color)', boxShadow: '0 8px 18px rgba(29,39,48,0.08)', border: '1px solid var(--divider)' }}>
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Всего</div>
                         <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--primary-color)' }}>
                           {cat.total || 0}
                         </div>
                       </div>
-                      <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '12px', borderLeft: '4px solid var(--success)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '8px', borderLeft: '4px solid var(--success)', boxShadow: '0 8px 18px rgba(29,39,48,0.08)', border: '1px solid var(--divider)' }}>
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Доступно</div>
                         <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--success)' }}>
                           {cat.available || 0}
                         </div>
                       </div>
-                      <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '12px', borderLeft: '4px solid var(--warning)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '8px', borderLeft: '4px solid var(--warning)', boxShadow: '0 8px 18px rgba(29,39,48,0.08)', border: '1px solid var(--divider)' }}>
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Забронировано</div>
                         <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--warning)' }}>
                           {cat.booked || 0}
@@ -262,19 +262,19 @@ const Dashboard = () => {
             <div className="card">
               <h2 style={{ marginBottom: '20px' }}>📅 Статистика бронирований</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
-                <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '12px', borderLeft: '4px solid var(--warning)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '8px', borderLeft: '4px solid var(--warning)', boxShadow: '0 8px 18px rgba(29,39,48,0.08)', border: '1px solid var(--divider)' }}>
                   <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ожидают одобрения</div>
                   <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--warning)' }}>
                     {bookingReport.pending || 0}
                   </div>
                 </div>
-                <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '12px', borderLeft: '4px solid var(--success)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '8px', borderLeft: '4px solid var(--success)', boxShadow: '0 8px 18px rgba(29,39,48,0.08)', border: '1px solid var(--divider)' }}>
                   <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Одобрены</div>
                   <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--success)' }}>
                     {bookingReport.approved || 0}
                   </div>
                 </div>
-                <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '12px', borderLeft: '4px solid var(--error)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '8px', borderLeft: '4px solid var(--error)', boxShadow: '0 8px 18px rgba(29,39,48,0.08)', border: '1px solid var(--divider)' }}>
                   <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Истекли</div>
                   <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--error)' }}>
                     {bookingReport.expired || 0}
@@ -291,10 +291,10 @@ const Dashboard = () => {
       <h2 style={{ marginBottom: '16px' }}>Быстрые действия</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {cartItems.length > 0 && (
-      <button 
-      onClick={() => navigate('/bookings/bulk')} 
+      <button
+      onClick={() => navigate('/bookings/bulk')}
       className="btn btn-primary"
-      style={{ 
+      style={{
       position: 'relative'
       }}
       >
