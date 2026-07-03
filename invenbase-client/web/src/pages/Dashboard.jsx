@@ -104,13 +104,13 @@ const Dashboard = () => {
             <div style={{
               width: '60px',
               height: '60px',
-              borderRadius: '8px',
+              borderRadius: 'var(--stat-icon-radius)',
               background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
-              boxShadow: '0 8px 18px rgba(232,93,12,0.24)'
+              boxShadow: 'var(--stat-primary-shadow)'
             }}>
               <span className="material-icons" style={{ fontSize: '32px' }}>inventory</span>
             </div>
@@ -126,13 +126,13 @@ const Dashboard = () => {
             <div style={{
               width: '60px',
               height: '60px',
-              borderRadius: '8px',
+              borderRadius: 'var(--stat-icon-radius)',
               background: 'linear-gradient(135deg, var(--success) 0%, #059669 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
-              boxShadow: '0 8px 18px rgba(16,185,129,0.18)'
+              boxShadow: 'var(--stat-success-shadow)'
             }}>
               <span className="material-icons" style={{ fontSize: '32px' }}>check_circle</span>
             </div>
@@ -148,13 +148,13 @@ const Dashboard = () => {
             <div style={{
               width: '60px',
               height: '60px',
-              borderRadius: '8px',
+              borderRadius: 'var(--stat-icon-radius)',
               background: 'linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-cyan) 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
-              boxShadow: '0 8px 18px rgba(0,119,184,0.18)'
+              boxShadow: 'var(--stat-blue-shadow)'
             }}>
               <span className="material-icons" style={{ fontSize: '32px' }}>event</span>
             </div>
@@ -172,13 +172,13 @@ const Dashboard = () => {
                 <div style={{
                   width: '60px',
                   height: '60px',
-                  borderRadius: '8px',
+                  borderRadius: 'var(--stat-icon-radius)',
                   background: 'linear-gradient(135deg, var(--warning) 0%, #D97706 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
-                  boxShadow: '0 8px 18px rgba(245,158,11,0.18)'
+                  boxShadow: 'var(--stat-warning-shadow)'
                 }}>
                   <span className="material-icons" style={{ fontSize: '32px' }}>pending</span>
                 </div>
@@ -193,13 +193,13 @@ const Dashboard = () => {
                 <div style={{
                   width: '60px',
                   height: '60px',
-                  borderRadius: '8px',
+                  borderRadius: 'var(--stat-icon-radius)',
                   background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
-                  boxShadow: '0 8px 18px rgba(0,119,184,0.20)'
+                  boxShadow: 'var(--stat-blue-shadow)'
                 }}>
                   <span className="material-icons" style={{ fontSize: '32px' }}>inventory</span>
                 </div>
@@ -233,19 +233,19 @@ const Dashboard = () => {
                       {cat.category_name || 'Без категории'}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-                      <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '8px', borderLeft: '4px solid var(--primary-color)', boxShadow: '0 8px 18px rgba(29,39,48,0.08)', border: '1px solid var(--divider)' }}>
+                      <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: 'var(--stat-icon-radius)', borderLeft: '4px solid var(--primary-color)', boxShadow: 'var(--stat-panel-shadow)', border: '1px solid var(--divider)' }}>
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Всего</div>
                         <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--primary-color)' }}>
                           {cat.total || 0}
                         </div>
                       </div>
-                      <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '8px', borderLeft: '4px solid var(--success)', boxShadow: '0 8px 18px rgba(29,39,48,0.08)', border: '1px solid var(--divider)' }}>
+                      <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: 'var(--stat-icon-radius)', borderLeft: '4px solid var(--success)', boxShadow: 'var(--stat-panel-shadow)', border: '1px solid var(--divider)' }}>
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Доступно</div>
                         <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--success)' }}>
                           {cat.available || 0}
                         </div>
                       </div>
-                      <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '8px', borderLeft: '4px solid var(--warning)', boxShadow: '0 8px 18px rgba(29,39,48,0.08)', border: '1px solid var(--divider)' }}>
+                      <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: 'var(--stat-icon-radius)', borderLeft: '4px solid var(--warning)', boxShadow: 'var(--stat-panel-shadow)', border: '1px solid var(--divider)' }}>
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Забронировано</div>
                         <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--warning)' }}>
                           {cat.booked || 0}
@@ -262,19 +262,19 @@ const Dashboard = () => {
             <div className="card">
               <h2 style={{ marginBottom: '20px' }}>📅 Статистика бронирований</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
-                <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '8px', borderLeft: '4px solid var(--warning)', boxShadow: '0 8px 18px rgba(29,39,48,0.08)', border: '1px solid var(--divider)' }}>
+                <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: 'var(--stat-icon-radius)', borderLeft: '4px solid var(--warning)', boxShadow: 'var(--stat-panel-shadow)', border: '1px solid var(--divider)' }}>
                   <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ожидают одобрения</div>
                   <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--warning)' }}>
                     {bookingReport.pending || 0}
                   </div>
                 </div>
-                <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '8px', borderLeft: '4px solid var(--success)', boxShadow: '0 8px 18px rgba(29,39,48,0.08)', border: '1px solid var(--divider)' }}>
+                <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: 'var(--stat-icon-radius)', borderLeft: '4px solid var(--success)', boxShadow: 'var(--stat-panel-shadow)', border: '1px solid var(--divider)' }}>
                   <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Одобрены</div>
                   <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--success)' }}>
                     {bookingReport.approved || 0}
                   </div>
                 </div>
-                <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: '8px', borderLeft: '4px solid var(--error)', boxShadow: '0 8px 18px rgba(29,39,48,0.08)', border: '1px solid var(--divider)' }}>
+                <div style={{ padding: '20px', background: 'var(--surface)', borderRadius: 'var(--stat-icon-radius)', borderLeft: '4px solid var(--error)', boxShadow: 'var(--stat-panel-shadow)', border: '1px solid var(--divider)' }}>
                   <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Истекли</div>
                   <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--error)' }}>
                     {bookingReport.expired || 0}

@@ -166,9 +166,9 @@ const Notifications = () => {
                   borderLeft: notification.is_read ? 'none' : '4px solid var(--primary-color)',
                   opacity: notification.is_read ? 0.7 : 1,
                   background: isBookingNotification && !notification.is_read
-                    ? 'linear-gradient(to right, rgba(232, 93, 12, 0.12), transparent)'
+                    ? 'var(--notification-booking-bg)'
                     : isSupportNotification && !notification.is_read
-                    ? 'linear-gradient(to right, rgba(0, 119, 184, 0.10), transparent)'
+                    ? 'var(--notification-support-bg)'
                     : 'var(--card-bg)'
                 }}
               >

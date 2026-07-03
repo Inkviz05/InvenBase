@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 
+const savedTheme = localStorage.getItem('invenbase-theme') || 'technopark';
+document.documentElement.dataset.theme = savedTheme;
+
 // Функция для безопасной инициализации React
 function initApp() {
   const rootElement = document.getElementById('root');

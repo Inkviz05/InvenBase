@@ -183,10 +183,10 @@ const Users = () => {
                       borderRadius: '8px',
                       background:
                         user.role === 'admin'
-                          ? 'rgba(232, 93, 12, 0.16)'
+                          ? 'var(--role-admin-bg)'
                           : user.role === 'responsible'
-                          ? 'rgba(0, 119, 184, 0.14)'
-                          : 'rgba(29, 39, 48, 0.05)',
+                          ? 'var(--role-responsible-bg)'
+                          : 'var(--inline-neutral-bg)',
                       color:
                         user.role === 'admin'
                           ? 'var(--primary-color)'
@@ -195,7 +195,7 @@ const Users = () => {
                           : 'var(--text-secondary)',
                       fontSize: '13px',
                       fontWeight: 600,
-                      border: `1px solid ${user.role === 'admin' ? 'rgba(232, 93, 12, 0.28)' : user.role === 'responsible' ? 'rgba(0, 119, 184, 0.28)' : 'transparent'}`,
+                      border: `1px solid ${user.role === 'admin' ? 'var(--role-admin-border)' : user.role === 'responsible' ? 'var(--role-responsible-border)' : 'transparent'}`,
                     }}
                   >
                     {getRoleText(user.role)}
@@ -268,8 +268,8 @@ const Users = () => {
               width: '90%',
               maxHeight: '90vh',
               overflow: 'auto',
-              boxShadow: '0 18px 44px rgba(29,39,48,0.18)',
-              border: '1px solid var(--divider)',
+              boxShadow: 'var(--modal-shadow)',
+              border: '1px solid var(--dropdown-border)',
             }}
             onClick={(e) => e.stopPropagation()}
           >

@@ -196,8 +196,8 @@ const BookingBulkCreate = () => {
           <div style={{
             marginTop: '16px',
             padding: '12px',
-            background: 'var(--zone-orange-soft)',
-            border: '1px solid rgba(232, 93, 12, 0.25)',
+            background: 'var(--cart-summary-bg)',
+            border: '1px solid var(--cart-summary-border)',
             borderRadius: '8px',
             display: 'flex',
             justifyContent: 'space-between',

@@ -34,6 +34,172 @@
   --zone-blue-soft: #E6F4FB;
   --zone-orange-soft: #FFF1E6;
   --marker-surface: #FDFBF4;
+  --body-grid-x: rgba(0, 119, 184, 0.035);
+  --body-grid-y: rgba(232, 93, 12, 0.025);
+  --body-background-image:
+    linear-gradient(90deg, var(--body-grid-x) 1px, transparent 1px),
+    linear-gradient(180deg, var(--body-grid-y) 1px, transparent 1px);
+  --body-background-size: 28px 28px;
+  --card-radius: 8px;
+  --card-shadow: 0 12px 30px rgba(29, 39, 48, 0.08);
+  --card-hover-shadow: 0 16px 34px rgba(0, 95, 147, 0.13);
+  --card-border: rgba(29, 39, 48, 0.1);
+  --card-top-border: 3px solid var(--secondary-color);
+  --card-hover-border: rgba(0, 119, 184, 0.28);
+  --button-radius: 8px;
+  --button-letter-spacing: 0;
+  --primary-button-background: var(--primary-color);
+  --primary-button-hover-background: var(--primary-dark);
+  --primary-shadow: rgba(232, 93, 12, 0.26);
+  --primary-shadow-strong: rgba(232, 93, 12, 0.32);
+  --secondary-button-hover-bg: var(--zone-blue-soft);
+  --secondary-button-hover-border: var(--secondary-color);
+  --secondary-button-hover-color: var(--secondary-color);
+  --focus-ring: rgba(232, 93, 12, 0.14);
+  --equipment-info-bg: var(--zone-blue-soft);
+  --equipment-info-border: var(--secondary-color);
+  --equipment-info-shadow: 0 8px 20px rgba(0, 95, 147, 0.08);
+  --table-wrap-radius: 8px;
+  --table-wrap-border: var(--divider);
+  --table-wrap-shadow: 0 10px 24px rgba(29, 39, 48, 0.07);
+  --table-head-bg: var(--zone-blue-soft);
+  --table-head-border: rgba(0, 119, 184, 0.24);
+  --table-row-border: rgba(29, 39, 48, 0.08);
+  --table-hover: rgba(0, 119, 184, 0.06);
+  --report-section-border: var(--divider);
+  --report-table-wrap-bg: var(--marker-surface);
+  --report-table-wrap-border: var(--divider);
+  --report-table-head: rgba(0, 119, 184, 0.1);
+  --report-table-hover: rgba(232, 93, 12, 0.05);
+  --header-shadow: 0 2px 12px rgba(29, 39, 48, 0.08);
+  --header-border-bottom: 3px solid var(--secondary-color);
+  --mobile-menu-color: var(--secondary-color);
+  --dropdown-shadow: 0 12px 28px rgba(29, 39, 48, 0.16);
+  --dropdown-radius: 8px;
+  --dropdown-border: var(--divider);
+  --dropdown-item-hover-bg: var(--zone-blue-soft);
+  --logo-background: #FFFFFF;
+  --logo-padding: 7px;
+  --logo-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  --user-details-bg: rgba(255,255,255,0.08);
+  --user-details-border-top: rgba(255,255,255,0.12);
+  --stat-icon-radius: 8px;
+  --stat-primary-shadow: 0 8px 18px rgba(232,93,12,0.24);
+  --stat-success-shadow: 0 8px 18px rgba(16,185,129,0.18);
+  --stat-blue-shadow: 0 8px 18px rgba(0,119,184,0.18);
+  --stat-warning-shadow: 0 8px 18px rgba(245,158,11,0.18);
+  --stat-panel-shadow: 0 8px 18px rgba(29,39,48,0.08);
+  --modal-shadow: 0 18px 44px rgba(29,39,48,0.18);
+  --modal-overlay-bg: rgba(29, 39, 48, 0.56);
+  --inline-panel-bg: var(--marker-surface);
+  --inline-neutral-bg: rgba(29, 39, 48, 0.05);
+  --cart-summary-bg: var(--zone-orange-soft);
+  --cart-summary-border: rgba(232, 93, 12, 0.25);
+  --notification-booking-bg: linear-gradient(to right, rgba(232, 93, 12, 0.12), transparent);
+  --notification-support-bg: linear-gradient(to right, rgba(0, 119, 184, 0.10), transparent);
+  --role-admin-bg: rgba(232, 93, 12, 0.16);
+  --role-admin-border: rgba(232, 93, 12, 0.28);
+  --role-responsible-bg: rgba(0, 119, 184, 0.14);
+  --role-responsible-border: rgba(0, 119, 184, 0.28);
+  --login-background: linear-gradient(135deg, var(--background) 0%, var(--zone-blue-soft) 58%, var(--zone-orange-soft) 100%);
+  --login-card-shadow: 0 18px 44px rgba(29,39,48,0.16);
+  --login-logo-bg: #FFFFFF;
+  --login-logo-radius: 8px;
+  --login-logo-shadow: 0 8px 20px rgba(0,119,184,0.16);
+}
+
+:root[data-theme="neon-purple"] {
+  --primary-color: #A855F7;
+  --primary-dark: #9333EA;
+  --primary-light: #C084FC;
+  --secondary-color: #EC4899;
+  --sidebar-bg: #1F1928;
+  --sidebar-gradient-start: #9333EA;
+  --sidebar-gradient-end: #EC4899;
+  --sidebar-hover: rgba(255, 255, 255, 0.12);
+  --background: #211C2B;
+  --surface: #32283D;
+  --card-bg: #2A1F35;
+  --text-primary: #FFFFFF;
+  --text-secondary: #B8B0C3;
+  --divider: rgba(255, 255, 255, 0.1);
+  --error: #EF4444;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --accent-purple: #A855F7;
+  --accent-pink: #EC4899;
+  --accent-cyan: #22D3EE;
+  --zone-blue-soft: rgba(168, 85, 247, 0.12);
+  --zone-orange-soft: rgba(236, 72, 153, 0.12);
+  --marker-surface: rgba(255, 255, 255, 0.04);
+  --body-background-image: none;
+  --body-background-size: auto;
+  --card-radius: 12px;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --card-hover-shadow: 0 6px 20px rgba(168, 85, 247, 0.2);
+  --card-border: rgba(255, 255, 255, 0.05);
+  --card-top-border: 1px solid var(--card-border);
+  --card-hover-border: rgba(168, 85, 247, 0.3);
+  --button-radius: 12px;
+  --button-letter-spacing: 0.5px;
+  --primary-button-background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  --primary-button-hover-background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-color) 100%);
+  --primary-shadow: rgba(168, 85, 247, 0.4);
+  --primary-shadow-strong: rgba(168, 85, 247, 0.5);
+  --secondary-button-hover-bg: var(--sidebar-hover);
+  --secondary-button-hover-border: var(--primary-color);
+  --secondary-button-hover-color: var(--primary-light);
+  --focus-ring: rgba(168, 85, 247, 0.1);
+  --equipment-info-bg: var(--surface);
+  --equipment-info-border: var(--primary-color);
+  --equipment-info-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --table-wrap-radius: 12px;
+  --table-wrap-border: rgba(255, 255, 255, 0.08);
+  --table-wrap-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --table-head-bg: var(--card-bg);
+  --table-head-border: rgba(168, 85, 247, 0.35);
+  --table-row-border: rgba(255, 255, 255, 0.05);
+  --table-hover: rgba(168, 85, 247, 0.08);
+  --report-section-border: rgba(255, 255, 255, 0.08);
+  --report-table-wrap-bg: rgba(0, 0, 0, 0.15);
+  --report-table-wrap-border: rgba(255, 255, 255, 0.06);
+  --report-table-head: rgba(168, 85, 247, 0.12);
+  --report-table-hover: rgba(255, 255, 255, 0.03);
+  --header-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --header-border-bottom: 1px solid var(--divider);
+  --mobile-menu-color: white;
+  --dropdown-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  --dropdown-radius: 12px;
+  --dropdown-border: rgba(255,255,255,0.1);
+  --dropdown-item-hover-bg: var(--sidebar-hover);
+  --logo-background: rgba(255,255,255,0.12);
+  --logo-padding: 6px;
+  --logo-shadow: none;
+  --user-details-bg: rgba(0,0,0,0.2);
+  --user-details-border-top: rgba(255,255,255,0.05);
+  --stat-icon-radius: 12px;
+  --stat-primary-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+  --stat-success-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  --stat-blue-shadow: 0 4px 12px rgba(34, 211, 238, 0.4);
+  --stat-warning-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+  --stat-panel-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  --modal-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  --modal-overlay-bg: rgba(0, 0, 0, 0.7);
+  --inline-panel-bg: var(--surface);
+  --inline-neutral-bg: rgba(255, 255, 255, 0.05);
+  --cart-summary-bg: rgba(168, 85, 247, 0.1);
+  --cart-summary-border: rgba(168, 85, 247, 0.3);
+  --notification-booking-bg: linear-gradient(to right, rgba(168, 85, 247, 0.1), transparent);
+  --notification-support-bg: linear-gradient(to right, rgba(56, 142, 60, 0.08), transparent);
+  --role-admin-bg: rgba(168, 85, 247, 0.2);
+  --role-admin-border: rgba(168, 85, 247, 0.3);
+  --role-responsible-bg: rgba(236, 72, 153, 0.2);
+  --role-responsible-border: rgba(236, 72, 153, 0.3);
+  --login-background: linear-gradient(135deg, var(--background) 0%, #1A1523 100%);
+  --login-card-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  --login-logo-bg: rgba(255,255,255,0.05);
+  --login-logo-radius: 12px;
+  --login-logo-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
 }
 
 body {
@@ -43,10 +209,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background);
-  background-image:
-    linear-gradient(90deg, rgba(0, 119, 184, 0.035) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(232, 93, 12, 0.025) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-image: var(--body-background-image);
+  background-size: var(--body-background-size);
   color: var(--text-primary);
   line-height: 1.5;
 }
@@ -115,25 +279,25 @@ body {
 
 .card {
   background: var(--card-bg);
-  border-radius: 8px;
-  box-shadow: 0 12px 30px rgba(29, 39, 48, 0.08);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
   padding: 20px;
   margin-bottom: 16px;
-  border: 1px solid rgba(29, 39, 48, 0.1);
-  border-top: 3px solid var(--secondary-color);
+  border: 1px solid var(--card-border);
+  border-top: var(--card-top-border);
   transition: all 0.3s ease;
 }
 
 .card:hover {
-  box-shadow: 0 16px 34px rgba(0, 95, 147, 0.13);
-  border-color: rgba(0, 119, 184, 0.28);
+  box-shadow: var(--card-hover-shadow);
+  border-color: var(--card-hover-border);
   transform: translateY(-2px);
 }
 
 .btn {
   padding: 12px 24px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--button-radius);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -142,19 +306,19 @@ body {
   align-items: center;
   gap: 8px;
   text-transform: uppercase;
-  letter-spacing: 0;
+  letter-spacing: var(--button-letter-spacing);
 }
 
 .btn-primary {
-  background: var(--primary-color);
+  background: var(--primary-button-background);
   color: white;
-  box-shadow: 0 8px 18px rgba(232, 93, 12, 0.26);
+  box-shadow: 0 8px 18px var(--primary-shadow);
   border: none;
 }
 
 .btn-primary:hover {
-  background: var(--primary-dark);
-  box-shadow: 0 10px 22px rgba(232, 93, 12, 0.32);
+  background: var(--primary-button-hover-background);
+  box-shadow: 0 10px 22px var(--primary-shadow-strong);
   transform: translateY(-2px);
 }
 
@@ -165,9 +329,9 @@ body {
 }
 
 .btn-secondary:hover {
-  background: var(--zone-blue-soft);
-  border-color: var(--secondary-color);
-  color: var(--secondary-color);
+  background: var(--secondary-button-hover-bg);
+  border-color: var(--secondary-button-hover-border);
+  color: var(--secondary-button-hover-color);
 }
 
 .btn-danger {
@@ -202,7 +366,7 @@ body {
 .input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(232, 93, 12, 0.14);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .label {
@@ -286,11 +450,11 @@ h3 {
 
 .equipment-info {
   padding: 16px;
-  background: var(--zone-blue-soft);
+  background: var(--equipment-info-bg);
   border-radius: 8px;
   margin-bottom: 16px;
-  border-left: 4px solid var(--secondary-color);
-  box-shadow: 0 8px 20px rgba(0, 95, 147, 0.08);
+  border-left: 4px solid var(--equipment-info-border);
+  box-shadow: var(--equipment-info-shadow);
 }
 
 .qr-section {
@@ -314,10 +478,10 @@ h3 {
 /* Таблицы в отчётах */
 .table-report-wrap {
   overflow-x: auto;
-  border-radius: 8px;
-  border: 1px solid var(--divider);
+  border-radius: var(--table-wrap-radius);
+  border: 1px solid var(--table-wrap-border);
   background: var(--surface);
-  box-shadow: 0 10px 24px rgba(29, 39, 48, 0.07);
+  box-shadow: var(--table-wrap-shadow);
 }
 
 .table-report {
@@ -327,8 +491,8 @@ h3 {
 }
 
 .table-report thead {
-  background: var(--zone-blue-soft);
-  border-bottom: 2px solid rgba(0, 119, 184, 0.24);
+  background: var(--table-head-bg);
+  border-bottom: 2px solid var(--table-head-border);
 }
 
 .table-report th {
@@ -343,11 +507,11 @@ h3 {
 .table-report td {
   padding: 12px 16px;
   color: var(--text-primary);
-  border-bottom: 1px solid rgba(29, 39, 48, 0.08);
+  border-bottom: 1px solid var(--table-row-border);
 }
 
 .table-report tbody tr:hover {
-  background: rgba(0, 119, 184, 0.06);
+  background: var(--table-hover);
 }
 
 .table-report tbody tr:last-child td {
@@ -367,7 +531,7 @@ h3 {
   font-weight: 600;
   color: var(--text-primary);
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--report-section-border);
 }
 
 /* Страница отчётов: жёстко не вылезает за экран */
@@ -459,7 +623,7 @@ h3 {
 .report-tables-section .report-section-title {
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--report-section-border);
 }
 
 .report-table-block {
@@ -481,8 +645,8 @@ h3 {
 
 .report-table-block .table-report-wrap {
   border-radius: 10px;
-  border: 1px solid var(--divider);
-  background: var(--marker-surface);
+  border: 1px solid var(--report-table-wrap-border);
+  background: var(--report-table-wrap-bg);
 }
 
 .report-table-block .table-report {
@@ -490,7 +654,7 @@ h3 {
 }
 
 .report-table-block .table-report th {
-  background: rgba(0, 119, 184, 0.1);
+  background: var(--report-table-head);
   color: var(--text-primary);
   font-weight: 600;
   font-size: 12px;
@@ -503,15 +667,15 @@ h3 {
 
 .report-table-block .table-report td {
   padding: 10px 14px;
-  border-top: 1px solid rgba(29, 39, 48, 0.08);
+  border-top: 1px solid var(--table-row-border);
 }
 
 .report-table-block .table-report tbody tr:hover {
-  background: rgba(232, 93, 12, 0.05);
+  background: var(--report-table-hover);
 }
 
 .report-table-block .table-report tfoot td {
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--report-section-border);
   padding-top: 12px;
   color: var(--text-primary);
 }

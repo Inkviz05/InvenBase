@@ -243,8 +243,8 @@ const Categories = () => {
             style={{
               maxWidth: '400px',
               width: '90%',
-              boxShadow: '0 18px 44px rgba(29,39,48,0.18)',
-              border: '1px solid var(--divider)',
+              boxShadow: 'var(--modal-shadow)',
+              border: '1px solid var(--dropdown-border)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -297,8 +297,8 @@ const Categories = () => {
               width: '90%',
               maxHeight: '90vh',
               overflow: 'auto',
-              boxShadow: '0 18px 44px rgba(29,39,48,0.18)',
-              border: '1px solid var(--divider)',
+              boxShadow: 'var(--modal-shadow)',
+              border: '1px solid var(--dropdown-border)',
             }}
             onClick={(e) => e.stopPropagation()}
           >

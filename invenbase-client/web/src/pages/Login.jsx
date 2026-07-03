@@ -40,10 +40,10 @@ const Login = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, var(--background) 0%, var(--zone-blue-soft) 58%, var(--zone-orange-soft) 100%)',
+      background: 'var(--login-background)',
       padding: '16px'
     }}>
-      <div className="card" style={{ maxWidth: '400px', width: '100%', boxShadow: '0 18px 44px rgba(29,39,48,0.16)', border: '1px solid var(--divider)' }}>
+      <div className="card" style={{ maxWidth: '400px', width: '100%', boxShadow: 'var(--login-card-shadow)', border: '1px solid var(--divider)' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <img 
             src="/logo.png" 
@@ -51,12 +51,12 @@ const Login = () => {
             style={{
               width: '60px',
               height: '60px',
-              borderRadius: '8px',
+              borderRadius: 'var(--login-logo-radius)',
               margin: '0 auto 16px',
               objectFit: 'contain',
-              background: '#FFFFFF',
+              background: 'var(--login-logo-bg)',
               padding: '8px',
-              boxShadow: '0 8px 20px rgba(0,119,184,0.16)'
+              boxShadow: 'var(--login-logo-shadow)'
             }}
           />
           <h1 style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '28px', fontWeight: 700 }}>InvenBase</h1>

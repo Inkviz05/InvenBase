@@ -295,7 +295,7 @@ const BookingList = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(29, 39, 48, 0.56)',
+          background: 'var(--modal-overlay-bg)',
           zIndex: 2000,
           display: 'flex',
           alignItems: 'center',
@@ -310,8 +310,8 @@ const BookingList = () => {
             width: '100%',
             maxHeight: '90vh',
             overflow: 'auto',
-            boxShadow: '0 18px 44px rgba(29,39,48,0.18)',
-            border: '1px solid var(--divider)',
+            boxShadow: 'var(--modal-shadow)',
+            border: '1px solid var(--dropdown-border)',
           }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ margin: 0 }}>Выбор оборудования</h2>
@@ -448,7 +448,7 @@ const BookingList = () => {
                   ? 'rgba(239, 68, 68, 0.2)'
                   : getStatusColor(booking.status) === 'var(--warning)'
                   ? 'rgba(245, 158, 11, 0.2)'
-                  : 'rgba(29, 39, 48, 0.05)',
+                  : 'var(--inline-neutral-bg)',
                 color: getStatusColor(booking.status),
                 fontSize: '13px',
                 fontWeight: 600,
@@ -474,7 +474,7 @@ const BookingList = () => {
             </div>
 
             {booking.purpose && (
-              <div style={{ marginBottom: '12px', padding: '12px', background: 'var(--marker-surface)', borderRadius: '8px', border: '1px solid var(--divider)' }}>
+              <div style={{ marginBottom: '12px', padding: '12px', background: 'var(--inline-panel-bg)', borderRadius: '8px', border: '1px solid var(--divider)' }}>
                 <strong style={{ color: 'var(--text-primary)' }}>Цель:</strong> <span style={{ color: 'var(--text-secondary)' }}>{booking.purpose}</span>
               </div>
             )}

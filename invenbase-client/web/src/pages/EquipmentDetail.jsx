@@ -314,7 +314,7 @@ const EquipmentDetail = () => {
           {equipment.qr_code && (
             <div>
               <label className="label">QR-код</label>
-              <p style={{ fontFamily: 'monospace', background: 'var(--marker-surface)', padding: '12px', borderRadius: '8px', border: '1px solid var(--divider)', color: 'var(--text-primary)' }}>
+              <p style={{ fontFamily: 'monospace', background: 'var(--inline-panel-bg)', padding: '12px', borderRadius: '8px', border: '1px solid var(--divider)', color: 'var(--text-primary)' }}>
                 {equipment.qr_code}
               </p>
             </div>
@@ -465,8 +465,8 @@ const EquipmentDetail = () => {
             style={{
               maxWidth: '400px',
               width: '90%',
-              boxShadow: '0 18px 44px rgba(29,39,48,0.18)',
-              border: '1px solid var(--divider)',
+              boxShadow: 'var(--modal-shadow)',
+              border: '1px solid var(--dropdown-border)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -524,8 +524,8 @@ const EquipmentDetail = () => {
               maxWidth: '500px',
               width: '90%',
               textAlign: 'center',
-              boxShadow: '0 18px 44px rgba(29,39,48,0.18)',
-              border: '1px solid var(--divider)',
+              boxShadow: 'var(--modal-shadow)',
+              border: '1px solid var(--dropdown-border)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -565,7 +565,7 @@ const EquipmentDetail = () => {
                   }}
                 />
                 {qrData && (
-                  <div style={{ marginBottom: '20px', padding: '12px', background: 'var(--marker-surface)', borderRadius: '8px', border: '1px solid var(--divider)' }}>
+                  <div style={{ marginBottom: '20px', padding: '12px', background: 'var(--inline-panel-bg)', borderRadius: '8px', border: '1px solid var(--divider)' }}>
                     <strong style={{ color: 'var(--text-primary)' }}>Код:</strong> <span style={{ color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{qrData}</span>
                   </div>
                 )}
@@ -607,8 +607,8 @@ const EquipmentDetail = () => {
             style={{
               maxWidth: '500px',
               width: '90%',
-              boxShadow: '0 18px 44px rgba(29,39,48,0.18)',
-              border: '1px solid var(--divider)',
+              boxShadow: 'var(--modal-shadow)',
+              border: '1px solid var(--dropdown-border)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -619,7 +619,7 @@ const EquipmentDetail = () => {
             <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '16px', lineHeight: 1.4 }}>
               Укажите новое местоположение. Запись о перемещении сохранится в истории.
             </p>
-            <div style={{ background: 'var(--marker-surface)', padding: '12px', borderRadius: '8px', marginBottom: '16px', border: '1px solid var(--divider)' }}>
+            <div style={{ background: 'var(--inline-panel-bg)', padding: '12px', borderRadius: '8px', marginBottom: '16px', border: '1px solid var(--divider)' }}>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '6px', fontWeight: 600 }}>Сейчас:</div>
               <div style={{ fontSize: '13px', color: 'var(--text-primary)' }}>Сквад: {equipment.squad_name || 'Без сквада'}</div>
               <div style={{ fontSize: '13px', color: 'var(--text-primary)' }}>Местоположение: {equipment.location || '—'}</div>

@@ -5,6 +5,10 @@ import { useCart } from '../context/CartContext';
 import { notificationsAPI } from '../api/notifications';
 
 const Layout = () => {
+  const themes = [
+    { id: 'technopark', name: 'Технопарк', icon: 'domain' },
+    { id: 'neon-purple', name: 'Неоновый фиолетовый', icon: 'auto_awesome' },
+  ];
   const { user, logout, isAdmin, isResponsible } = useAuth();
   const { getCartItemsCount } = useCart();
   const location = useLocation();
@@ -14,7 +18,14 @@ const Layout = () => {
   const [showUserDetails, setShowUserDetails] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [theme, setTheme] = useState(() => localStorage.getItem('invenbase-theme') || 'technopark');
   const cartCount = getCartItemsCount();
+
+  React.useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('invenbase-theme', theme);
+  }, [theme]);
+
   React.useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -60,6 +71,11 @@ const Layout = () => {
     navigate('/login');
   };
 
+  const handleThemeChange = (themeId) => {
+    setTheme(themeId);
+    setShowMenu(false);
+  };
+
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -69,11 +85,11 @@ const Layout = () => {
         background: 'var(--surface)',
         color: 'var(--text-primary)',
         padding: '16px 24px',
-        boxShadow: '0 2px 12px rgba(29,39,48,0.08)',
+        boxShadow: 'var(--header-shadow)',
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        borderBottom: '3px solid var(--secondary-color)'
+        borderBottom: 'var(--header-border-bottom)'
       }}>
         <div className="app-header-inner">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
@@ -82,7 +98,7 @@ const Layout = () => {
               style={{
                 background: 'none',
                 border: 'none',
-                color: 'var(--secondary-color)',
+                color: 'var(--mobile-menu-color)',
                 cursor: 'pointer',
                 display: isMobile ? 'flex' : 'none',
                 alignItems: 'center',
@@ -183,16 +199,68 @@ const Layout = () => {
                     top: '100%',
                     right: 0,
                     background: 'var(--card-bg)',
-                    boxShadow: '0 12px 28px rgba(29,39,48,0.16)',
-                    borderRadius: '8px',
+                    boxShadow: 'var(--dropdown-shadow)',
+                    borderRadius: 'var(--dropdown-radius)',
                     marginTop: '8px',
-                    minWidth: '200px',
+                    minWidth: '260px',
                     zIndex: 1001,
                     overflow: 'hidden',
-                    border: '1px solid var(--divider)'
+                    border: '1px solid var(--dropdown-border)'
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
+                  <div style={{ padding: '12px', borderBottom: '1px solid var(--divider)' }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      color: 'var(--text-secondary)',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      marginBottom: '8px'
+                    }}>
+                      <span className="material-icons" style={{ fontSize: '16px' }}>palette</span>
+                      Тема
+                    </div>
+                    <div style={{ display: 'grid', gap: '6px' }}>
+                      {themes.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => handleThemeChange(item.id)}
+                          style={{
+                            width: '100%',
+                            padding: '10px',
+                            background: theme === item.id ? 'var(--zone-blue-soft)' : 'transparent',
+                            border: theme === item.id ? '1px solid var(--secondary-color)' : '1px solid transparent',
+                            borderRadius: 'var(--dropdown-radius)',
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                            color: 'var(--text-primary)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '10px',
+                            transition: 'background 0.2s ease, border-color 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (theme !== item.id) e.currentTarget.style.background = 'var(--zone-blue-soft)';
+                          }}
+                          onMouseLeave={(e) => {
+                            if (theme !== item.id) e.currentTarget.style.background = 'transparent';
+                          }}
+                        >
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span className="material-icons" style={{ fontSize: '20px', color: 'var(--primary-color)' }}>{item.icon}</span>
+                            {item.name}
+                          </span>
+                          {theme === item.id && (
+                            <span className="material-icons" style={{ fontSize: '18px', color: 'var(--secondary-color)' }}>check</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <button
                     onClick={handleLogout}
                     style={{
@@ -208,7 +276,7 @@ const Layout = () => {
                       gap: '8px',
                       transition: 'background 0.2s ease'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--zone-blue-soft)'}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--dropdown-item-hover-bg)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
                   >
                     <span className="material-icons">logout</span>
@@ -271,9 +339,9 @@ const Layout = () => {
                   height: '64px',
                   borderRadius: '10px',
                   objectFit: 'contain',
-                  background: '#FFFFFF',
-                  padding: '7px',
-                  boxShadow: '0 6px 18px rgba(0,0,0,0.18)',
+                  background: 'var(--logo-background)',
+                  padding: 'var(--logo-padding)',
+                  boxShadow: 'var(--logo-shadow)',
                   flexShrink: 0
                 }}
               />
@@ -348,8 +416,8 @@ const Layout = () => {
             {showUserDetails && (
               <div style={{ 
                 padding: '12px 20px 20px 20px', 
-                background: 'rgba(255,255,255,0.08)',
-                borderTop: '1px solid rgba(255,255,255,0.12)'
+                background: 'var(--user-details-bg)',
+                borderTop: '1px solid var(--user-details-border-top)'
               }}>
                 {user?.email && (
                   <div style={{ 
