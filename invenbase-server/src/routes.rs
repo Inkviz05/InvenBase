@@ -129,7 +129,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                 .route("", web::get().to(|state: web::Data<AppState>, auth: Authenticated| async move {
                     bookings::get_bookings(state, auth.claims()).await
                 }))
-                .route("bulk", web::post().to(|state: web::Data<AppState>, auth: Authenticated, req: web::Json<_>| async move {
+                .route("/bulk", web::post().to(|state: web::Data<AppState>, auth: Authenticated, req: web::Json<_>| async move {
                     bookings::create_bulk_bookings(state, auth.claims(), req).await
                 }))
                 .route("", web::post().to(|state: web::Data<AppState>, auth: Authenticated, req: web::Json<_>| async move {
