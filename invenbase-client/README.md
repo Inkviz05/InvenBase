@@ -1,125 +1,70 @@
-# Клиентское приложение Кванториум
+# InvenBase Web Client
 
-Веб-приложение для системы учёта и бронирования оборудования технопарка "Кванториум".
+React/Vite web-клиент для системы учета и бронирования оборудования.
 
-## Структура проекта
+В этой директории больше нет Android WebView-проекта. Android-приложение поддерживается отдельно в `../invenbase-android`.
 
-- `web/` - React веб-приложение
-- `android/` - Android проект с WebView для упаковки в APK
+## Структура
 
-## Требования
-
-- Node.js 18+ и npm
-- Android Studio с Android SDK
-- Серверная часть должна быть запущена и доступна
-
-## Разработка веб-приложения
-
-
-1. Перейдите в директорию `web/`:
-```bash
-cd web
+```text
+web/
+  src/
+    api/          API-клиенты
+    components/   Общие компоненты
+    context/      React context
+    pages/        Страницы приложения
+    App.jsx
+    main.jsx
+    config.js
+  public/
+  package.json
+  vite.config.js
 ```
 
-2. Установите зависимости:
+## Запуск
+
 ```bash
+cd invenbase-client/web
+cp .env.example .env
 npm install
-```
-
-3. Создайте файл `.env` с настройками:
-```
-VITE_API_URL=http://localhost:8080/api
-```
-
-4. Запустите dev-сервер:
-```bash
 npm run dev
 ```
 
-Приложение будет доступно по адресу http://localhost:3000
+Dev-сервер доступен на `http://localhost:3000`.
 
-## Сборка для продакшена
+## Конфигурация
 
-### Автоматическая сборка (рекомендуется)
+`web/.env`:
 
-**Windows:**
-```bash
-build-android.bat
+```env
+VITE_API_URL=http://localhost:8080/api
+VITE_API_PORT=8080
 ```
 
-**Linux/Mac:**
+В режиме разработки запросы к `/api` проксируются Vite на backend. В production используется `VITE_API_URL`, а если он не задан, клиент пытается обратиться к API на том же host и порту `VITE_API_PORT`.
+
+## Сборка
+
 ```bash
-chmod +x build-android.sh
-./build-android.sh
-```
-
-Скрипт автоматически:
-1. Установит зависимости
-2. Соберёт веб-приложение
-3. Скопирует файлы в Android проект
-
-### Ручная сборка
-
-1. Соберите веб-приложение:
-```bash
-cd web
-npm install
+cd invenbase-client/web
 npm run build
+npm run preview
 ```
 
-2. Скопируйте содержимое `web/dist/` в `android/app/src/main/assets/`
+Результат сборки появляется в `web/dist/`.
 
-3. Убедитесь, что в `MainActivity.java` используется:
-```java
-webView.loadUrl("file:///android_asset/index.html");
+## Основные модули
+
+- `src/api` - axios-клиенты для backend endpoints.
+- `src/context/AuthContext.jsx` - авторизация и текущий пользователь.
+- `src/context/CartContext.jsx` - корзина бронирований.
+- `src/pages` - страницы оборудования, бронирований, отчетов, уведомлений, пользователей и поддержки.
+
+## Android
+
+WebView APK больше не собирается из web-клиента. Для Android используется native Java-приложение:
+
+```bash
+cd ../invenbase-android
+./gradlew assembleDebug
 ```
-
-## Сборка APK в Android Studio
-
-1. Откройте проект в Android Studio:
-   - File → Open → выберите папку `android/`
-
-2. Настройте проект:
-   - Убедитесь, что установлен Android SDK 24+
-   - Синхронизируйте Gradle файлы
-
-3. Соберите APK:
-   - Build → Build Bundle(s) / APK(s) → Build APK(s)
-   - APK будет создан в `android/app/build/outputs/apk/`
-
-## Функциональность
-
-- ✅ Авторизация пользователей
-- ✅ Просмотр списка оборудования
-- ✅ Детальная информация об оборудовании
-- ✅ Создание и управление бронированиями
-- ✅ Сканирование QR-кодов
-- ✅ Просмотр уведомлений
-- ✅ Адаптивный дизайн для мобильных устройств
-
-## Роли пользователей
-
-- **admin** - полный доступ ко всем функциям
-- **responsible** - может управлять оборудованием и бронированиями
-- **user** - может просматривать оборудование и создавать бронирования
-
-## Настройка API
-
-По умолчанию приложение подключается к `http://localhost:8080/api`. 
-
-Для изменения URL API:
-1. В веб-версии: создайте `.env` файл в папке `web/` с `VITE_API_URL=your_api_url`
-2. В Android версии: 
-   - Для разработки: измените URL в `MainActivity.java` на `http://10.0.2.2:8080/api` (эмулятор) или IP вашего компьютера
-   - Для продакшена: используйте переменную окружения или настройте через конфигурацию
-
-**Важно:** После изменения URL API пересоберите веб-приложение и скопируйте файлы в Android проект.
-
-## Поддержка
-
-При возникновении проблем проверьте:
-- Запущен ли сервер
-- Правильность URL API
-- Разрешения камеры для QR-сканера
-- Логи в консоли браузера/Android Studio
-

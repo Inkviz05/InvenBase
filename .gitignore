@@ -1,0 +1,37 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*service-account*.json
+firebase-service-account.json
+
+# Logs
+*.log
+
+# OS and IDE
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+
+# Rust
+target/
+
+# Node / web
+node_modules/
+dist/
+
+# Android / Gradle
+.gradle/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+**/build/
+
+# Generated WebView Android bundle
+invenbase-client/android/app/src/main/assets/index.html
+invenbase-client/android/app/src/main/assets/assets/

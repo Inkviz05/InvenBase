@@ -61,11 +61,14 @@ async fn main() -> std::io::Result<()> {
     // Запуск HTTP сервера
     let app_state_for_server = app_state.clone();
     HttpServer::new(move || {
-        let cors = Cors::default()
-            .allow_any_origin()
+        let mut cors = Cors::default()
             .allow_any_method()
             .allow_any_header()
             .max_age(3600);
+
+        for origin in &app_state_for_server.config.cors_allowed_origins {
+            cors = cors.allowed_origin(origin);
+        }
 
         App::new()
             .app_data(web::Data::new(app_state_for_server.clone()))

@@ -7,6 +7,7 @@ pub struct Config {
     pub port: u16,
     pub jwt_secret: String,
     pub jwt_expiration: u64,
+    pub cors_allowed_origins: Vec<String>,
     /// Ключ сервера FCM для отправки push-уведомлений (Legacy API - отключен в июле 2024)
     pub fcm_server_key: Option<String>,
     /// Project ID для FCM HTTP v1 API
@@ -83,6 +84,13 @@ impl Config {
                 .unwrap_or_else(|_| "86400".to_string())
                 .parse()
                 .unwrap_or(86400), // 24 часа
+            cors_allowed_origins: env::var("CORS_ALLOWED_ORIGINS")
+                .unwrap_or_else(|_| "http://localhost:3000,http://127.0.0.1:3000".to_string())
+                .split(',')
+                .map(str::trim)
+                .filter(|origin| !origin.is_empty())
+                .map(ToOwned::to_owned)
+                .collect(),
             fcm_server_key,
             fcm_project_id,
             fcm_service_account_path,

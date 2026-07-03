@@ -38,7 +38,7 @@ function initApp() {
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initApp);
 } else {
-  // DOM уже загружен, но дадим небольшую задержку для WebView
+  // DOM is already loaded; schedule initialization after the current tick.
   setTimeout(initApp, 50);
 }
 

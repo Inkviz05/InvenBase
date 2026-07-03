@@ -15,13 +15,6 @@ const Layout = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const cartCount = getCartItemsCount();
-  
-  // Проверяем, находимся ли мы в Android WebView
-  const isAndroidWebView = typeof window !== 'undefined' && 
-    (window.ANDROID_WEBVIEW === true || 
-     (window.navigator.userAgent.includes('Android') && 
-      (window.navigator.userAgent.includes('wv') || window.location.protocol === 'file:')));
-
   React.useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -71,7 +64,7 @@ const Layout = () => {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Header - одинаковый для веб и Android */}
+      {/* Header */}
       <header className="app-header" style={{
         background: 'var(--surface)',
         color: 'var(--text-primary)',

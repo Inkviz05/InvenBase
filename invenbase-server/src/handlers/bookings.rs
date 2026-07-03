@@ -14,14 +14,15 @@ pub async fn create_booking(
 ) -> Result<HttpResponse, AppError> {
     let user_id = uuid::Uuid::parse_str(&claims.sub)
         .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
+    let mut tx = state.db.pool.begin().await?;
 
     // Проверяем доступность оборудования
     if let Some(equipment_id) = req.equipment_id {
         let available: Option<(i32,)> = sqlx::query_as::<sqlx::Postgres, _>(
-            "SELECT available_quantity FROM equipment WHERE id = $1"
+            "SELECT available_quantity FROM equipment WHERE id = $1 FOR UPDATE"
         )
         .bind(equipment_id)
-        .fetch_optional(&state.db.pool)
+        .fetch_optional(&mut *tx)
         .await?;
 
         if let Some((available_qty,)) = available {
@@ -37,7 +38,6 @@ pub async fn create_booking(
 
     let booking_id = uuid::Uuid::new_v4();
     let permission_type = req.permission_type.as_deref().unwrap_or("internal").to_string();
-
     sqlx::query::<sqlx::Postgres>(
         "INSERT INTO bookings (id, user_id, equipment_id, group_id, quantity, start_date, end_date, purpose, permission_type, status)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending')"
@@ -51,7 +51,7 @@ pub async fn create_booking(
     .bind(req.end_date)
     .bind(&req.purpose)
     .bind(&permission_type)
-    .execute(&state.db.pool)
+    .execute(&mut *tx)
     .await?;
 
     // Обновляем доступное количество оборудования
@@ -61,9 +61,11 @@ pub async fn create_booking(
         )
         .bind(req.quantity)
         .bind(equipment_id)
-        .execute(&state.db.pool)
+        .execute(&mut *tx)
         .await?;
     }
+
+    tx.commit().await?;
 
     let notification_message = format!("Пользователь {} создал новое бронирование", claims.username);
 
