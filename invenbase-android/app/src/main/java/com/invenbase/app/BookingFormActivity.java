@@ -20,6 +20,7 @@ import com.invenbase.app.api.ApiClient;
 import com.invenbase.app.api.ApiService;
 import com.invenbase.app.models.Booking;
 import com.invenbase.app.models.Equipment;
+import com.invenbase.app.utils.ApiErrorParser;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -201,7 +202,7 @@ public class BookingFormActivity extends BaseActivity {
                     Toast.makeText(BookingFormActivity.this, R.string.booking_created, Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    Toast.makeText(BookingFormActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BookingFormActivity.this, ApiErrorParser.fromResponse(BookingFormActivity.this, response), Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -210,7 +211,7 @@ public class BookingFormActivity extends BaseActivity {
             public void onFailure(Call<Booking> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 buttonCreate.setEnabled(true);
-                Toast.makeText(BookingFormActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(BookingFormActivity.this, ApiErrorParser.fromThrowable(BookingFormActivity.this, t), Toast.LENGTH_LONG).show();
             }
         });
     }

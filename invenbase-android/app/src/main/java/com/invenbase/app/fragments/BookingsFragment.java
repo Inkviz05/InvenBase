@@ -19,6 +19,7 @@ import com.invenbase.app.adapters.BookingAdapter;
 import com.invenbase.app.api.ApiClient;
 import com.invenbase.app.api.ApiService;
 import com.invenbase.app.models.Booking;
+import com.invenbase.app.utils.ApiErrorParser;
 import com.invenbase.app.utils.AuthManager;
 
 import java.util.List;
@@ -92,7 +93,7 @@ public class BookingsFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     adapter.setBookingList(response.body());
                 } else {
-                    Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), ApiErrorParser.fromResponse(requireContext(), response), Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -100,7 +101,7 @@ public class BookingsFragment extends Fragment {
             // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<List<Booking>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(requireContext(), R.string.error + ": " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), ApiErrorParser.fromThrowable(requireContext(), t), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -121,7 +122,7 @@ public class BookingsFragment extends Fragment {
                                 Toast.makeText(requireContext(), R.string.booking_approved, Toast.LENGTH_SHORT).show();
                                 loadBookings();
                             } else {
-                                Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(requireContext(), ApiErrorParser.fromResponse(requireContext(), response), Toast.LENGTH_LONG).show();
                             }
                         }
 
@@ -129,7 +130,7 @@ public class BookingsFragment extends Fragment {
                         // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Booking> call, Throwable t) {
                             progressBar.setVisibility(View.GONE);
-                            Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), ApiErrorParser.fromThrowable(requireContext(), t), Toast.LENGTH_LONG).show();
                         }
                     });
                 })
@@ -152,7 +153,7 @@ public class BookingsFragment extends Fragment {
                                 Toast.makeText(requireContext(), R.string.booking_rejected, Toast.LENGTH_SHORT).show();
                                 loadBookings();
                             } else {
-                                Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(requireContext(), ApiErrorParser.fromResponse(requireContext(), response), Toast.LENGTH_LONG).show();
                             }
                         }
 
@@ -160,7 +161,7 @@ public class BookingsFragment extends Fragment {
                         // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Booking> call, Throwable t) {
                             progressBar.setVisibility(View.GONE);
-                            Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), ApiErrorParser.fromThrowable(requireContext(), t), Toast.LENGTH_LONG).show();
                         }
                     });
                 })
@@ -183,7 +184,7 @@ public class BookingsFragment extends Fragment {
                                 Toast.makeText(requireContext(), R.string.booking_deleted, Toast.LENGTH_SHORT).show();
                                 loadBookings();
                             } else {
-                                Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(requireContext(), ApiErrorParser.fromResponse(requireContext(), response), Toast.LENGTH_LONG).show();
                             }
                         }
 
@@ -191,7 +192,7 @@ public class BookingsFragment extends Fragment {
                         // Метод onFailure: обрабатывает соответствующее событие приложения.
                         public void onFailure(Call<Void> call, Throwable t) {
                             progressBar.setVisibility(View.GONE);
-                            Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), ApiErrorParser.fromThrowable(requireContext(), t), Toast.LENGTH_LONG).show();
                         }
                     });
                 })

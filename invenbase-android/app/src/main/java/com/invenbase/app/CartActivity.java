@@ -14,18 +14,16 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.gson.Gson;
 import com.invenbase.app.adapters.CartAdapter;
 import com.invenbase.app.api.ApiClient;
 import com.invenbase.app.api.ApiService;
-import com.invenbase.app.models.ApiError;
 import com.invenbase.app.models.Booking;
 import com.invenbase.app.models.BulkBookingsRequest;
 import com.invenbase.app.models.CartItem;
 import com.invenbase.app.models.CreateBookingItem;
+import com.invenbase.app.utils.ApiErrorParser;
 import com.invenbase.app.utils.CartManager;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -185,7 +183,7 @@ public class CartActivity extends BaseActivity {
                     loadCart();
                     Toast.makeText(CartActivity.this, R.string.booking_created, Toast.LENGTH_SHORT).show();
                 } else {
-                    String msg = getErrorMessage(response);
+                    String msg = ApiErrorParser.fromResponse(CartActivity.this, response);
                     Toast.makeText(CartActivity.this, msg, Toast.LENGTH_LONG).show();
                 }
             }
@@ -195,25 +193,13 @@ public class CartActivity extends BaseActivity {
             public void onFailure(Call<List<Booking>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 buttonCreateBookings.setEnabled(true);
-                String msg = t.getMessage() != null ? t.getMessage() : getString(R.string.error);
+                String msg = ApiErrorParser.fromThrowable(CartActivity.this, t);
                 Toast.makeText(CartActivity.this, msg, Toast.LENGTH_LONG).show();
             }
         });
     }
 
     // Метод getErrorMessage: возвращает нужное значение для текущего контекста.
-    private String getErrorMessage(Response<?> response) {
-        if (response.errorBody() == null) return getString(R.string.error);
-        try {
-            String body = response.errorBody().string();
-            ApiError err = new Gson().fromJson(body, ApiError.class);
-            if (err != null && err.getMessage() != null && !err.getMessage().isEmpty()) {
-                return err.getMessage();
-            }
-        } catch (IOException ignored) { }
-        return getString(R.string.error);
-    }
-
     // Метод buildIsoDate: выполняет основную бизнес- или UI-логику данного участка кода.
     private String buildIsoDate(Date date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);

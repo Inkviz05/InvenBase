@@ -14,6 +14,7 @@ import com.invenbase.app.api.ApiClient;
 import com.invenbase.app.api.ApiService;
 import com.invenbase.app.models.LoginRequest;
 import com.invenbase.app.models.LoginResponse;
+import com.invenbase.app.utils.ApiErrorParser;
 import com.invenbase.app.utils.AuthManager;
 
 import retrofit2.Call;
@@ -113,7 +114,7 @@ public class LoginActivity extends BaseActivity {
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
                 } else {
-                    Toast.makeText(LoginActivity.this, R.string.login_error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, ApiErrorParser.fromResponse(LoginActivity.this, response), Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -122,7 +123,7 @@ public class LoginActivity extends BaseActivity {
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 buttonLogin.setEnabled(true);
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(LoginActivity.this, R.string.error + ": " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, ApiErrorParser.fromThrowable(LoginActivity.this, t), Toast.LENGTH_LONG).show();
             }
         });
     }
