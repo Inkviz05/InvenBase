@@ -68,6 +68,11 @@ public class BookingsFragment extends Fragment {
             }
 
             @Override
+            public void onConfirmReturn(Booking booking) {
+                confirmBookingReturn(booking);
+            }
+
+            @Override
             // Метод onDelete: обрабатывает соответствующее событие приложения.
             public void onDelete(Booking booking) {
                 deleteBooking(booking);
@@ -169,6 +174,34 @@ public class BookingsFragment extends Fragment {
     }
 
     // Метод deleteBooking: выполняет основную бизнес- или UI-логику данного участка кода.
+    private void confirmBookingReturn(Booking booking) {
+        new AlertDialog.Builder(requireContext())
+                .setMessage(R.string.confirm_return_booking)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.confirm_return, (dialog, which) -> {
+                    progressBar.setVisibility(View.VISIBLE);
+                    apiService.confirmBookingReturn(booking.getId()).enqueue(new Callback<Booking>() {
+                        @Override
+                        public void onResponse(Call<Booking> call, Response<Booking> response) {
+                            progressBar.setVisibility(View.GONE);
+                            if (response.isSuccessful()) {
+                                Toast.makeText(requireContext(), R.string.booking_returned, Toast.LENGTH_SHORT).show();
+                                loadBookings();
+                            } else {
+                                Toast.makeText(requireContext(), ApiErrorParser.fromResponse(requireContext(), response), Toast.LENGTH_LONG).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Booking> call, Throwable t) {
+                            progressBar.setVisibility(View.GONE);
+                            Toast.makeText(requireContext(), ApiErrorParser.fromThrowable(requireContext(), t), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                })
+                .show();
+    }
+
     private void deleteBooking(Booking booking) {
         new AlertDialog.Builder(requireContext())
                 .setMessage(R.string.confirm_delete_booking)

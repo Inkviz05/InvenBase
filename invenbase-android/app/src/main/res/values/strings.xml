@@ -49,6 +49,9 @@
     <string name="reject">Отклонить</string>
     <string name="booking_approved">Бронирование одобрено</string>
     <string name="booking_rejected">Бронирование отклонено</string>
+    <string name="confirm_return">Подтвердить возврат</string>
+    <string name="confirm_return_booking">Подтвердить фактический возврат оборудования?</string>
+    <string name="booking_returned">Возврат оборудования подтверждён</string>
     <string name="booking_deleted">Бронирование удалено</string>
     <string name="confirm_delete_booking">Вы уверены, что хотите удалить это бронирование?</string>
     

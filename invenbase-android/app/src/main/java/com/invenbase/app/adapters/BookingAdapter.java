@@ -37,6 +37,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
         void onApprove(Booking booking);
         // ООП (интерфейс): контракт отклонения бронирования.
         void onReject(Booking booking);
+        void onConfirmReturn(Booking booking);
         // ООП (интерфейс): контракт удаления бронирования.
         void onDelete(Booking booking);
     }
@@ -97,6 +98,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
         private TextView textStatus;
         private Button buttonApprove;
         private Button buttonReject;
+        private Button buttonConfirmReturn;
         private Button buttonDelete;
         private View actionContainer;
 
@@ -109,6 +111,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
             textStatus = itemView.findViewById(R.id.text_status);
             buttonApprove = itemView.findViewById(R.id.button_approve);
             buttonReject = itemView.findViewById(R.id.button_reject);
+            buttonConfirmReturn = itemView.findViewById(R.id.button_confirm_return);
             buttonDelete = itemView.findViewById(R.id.button_delete);
             actionContainer = itemView.findViewById(R.id.action_container);
 
@@ -130,6 +133,14 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
                 buttonReject.setOnClickListener(v -> {
                     if (actionListener != null) {
                         actionListener.onReject(bookingList.get(getAdapterPosition()));
+                    }
+                });
+            }
+
+            if (buttonConfirmReturn != null) {
+                buttonConfirmReturn.setOnClickListener(v -> {
+                    if (actionListener != null) {
+                        actionListener.onConfirmReturn(bookingList.get(getAdapterPosition()));
                     }
                 });
             }
@@ -170,6 +181,9 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
                     }
                     if (buttonReject != null) {
                         buttonReject.setVisibility("pending".equals(booking.getStatus()) ? View.VISIBLE : View.GONE);
+                    }
+                    if (buttonConfirmReturn != null) {
+                        buttonConfirmReturn.setVisibility("awaiting_return".equals(booking.getStatus()) ? View.VISIBLE : View.GONE);
                     }
                     if (buttonDelete != null) {
                         buttonDelete.setVisibility(View.VISIBLE);
