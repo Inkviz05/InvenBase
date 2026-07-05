@@ -42,18 +42,23 @@ async fn insert_user(pool: &PgPool, role: &str) -> Result<Uuid> {
 }
 
 async fn insert_equipment(pool: &PgPool, quantity: i32) -> Result<Uuid> {
+    insert_equipment_with_status(pool, quantity, "available").await
+}
+
+async fn insert_equipment_with_status(pool: &PgPool, quantity: i32, status: &str) -> Result<Uuid> {
     let id = Uuid::new_v4();
     let name = format!("Integration equipment {}", id.simple());
 
     sqlx::query(
         r#"
         INSERT INTO equipment (id, name, quantity, available_quantity, status)
-        VALUES ($1, $2, $3, $3, 'available')
+        VALUES ($1, $2, $3, $3, $4)
         "#,
     )
     .bind(id)
     .bind(name)
     .bind(quantity)
+    .bind(status)
     .execute(pool)
     .await?;
 
@@ -101,6 +106,28 @@ async fn cleanup(
         .bind(equipment_id)
         .execute(pool)
         .await?;
+
+    for user_id in user_ids {
+        sqlx::query("DELETE FROM users WHERE id = $1")
+            .bind(user_id)
+            .execute(pool)
+            .await?;
+    }
+
+    Ok(())
+}
+
+async fn cleanup_equipment_and_users(
+    pool: &PgPool,
+    equipment_ids: &[Uuid],
+    user_ids: &[Uuid],
+) -> Result<()> {
+    for equipment_id in equipment_ids {
+        sqlx::query("DELETE FROM equipment WHERE id = $1")
+            .bind(equipment_id)
+            .execute(pool)
+            .await?;
+    }
 
     for user_id in user_ids {
         sqlx::query("DELETE FROM users WHERE id = $1")
@@ -167,5 +194,117 @@ async fn invalid_return_transition_keeps_reserved_stock_until_cancelled() -> Res
     assert_eq!(available_quantity(&db.pool, equipment_id).await?, 4);
 
     cleanup(&db.pool, booking.id, equipment_id, &[user_id]).await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn rejecting_pending_booking_releases_reserved_stock() -> Result<()> {
+    let Some(db) = connect_test_db().await? else {
+        return Ok(());
+    };
+
+    let user_id = insert_user(&db.pool, "user").await?;
+    let equipment_id = insert_equipment(&db.pool, 3).await?;
+
+    let booking =
+        bookings::create_reserved_booking(&db.pool, user_id, &booking_request(equipment_id, 2))
+            .await?;
+    assert_eq!(available_quantity(&db.pool, equipment_id).await?, 1);
+
+    let booking = bookings::reject_booking(&db.pool, booking.id).await?;
+    assert_eq!(booking.status, bookings::STATUS_REJECTED);
+    assert_eq!(available_quantity(&db.pool, equipment_id).await?, 3);
+
+    cleanup(&db.pool, booking.id, equipment_id, &[user_id]).await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn cancelling_pending_booking_releases_reserved_stock() -> Result<()> {
+    let Some(db) = connect_test_db().await? else {
+        return Ok(());
+    };
+
+    let user_id = insert_user(&db.pool, "user").await?;
+    let equipment_id = insert_equipment(&db.pool, 3).await?;
+
+    let booking =
+        bookings::create_reserved_booking(&db.pool, user_id, &booking_request(equipment_id, 1))
+            .await?;
+    assert_eq!(available_quantity(&db.pool, equipment_id).await?, 2);
+
+    let booking = bookings::cancel_booking(&db.pool, booking.id).await?;
+    assert_eq!(booking.status, bookings::STATUS_CANCELLED);
+    assert_eq!(available_quantity(&db.pool, equipment_id).await?, 3);
+
+    cleanup(&db.pool, booking.id, equipment_id, &[user_id]).await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn cancelling_approved_booking_releases_reserved_stock() -> Result<()> {
+    let Some(db) = connect_test_db().await? else {
+        return Ok(());
+    };
+
+    let user_id = insert_user(&db.pool, "user").await?;
+    let admin_id = insert_user(&db.pool, "admin").await?;
+    let equipment_id = insert_equipment(&db.pool, 2).await?;
+
+    let booking =
+        bookings::create_reserved_booking(&db.pool, user_id, &booking_request(equipment_id, 1))
+            .await?;
+    let booking = bookings::approve_booking(&db.pool, booking.id, admin_id).await?;
+    assert_eq!(booking.status, bookings::STATUS_APPROVED);
+    assert_eq!(available_quantity(&db.pool, equipment_id).await?, 1);
+
+    let booking = bookings::cancel_booking(&db.pool, booking.id).await?;
+    assert_eq!(booking.status, bookings::STATUS_CANCELLED);
+    assert_eq!(available_quantity(&db.pool, equipment_id).await?, 2);
+
+    cleanup(&db.pool, booking.id, equipment_id, &[user_id, admin_id]).await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn overbooking_fails_without_changing_available_stock() -> Result<()> {
+    let Some(db) = connect_test_db().await? else {
+        return Ok(());
+    };
+
+    let user_id = insert_user(&db.pool, "user").await?;
+    let equipment_id = insert_equipment(&db.pool, 1).await?;
+
+    let result =
+        bookings::create_reserved_booking(&db.pool, user_id, &booking_request(equipment_id, 2))
+            .await;
+
+    assert!(matches!(result, Err(AppError::BadRequest(_))));
+    assert_eq!(available_quantity(&db.pool, equipment_id).await?, 1);
+
+    cleanup_equipment_and_users(&db.pool, &[equipment_id], &[user_id]).await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn unavailable_equipment_statuses_cannot_be_reserved() -> Result<()> {
+    let Some(db) = connect_test_db().await? else {
+        return Ok(());
+    };
+
+    let user_id = insert_user(&db.pool, "user").await?;
+    let maintenance_id = insert_equipment_with_status(&db.pool, 1, "maintenance").await?;
+    let unavailable_id = insert_equipment_with_status(&db.pool, 1, "unavailable").await?;
+
+    for equipment_id in [maintenance_id, unavailable_id] {
+        let result =
+            bookings::create_reserved_booking(&db.pool, user_id, &booking_request(equipment_id, 1))
+                .await;
+
+        assert!(matches!(result, Err(AppError::BadRequest(_))));
+        assert_eq!(available_quantity(&db.pool, equipment_id).await?, 1);
+    }
+
+    cleanup_equipment_and_users(&db.pool, &[maintenance_id, unavailable_id], &[user_id]).await?;
     Ok(())
 }
