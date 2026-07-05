@@ -111,7 +111,7 @@ cd invenbase-android
 ## Ближайшие технические задачи
 
 1. Запустить SQL-аудит старых данных и затем перевести `CHECK` constraints из `NOT VALID` в validated.
-2. Покрыть бронирования интеграционными тестами.
+2. Расширить интеграционные тесты на роли, пользователей и support requests.
 3. Разделить backend handlers и бизнес-логику на service layer.
 4. Убрать debug-логи из web-клиента.
 5. Постепенно привести native Android к MVVM-структуре.

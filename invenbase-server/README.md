@@ -160,6 +160,13 @@ cargo run
 cargo test
 ```
 
+Integration-тесты бронирований используют PostgreSQL из `TEST_DATABASE_URL`.
+Без этой переменной DB-тесты пропускают подключение:
+
+```bash
+TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/kvantoriym_test cargo test
+```
+
 ### Сборка для production
 
 ```bash

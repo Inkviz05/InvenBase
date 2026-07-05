@@ -114,6 +114,8 @@ src/
    - создание/аппрув/отклонение бронирования
    - проверка остатков оборудования
    - support requests
+
+Выполнено частично: добавлены PostgreSQL integration tests для цикла бронирования `pending -> approved -> awaiting_return -> returned`, неверного возврата и возврата `available_quantity`.
 2. Backend unit tests:
    - проверка ролей
    - state machine бронирований

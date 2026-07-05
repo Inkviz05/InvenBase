@@ -1,22 +1,12 @@
-mod config;
-mod database;
-mod models;
-mod handlers;
-mod routes;
-mod auth;
-mod errors;
-mod app_state;
-mod middleware;
-mod background_tasks;
-mod services;
-
-use actix_web::{web, App, HttpServer};
 use actix_cors::Cors;
+use actix_web::{web, App, HttpServer};
 use std::sync::Arc;
 
-use crate::config::Config;
-use crate::database::Database;
-use crate::app_state::AppState;
+use kvantoriym_server::app_state::AppState;
+use kvantoriym_server::background_tasks;
+use kvantoriym_server::config::Config;
+use kvantoriym_server::database::Database;
+use kvantoriym_server::routes;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -27,7 +17,7 @@ async fn main() -> std::io::Result<()> {
 
     // Загрузка конфигурации
     let config = Config::from_env().expect("Не удалось загрузить конфигурацию");
-    
+
     // Подключение к базе данных
     let db = Arc::new(
         Database::new(&config.database_url)
@@ -41,17 +31,19 @@ async fn main() -> std::io::Result<()> {
                 eprintln!("  4. Учетные данные верные");
                 std::process::exit(1);
             })
-            .unwrap()
+            .unwrap(),
     );
 
     // Инициализация базы данных (создание таблиц)
-    db.init(config.default_admin.as_ref()).await.expect("Не удалось инициализировать базу данных");
+    db.init(config.default_admin.as_ref())
+        .await
+        .expect("Не удалось инициализировать базу данных");
 
     log::info!("База данных инициализирована");
 
     let app_state = AppState::new(db.clone(), config.clone());
     let app_state_for_background = Arc::new(app_state.clone());
-    
+
     // Запускаем фоновую задачу проверки истечения времени бронирований
     tokio::spawn(async move {
         background_tasks::start_booking_expiration_checker(app_state_for_background).await;
@@ -80,14 +72,8 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .wrap(actix_web::middleware::Logger::default())
             .service(actix_files::Files::new("/static", "./static").show_files_listing())
-            .service(
-                web::scope("/api")
-                    .configure(routes::configure_api)
-            )
-            .service(
-                web::scope("")
-                    .configure(routes::configure_web)
-            )
+            .service(web::scope("/api").configure(routes::configure_api))
+            .service(web::scope("").configure(routes::configure_web))
     })
     .bind((config.host.clone(), config.port))?
     .run()
