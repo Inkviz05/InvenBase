@@ -1,7 +1,7 @@
-use actix_web::{web, HttpResponse};
 use crate::app_state::AppState;
 use crate::handlers::*;
-use crate::middleware::{Authenticated, AdminOnly, AdminOrResponsible};
+use crate::middleware::{AdminOnly, AdminOrResponsible, Authenticated};
+use actix_web::{web, HttpResponse};
 
 pub fn configure_api(cfg: &mut web::ServiceConfig) {
     cfg
@@ -147,6 +147,9 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                 .route("/{id}/reject", web::post().to(|state: web::Data<AppState>, auth: AdminOrResponsible, path: web::Path<_>| async move {
                     bookings::reject_booking(state, auth.claims(), path).await
                 }))
+                .route("/{id}/return", web::post().to(|state: web::Data<AppState>, auth: AdminOrResponsible, path: web::Path<_>| async move {
+                    bookings::confirm_booking_return(state, auth.claims(), path).await
+                }))
                 .route("/{id}", web::delete().to(|state: web::Data<AppState>, auth: Authenticated, path: web::Path<_>| async move {
                     bookings::delete_booking(state, auth.claims(), path).await
                 }))
@@ -258,16 +261,20 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
 }
 
 pub fn configure_web(cfg: &mut web::ServiceConfig) {
-    cfg
-        .route("/", web::get().to(|| async {
+    cfg.route(
+        "/",
+        web::get().to(|| async {
             HttpResponse::Ok()
                 .content_type("text/html; charset=utf-8")
                 .body(include_str!("../static/index.html"))
-        }))
-        .route("/admin", web::get().to(|| async {
+        }),
+    )
+    .route(
+        "/admin",
+        web::get().to(|| async {
             HttpResponse::Ok()
                 .content_type("text/html; charset=utf-8")
                 .body(include_str!("../static/admin.html"))
-        }));
+        }),
+    );
 }
-

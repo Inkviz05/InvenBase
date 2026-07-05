@@ -31,6 +31,11 @@ export const bookingsAPI = {
     return response.data;
   },
 
+  confirmReturn: async (id) => {
+    const response = await apiClient.post(`/bookings/${id}/return`);
+    return response.data;
+  },
+
   delete: async (id) => {
     await apiClient.delete(`/bookings/${id}`);
   },

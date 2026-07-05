@@ -8,6 +8,7 @@ mod errors;
 mod app_state;
 mod middleware;
 mod background_tasks;
+mod services;
 
 use actix_web::{web, App, HttpServer};
 use actix_cors::Cors;

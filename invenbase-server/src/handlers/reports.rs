@@ -1,9 +1,12 @@
 use actix_web::{web, HttpResponse};
 
-use crate::models::{EquipmentReport, CategoryStatistics, BookingWithDetails, BookingReportQuery, AuditReportEntry, AuditReportQuery};
+use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::app_state::AppState;
+use crate::models::{
+    AuditReportEntry, AuditReportQuery, BookingReportQuery, BookingWithDetails, CategoryStatistics,
+    EquipmentReport,
+};
 
 pub async fn get_equipment_report(
     state: web::Data<AppState>,
@@ -12,14 +15,12 @@ pub async fn get_equipment_report(
     AuthService::require_any_role(&claims, &["admin", "responsible"])?;
 
     // Общая статистика
-    let total: (i64,) = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT COUNT(*) FROM equipment"
-    )
-    .fetch_one(&state.db.pool)
-    .await?;
+    let total: (i64,) = sqlx::query_as::<sqlx::Postgres, _>("SELECT COUNT(*) FROM equipment")
+        .fetch_one(&state.db.pool)
+        .await?;
 
     let available: (i64,) = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT COUNT(*) FROM equipment WHERE status = 'available' AND available_quantity > 0"
+        "SELECT COUNT(*) FROM equipment WHERE status = 'available' AND available_quantity > 0",
     )
     .fetch_one(&state.db.pool)
     .await?;
@@ -43,7 +44,7 @@ pub async fn get_equipment_report(
         LEFT JOIN equipment e ON c.id = e.category_id
         GROUP BY c.id, c.name
         ORDER BY c.name
-        "#
+        "#,
     )
     .fetch_all(&state.db.pool)
     .await?;
@@ -65,51 +66,63 @@ pub async fn get_booking_report(
     AuthService::require_any_role(&claims, &["admin", "responsible"])?;
 
     let pending: (i64,) = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT COUNT(*) FROM bookings WHERE status = 'pending'"
+        "SELECT COUNT(*) FROM bookings WHERE status = 'pending'",
     )
     .fetch_one(&state.db.pool)
     .await?;
 
     let approved: (i64,) = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT COUNT(*) FROM bookings WHERE status = 'approved' AND end_date > CURRENT_TIMESTAMP"
+        "SELECT COUNT(*) FROM bookings WHERE status = 'approved' AND end_date > CURRENT_TIMESTAMP",
     )
     .fetch_one(&state.db.pool)
     .await?;
 
     let expired: (i64,) = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT COUNT(*) FROM bookings WHERE status = 'approved' AND end_date < CURRENT_TIMESTAMP"
+        "SELECT COUNT(*) FROM bookings WHERE status = 'expired'",
+    )
+    .fetch_one(&state.db.pool)
+    .await?;
+
+    let awaiting_return: (i64,) = sqlx::query_as::<sqlx::Postgres, _>(
+        "SELECT COUNT(*) FROM bookings WHERE status = 'awaiting_return'",
+    )
+    .fetch_one(&state.db.pool)
+    .await?;
+
+    let returned: (i64,) = sqlx::query_as::<sqlx::Postgres, _>(
+        "SELECT COUNT(*) FROM bookings WHERE status = 'returned'",
     )
     .fetch_one(&state.db.pool)
     .await?;
 
     let rejected: (i64,) = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT COUNT(*) FROM bookings WHERE status = 'rejected'"
+        "SELECT COUNT(*) FROM bookings WHERE status = 'rejected'",
     )
     .fetch_one(&state.db.pool)
     .await?;
 
     let cancelled: (i64,) = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT COUNT(*) FROM bookings WHERE status = 'cancelled'"
+        "SELECT COUNT(*) FROM bookings WHERE status = 'cancelled'",
     )
     .fetch_one(&state.db.pool)
     .await?;
 
     let completed: (i64,) = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT COUNT(*) FROM bookings WHERE status = 'completed'"
+        "SELECT COUNT(*) FROM bookings WHERE status = 'completed'",
     )
     .fetch_one(&state.db.pool)
     .await?;
 
-    let total: (i64,) = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT COUNT(*) FROM bookings"
-    )
-    .fetch_one(&state.db.pool)
-    .await?;
+    let total: (i64,) = sqlx::query_as::<sqlx::Postgres, _>("SELECT COUNT(*) FROM bookings")
+        .fetch_one(&state.db.pool)
+        .await?;
 
     Ok(HttpResponse::Ok().json(serde_json::json!({
         "pending": pending.0,
         "approved": approved.0,
         "expired": expired.0,
+        "awaiting_return": awaiting_return.0,
+        "returned": returned.0,
         "rejected": rejected.0,
         "cancelled": cancelled.0,
         "completed": completed.0,
@@ -141,7 +154,7 @@ pub async fn get_booking_detailed_report(
         WHERE ($1::date IS NULL OR b.start_date::date >= $1::date)
           AND ($2::date IS NULL OR b.start_date::date <= $2::date)
         ORDER BY b.start_date ASC
-        "#
+        "#,
     )
     .bind(from)
     .bind(to)
@@ -203,4 +216,3 @@ pub async fn get_audit_report(
 
     Ok(HttpResponse::Ok().json(logs))
 }
-

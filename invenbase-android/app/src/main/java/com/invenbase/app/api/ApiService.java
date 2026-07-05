@@ -94,6 +94,9 @@ public interface ApiService {
     @POST("/api/bookings/{id}/reject")
     // Метод rejectBooking: выполняет основную бизнес- или UI-логику данного участка кода.
     Call<Booking> rejectBooking(@Path("id") String id);
+
+    @POST("/api/bookings/{id}/return")
+    Call<Booking> confirmBookingReturn(@Path("id") String id);
     
     @DELETE("/api/bookings/{id}")
     // Метод deleteBooking: выполняет основную бизнес- или UI-логику данного участка кода.

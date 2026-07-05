@@ -200,6 +200,9 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
                 case "pending": return "Ожидает одобрения";
                 case "approved": return "Одобрено";
                 case "rejected": return "Отклонено";
+                case "awaiting_return": return "Ожидает возврата";
+                case "returned": return "Возвращено";
+                case "expired": return "Истекло";
                 case "cancelled": return "Отменено";
                 default: return status;
             }
@@ -212,6 +215,9 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
                 case "pending": return R.color.warning;
                 case "approved": return R.color.success;
                 case "rejected": return R.color.error;
+                case "awaiting_return": return R.color.warning;
+                case "returned": return R.color.success;
+                case "expired": return R.color.text_secondary;
                 case "cancelled": return R.color.text_secondary;
                 default: return R.color.text_secondary;
             }

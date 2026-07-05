@@ -60,6 +60,18 @@ const BookingList = () => {
     }
   };
 
+  const handleConfirmReturn = async (id) => {
+    if (!window.confirm('Подтвердить фактический возврат оборудования?')) {
+      return;
+    }
+    try {
+      await bookingsAPI.confirmReturn(id);
+      fetchBookings();
+    } catch (error) {
+      alert('Ошибка при подтверждении возврата оборудования');
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm('Вы уверены, что хотите удалить это бронирование?')) {
       return;
@@ -77,6 +89,9 @@ const BookingList = () => {
       case 'approved': return 'var(--success)';
       case 'rejected': return 'var(--error)';
       case 'pending': return 'var(--warning)';
+      case 'awaiting_return': return 'var(--warning)';
+      case 'returned': return 'var(--success)';
+      case 'expired': return 'var(--text-secondary)';
       case 'cancelled': return 'var(--text-secondary)';
       default: return 'var(--text-secondary)';
     }
@@ -87,6 +102,9 @@ const BookingList = () => {
       case 'approved': return 'Одобрено';
       case 'rejected': return 'Отклонено';
       case 'pending': return 'Ожидает';
+      case 'awaiting_return': return 'Ожидает возврата';
+      case 'returned': return 'Возвращено';
+      case 'expired': return 'Истекло';
       case 'cancelled': return 'Отменено';
       default: return status;
     }
@@ -420,6 +438,12 @@ const BookingList = () => {
           Одобрены
         </button>
         <button
+          className={`btn ${filter === 'awaiting_return' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setFilter('awaiting_return')}
+        >
+          Ожидают возврата
+        </button>
+        <button
           className={`btn ${filter === 'rejected' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setFilter('rejected')}
         >
@@ -497,6 +521,15 @@ const BookingList = () => {
                     Отклонить
                   </button>
                 </>
+              )}
+              {(isAdmin() || isResponsible()) && booking.status === 'awaiting_return' && (
+                <button
+                  onClick={() => handleConfirmReturn(booking.id)}
+                  className="btn btn-primary"
+                  style={{ fontSize: '12px', padding: '6px 12px' }}
+                >
+                  Подтвердить возврат
+                </button>
               )}
               <button
                 onClick={() => handleDelete(booking.id)}

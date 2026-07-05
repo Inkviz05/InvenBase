@@ -46,7 +46,7 @@ const Reports = () => {
   };
 
   const bookingSummary = bookingReport || {
-    total: 0, pending: 0, approved: 0, rejected: 0, expired: 0, cancelled: 0, completed: 0,
+    total: 0, pending: 0, approved: 0, rejected: 0, expired: 0, awaiting_return: 0, returned: 0, cancelled: 0, completed: 0,
   };
 
   const getFilteredBookingsByPeriod = () => {
@@ -132,7 +132,7 @@ const Reports = () => {
       (equipmentReport?.by_category || []).forEach((c) => { catById[c.category_id] = c.category_name || 'Без категории'; });
       const equipmentById = {};
       (allEquipment || []).forEach((eq) => { equipmentById[eq.id] = eq; });
-      const statusRu = { pending: 'Ожидают одобрения', approved: 'Одобрены', rejected: 'Отклонены', cancelled: 'Отменены', completed: 'Завершены', expired: 'Истекли' };
+      const statusRu = { pending: 'Ожидают одобрения', approved: 'Одобрены', rejected: 'Отклонены', awaiting_return: 'Ожидают возврата', returned: 'Возвращены', cancelled: 'Отменены', completed: 'Завершены', expired: 'Истекли' };
       const permRu = { internal: 'Внутренний', external: 'Внешний' };
       const statusEqRu = { available: 'Доступно', maintenance: 'На обслуживании' };
 
@@ -150,6 +150,8 @@ const Reports = () => {
         ['Всего заявок на бронирование', bookingSummary.total ?? 0],
         ['Ожидают одобрения', bookingSummary.pending ?? 0],
         ['Одобрены (активные)', bookingSummary.approved ?? 0],
+        ['Ожидают возврата', bookingSummary.awaiting_return ?? 0],
+        ['Возвращены', bookingSummary.returned ?? 0],
         ['Отклонены', bookingSummary.rejected ?? 0],
         ['Истекли', bookingSummary.expired ?? 0],
         ['Отменены', bookingSummary.cancelled ?? 0],
@@ -396,6 +398,8 @@ const Reports = () => {
                   { key: 'total', label: 'Всего бронирований', color: 'var(--primary-color)' },
                   { key: 'pending', label: 'Ожидают одобрения', color: 'var(--warning)' },
                   { key: 'approved', label: 'Одобрены', color: 'var(--success)' },
+                  { key: 'awaiting_return', label: 'Ожидают возврата', color: 'var(--warning)' },
+                  { key: 'returned', label: 'Возвращены', color: 'var(--success)' },
                   { key: 'rejected', label: 'Отклонены', color: 'var(--error)' },
                   { key: 'expired', label: 'Истекли', color: 'var(--text-secondary)' },
                   { key: 'cancelled', label: 'Отменены', color: 'var(--warning)' },
