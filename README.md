@@ -35,6 +35,9 @@ HOST=127.0.0.1
 PORT=8080
 JWT_SECRET=change-me-use-a-long-random-secret-minimum-32-chars
 JWT_EXPIRATION=86400
+CREATE_DEFAULT_ADMIN=true
+DEFAULT_ADMIN_USERNAME=admin
+DEFAULT_ADMIN_PASSWORD=replace-with-a-strong-initial-password
 CORS_ALLOWED_ORIGINS=http://localhost:3000
 ```
 
@@ -87,7 +90,7 @@ cd invenbase-android
 
 Перед production-запуском обязательно:
 
-1. Сменить стандартный пароль администратора.
+1. Не использовать дефолтные учетные данные администратора: задавать первого администратора через `CREATE_DEFAULT_ADMIN` и `DEFAULT_ADMIN_PASSWORD`, затем отключать seed.
 2. Использовать уникальный `JWT_SECRET` длиной минимум 32 символа.
 3. Ограничить `CORS_ALLOWED_ORIGINS` реальными доменами клиентов.
 4. Не хранить `.env`, Firebase service account и приватные ключи в git.

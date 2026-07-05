@@ -19,8 +19,11 @@ CREATE DATABASE kvantoriym;
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/kvantoriym
 HOST=127.0.0.1
 PORT=8080
-JWT_SECRET=your-secret-key-change-in-production-minimum-32-characters-long
+JWT_SECRET=replace-with-a-long-random-secret-minimum-32-chars
 JWT_EXPIRATION=86400
+CREATE_DEFAULT_ADMIN=true
+DEFAULT_ADMIN_USERNAME=admin
+DEFAULT_ADMIN_PASSWORD=replace-with-a-strong-initial-password
 ```
 
 Замените `postgres:postgres` на ваши данные для подключения к PostgreSQL.
@@ -42,11 +45,8 @@ cargo run
 ## Шаг 4: Доступ к системе
 
 1. Откройте браузер и перейдите на `http://localhost:8080`
-2. Войдите с учетными данными по умолчанию:
-   - **Логин**: `admin`
-   - **Пароль**: `admin123`
-
-⚠️ **Важно**: После первого входа измените пароль администратора!
+2. Войдите с учетными данными, которые указали в `DEFAULT_ADMIN_USERNAME` и `DEFAULT_ADMIN_PASSWORD`.
+3. После первого входа отключите seed администратора: установите `CREATE_DEFAULT_ADMIN=false`.
 
 ## Возможные проблемы
 

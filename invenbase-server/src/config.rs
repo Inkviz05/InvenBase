@@ -1,6 +1,14 @@
 use std::env;
 
 #[derive(Clone)]
+pub struct DefaultAdminConfig {
+    pub username: String,
+    pub password: String,
+    pub email: String,
+    pub full_name: String,
+}
+
+#[derive(Clone)]
 pub struct Config {
     pub database_url: String,
     pub host: String,
@@ -14,6 +22,7 @@ pub struct Config {
     pub fcm_project_id: Option<String>,
     /// Путь к Service Account JSON файлу для FCM HTTP v1 API
     pub fcm_service_account_path: Option<String>,
+    pub default_admin: Option<DefaultAdminConfig>,
 }
 
 impl Config {
@@ -70,6 +79,32 @@ impl Config {
             }
         }
 
+        let jwt_secret = env::var("JWT_SECRET")
+            .map_err(|_| "JWT_SECRET is required and must contain at least 32 characters")?;
+        if jwt_secret.len() < 32 {
+            return Err("JWT_SECRET must contain at least 32 characters".into());
+        }
+
+        let default_admin = if env::var("CREATE_DEFAULT_ADMIN")
+            .unwrap_or_else(|_| "false".to_string())
+            .eq_ignore_ascii_case("true")
+        {
+            let password = env::var("DEFAULT_ADMIN_PASSWORD")
+                .map_err(|_| "DEFAULT_ADMIN_PASSWORD is required when CREATE_DEFAULT_ADMIN=true")?;
+            if password.len() < 12 {
+                return Err("DEFAULT_ADMIN_PASSWORD must contain at least 12 characters".into());
+            }
+
+            Some(DefaultAdminConfig {
+                username: env::var("DEFAULT_ADMIN_USERNAME").unwrap_or_else(|_| "admin".to_string()),
+                password,
+                email: env::var("DEFAULT_ADMIN_EMAIL").unwrap_or_else(|_| "admin@kvantoriym.local".to_string()),
+                full_name: env::var("DEFAULT_ADMIN_FULL_NAME").unwrap_or_else(|_| "Administrator".to_string()),
+            })
+        } else {
+            None
+        };
+
         Ok(Config {
             database_url: env::var("DATABASE_URL")
                 .unwrap_or_else(|_| "postgresql://postgres:postgres@localhost:5432/kvantoriym".to_string()),
@@ -78,8 +113,7 @@ impl Config {
                 .unwrap_or_else(|_| "8080".to_string())
                 .parse()
                 .unwrap_or(8080),
-            jwt_secret: env::var("JWT_SECRET")
-                .unwrap_or_else(|_| "your-secret-key-change-in-production".to_string()),
+            jwt_secret,
             jwt_expiration: env::var("JWT_EXPIRATION")
                 .unwrap_or_else(|_| "86400".to_string())
                 .parse()
@@ -94,6 +128,7 @@ impl Config {
             fcm_server_key,
             fcm_project_id,
             fcm_service_account_path,
+            default_admin,
         })
     }
 }
