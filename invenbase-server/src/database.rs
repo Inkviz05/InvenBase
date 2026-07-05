@@ -284,6 +284,8 @@ impl Database {
         .execute(&self.pool)
         .await;
 
+        self.apply_schema_constraints().await?;
+
         // Создание индексов для оптимизации
         sqlx::query("CREATE INDEX IF NOT EXISTS idx_equipment_category ON equipment(category_id)")
             .execute(&self.pool)
@@ -360,6 +362,92 @@ impl Database {
         // Создание администратора по умолчанию, если его нет
         if let Some(default_admin) = default_admin {
             self.create_default_admin(default_admin).await?;
+        }
+
+        Ok(())
+    }
+
+    async fn apply_schema_constraints(&self) -> Result<(), sqlx::Error> {
+        let constraints = [
+            (
+                "users",
+                "users_role_check",
+                "role IN ('admin', 'responsible', 'user')",
+            ),
+            ("equipment", "equipment_quantity_positive_check", "quantity > 0"),
+            (
+                "equipment",
+                "equipment_available_quantity_non_negative_check",
+                "available_quantity >= 0",
+            ),
+            (
+                "equipment",
+                "equipment_available_quantity_lte_quantity_check",
+                "available_quantity <= quantity",
+            ),
+            (
+                "equipment",
+                "equipment_status_check",
+                "status IN ('available', 'maintenance', 'unavailable')",
+            ),
+            (
+                "equipment_group_items",
+                "equipment_group_items_quantity_positive_check",
+                "quantity > 0",
+            ),
+            ("bookings", "bookings_quantity_positive_check", "quantity > 0"),
+            ("bookings", "bookings_date_order_check", "end_date > start_date"),
+            (
+                "bookings",
+                "bookings_status_check",
+                "status IN ('pending', 'approved', 'rejected', 'cancelled', 'expired', 'awaiting_return', 'returned', 'completed')",
+            ),
+            (
+                "bookings",
+                "bookings_permission_type_check",
+                "permission_type IN ('internal', 'external')",
+            ),
+            (
+                "bookings",
+                "bookings_target_check",
+                "equipment_id IS NOT NULL OR group_id IS NOT NULL",
+            ),
+            (
+                "permissions",
+                "permissions_status_check",
+                "status IN ('active', 'revoked')",
+            ),
+            (
+                "permissions",
+                "permissions_permission_type_check",
+                "permission_type IN ('internal', 'external')",
+            ),
+            (
+                "support_requests",
+                "support_requests_status_check",
+                "status IN ('open', 'in_progress', 'answered', 'closed')",
+            ),
+        ];
+
+        for (table, name, expression) in constraints {
+            let query = format!(
+                r#"
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1
+                        FROM pg_constraint
+                        WHERE conname = '{name}'
+                    ) THEN
+                        ALTER TABLE {table}
+                        ADD CONSTRAINT {name}
+                        CHECK ({expression}) NOT VALID;
+                    END IF;
+                END $$;
+                "#
+            );
+
+            sqlx::query(&query).execute(&self.pool).await?;
         }
 
         Ok(())
