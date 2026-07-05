@@ -183,7 +183,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
                         buttonReject.setVisibility("pending".equals(booking.getStatus()) ? View.VISIBLE : View.GONE);
                     }
                     if (buttonConfirmReturn != null) {
-                        buttonConfirmReturn.setVisibility("awaiting_return".equals(booking.getStatus()) ? View.VISIBLE : View.GONE);
+                        buttonConfirmReturn.setVisibility(canConfirmReturn(booking) ? View.VISIBLE : View.GONE);
                     }
                     if (buttonDelete != null) {
                         buttonDelete.setVisibility(canCancelBooking(booking.getStatus()) ? View.VISIBLE : View.GONE);
@@ -239,6 +239,32 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
 
         private boolean canCancelBooking(String status) {
             return "pending".equals(status) || "approved".equals(status) || "awaiting_return".equals(status);
+        }
+
+        private boolean canConfirmReturn(Booking booking) {
+            if (booking == null) return false;
+            if ("awaiting_return".equals(booking.getStatus())) return true;
+            if (!"approved".equals(booking.getStatus())) return false;
+
+            Date endDate = parseDate(booking.getEndDate());
+            return endDate != null && !endDate.after(new Date());
+        }
+
+        private Date parseDate(String dateString) {
+            if (dateString == null) return null;
+            String[] patterns = {
+                    "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+                    "yyyy-MM-dd'T'HH:mm:ssXXX",
+                    "yyyy-MM-dd'T'HH:mm:ss"
+            };
+            for (String pattern : patterns) {
+                try {
+                    return new SimpleDateFormat(pattern, Locale.getDefault()).parse(dateString);
+                } catch (ParseException ignored) {
+                    // Try the next API date shape.
+                }
+            }
+            return null;
         }
     }
 }

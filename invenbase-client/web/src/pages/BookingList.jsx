@@ -26,6 +26,15 @@ const BookingList = () => {
     return booking.status === 'pending';
   };
 
+  const canConfirmReturn = (booking) => {
+    if (!booking || (!isAdmin() && !isResponsible())) return false;
+    if (booking.status === 'awaiting_return') return true;
+    if (booking.status !== 'approved' || !booking.end_date) return false;
+
+    const endDate = new Date(booking.end_date);
+    return !Number.isNaN(endDate.getTime()) && endDate <= new Date();
+  };
+
   useEffect(() => {
     fetchBookings();
     return () => {
@@ -529,7 +538,7 @@ const BookingList = () => {
                   </button>
                 </>
               )}
-              {(isAdmin() || isResponsible()) && booking.status === 'awaiting_return' && (
+              {canConfirmReturn(booking) && (
                 <button
                   onClick={() => handleConfirmReturn(booking.id)}
                   className="btn btn-primary"
