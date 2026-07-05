@@ -539,6 +539,27 @@ pub async fn delete_booking(
     path: web::Path<Uuid>,
 ) -> Result<HttpResponse, AppError> {
     let booking_id = path.into_inner();
+    cancel_booking_for_claims(&state, &claims, booking_id).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+pub async fn cancel_booking(
+    state: web::Data<AppState>,
+    claims: Claims,
+    path: web::Path<Uuid>,
+) -> Result<HttpResponse, AppError> {
+    let booking_id = path.into_inner();
+    let booking = cancel_booking_for_claims(&state, &claims, booking_id).await?;
+
+    Ok(HttpResponse::Ok().json(booking))
+}
+
+async fn cancel_booking_for_claims(
+    state: &web::Data<AppState>,
+    claims: &Claims,
+    booking_id: Uuid,
+) -> Result<Booking, AppError> {
     let user_id = uuid::Uuid::parse_str(&claims.sub)
         .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
 
@@ -559,7 +580,17 @@ pub async fn delete_booking(
         return Err(AppError::BadRequest("Cannot delete approved booking".to_string()));
     }
 
-    booking_service::cancel_booking(&state.db.pool, booking_id).await?;
+    let booking = booking_service::cancel_booking(&state.db.pool, booking_id).await?;
 
-    Ok(HttpResponse::NoContent().finish())
+    let _ = sqlx::query::<sqlx::Postgres>(
+        "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
+         VALUES ($1, 'cancel_booking', 'booking', $2, $3)",
+    )
+    .bind(user_id)
+    .bind(booking_id)
+    .bind(serde_json::json!({"status": "cancelled"}))
+    .execute(&state.db.pool)
+    .await;
+
+    Ok(booking)
 }

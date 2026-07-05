@@ -36,8 +36,13 @@ export const bookingsAPI = {
     return response.data;
   },
 
+  cancel: async (id) => {
+    const response = await apiClient.post(`/bookings/${id}/cancel`);
+    return response.data;
+  },
+
   delete: async (id) => {
-    await apiClient.delete(`/bookings/${id}`);
+    await apiClient.post(`/bookings/${id}/cancel`);
   },
 };
 

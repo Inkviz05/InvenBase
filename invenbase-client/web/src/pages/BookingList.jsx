@@ -84,7 +84,7 @@ const BookingList = () => {
       return;
     }
     try {
-      await bookingsAPI.delete(id);
+      await bookingsAPI.cancel(id);
       fetchBookings();
     } catch (error) {
       alert('\u041e\u0448\u0438\u0431\u043a\u0430 \u043f\u0440\u0438 \u043e\u0442\u043c\u0435\u043d\u0435 \u0431\u0440\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u044f');

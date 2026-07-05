@@ -147,6 +147,9 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                 .route("/{id}/reject", web::post().to(|state: web::Data<AppState>, auth: AdminOrResponsible, path: web::Path<_>| async move {
                     bookings::reject_booking(state, auth.claims(), path).await
                 }))
+                .route("/{id}/cancel", web::post().to(|state: web::Data<AppState>, auth: Authenticated, path: web::Path<_>| async move {
+                    bookings::cancel_booking(state, auth.claims(), path).await
+                }))
                 .route("/{id}/return", web::post().to(|state: web::Data<AppState>, auth: AdminOrResponsible, path: web::Path<_>| async move {
                     bookings::confirm_booking_return(state, auth.claims(), path).await
                 }))

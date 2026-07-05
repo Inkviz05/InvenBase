@@ -97,10 +97,9 @@ public interface ApiService {
 
     @POST("/api/bookings/{id}/return")
     Call<Booking> confirmBookingReturn(@Path("id") String id);
-    
-    @DELETE("/api/bookings/{id}")
-    // Метод deleteBooking: выполняет основную бизнес- или UI-логику данного участка кода.
-    Call<Void> deleteBooking(@Path("id") String id);
+
+    @POST("/api/bookings/{id}/cancel")
+    Call<Booking> cancelBooking(@Path("id") String id);
     
     // Categories
     @GET("/api/categories")
