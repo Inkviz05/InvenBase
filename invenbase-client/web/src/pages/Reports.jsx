@@ -97,6 +97,14 @@ const Reports = () => {
   };
 
   const { equipmentUsage = [], categoryUsage = [], totalEquipmentBookings = 0, totalCategoryBookings = 0 } = computeUsageStats();
+  const awaitingReturnBookings = (allBookings || [])
+    .filter((booking) => booking.status === 'awaiting_return')
+    .sort((a, b) => new Date(a.end_date || 0) - new Date(b.end_date || 0));
+  const getReturnOverdueDays = (endDate) => {
+    const time = new Date(endDate).getTime();
+    if (!Number.isFinite(time)) return 0;
+    return Math.max(0, Math.ceil((Date.now() - time) / (1000 * 60 * 60 * 24)));
+  };
 
   const applyPeriodPreset = (preset) => {
     setPeriodPreset(preset);
@@ -411,6 +419,37 @@ const Reports = () => {
                   </div>
                 ))}
               </div>
+              {awaitingReturnBookings.length > 0 && (
+                <div className="card report-section report-tables-section">
+                  <h3 className="report-section-title">{'\u041e\u0436\u0438\u0434\u0430\u044e\u0442 \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u0430'}</h3>
+                  <div className="table-report-wrap table-responsive">
+                    <table className="table-report">
+                      <thead>
+                        <tr>
+                          <th className="col-num">#</th>
+                          <th>{'\u041e\u0431\u043e\u0440\u0443\u0434\u043e\u0432\u0430\u043d\u0438\u0435'}</th>
+                          <th>{'\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c'}</th>
+                          <th>{'\u041a\u043e\u043b-\u0432\u043e'}</th>
+                          <th>{'\u041a\u043e\u043d\u0435\u0446 \u0431\u0440\u043e\u043d\u0438'}</th>
+                          <th>{'\u041e\u0436\u0438\u0434\u0430\u0435\u0442, \u0434\u043d.'}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {awaitingReturnBookings.map((booking, index) => (
+                          <tr key={booking.id || index}>
+                            <td className="col-num">{index + 1}</td>
+                            <td>{booking.equipment_name || booking.group_name || '\u2014'}</td>
+                            <td>{(booking.full_name && booking.full_name.trim()) || booking.username || '\u2014'}</td>
+                            <td>{booking.quantity ?? 0}</td>
+                            <td>{booking.end_date ? new Date(booking.end_date).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }) : '\u2014'}</td>
+                            <td>{getReturnOverdueDays(booking.end_date)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
               {(equipmentUsage.length > 0 || categoryUsage.length > 0) && (
                 <div className="card report-section report-tables-section">
                   <h3 className="report-section-title">Топы за период</h3>

@@ -52,8 +52,9 @@
     <string name="confirm_return">Подтвердить возврат</string>
     <string name="confirm_return_booking">Подтвердить фактический возврат оборудования?</string>
     <string name="booking_returned">Возврат оборудования подтверждён</string>
-    <string name="booking_deleted">Бронирование удалено</string>
-    <string name="confirm_delete_booking">Вы уверены, что хотите удалить это бронирование?</string>
+    <string name="booking_deleted">Бронирование отменено</string>
+    <string name="confirm_delete_booking">Отменить это бронирование? История бронирования сохранится.</string>
+    <string name="cancel_booking_action">Отменить</string>
     
     <!-- Common -->
     <string name="save">Сохранить</string>

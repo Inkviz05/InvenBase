@@ -186,7 +186,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
                         buttonConfirmReturn.setVisibility("awaiting_return".equals(booking.getStatus()) ? View.VISIBLE : View.GONE);
                     }
                     if (buttonDelete != null) {
-                        buttonDelete.setVisibility(View.VISIBLE);
+                        buttonDelete.setVisibility(canCancelBooking(booking.getStatus()) ? View.VISIBLE : View.GONE);
                     }
                 } else {
                     actionContainer.setVisibility(View.GONE);
@@ -235,6 +235,10 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
                 case "cancelled": return R.color.text_secondary;
                 default: return R.color.text_secondary;
             }
+        }
+
+        private boolean canCancelBooking(String status) {
+            return "pending".equals(status) || "approved".equals(status) || "awaiting_return".equals(status);
         }
     }
 }

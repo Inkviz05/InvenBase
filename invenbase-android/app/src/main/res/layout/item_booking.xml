@@ -100,7 +100,7 @@
                 android:id="@+id/button_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/delete"
+                android:text="@string/cancel_booking_action"
                 android:textSize="15sp"
                 android:minHeight="44dp"
                 android:paddingHorizontal="20dp"

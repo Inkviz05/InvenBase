@@ -18,6 +18,13 @@ const BookingList = () => {
   const scannerRef = useRef(null);
   
   const isRegularUser = !isAdmin() && !isResponsible();
+  const canCancelBooking = (booking) => {
+    if (!booking) return false;
+    if (isAdmin() || isResponsible()) {
+      return ['pending', 'approved', 'awaiting_return'].includes(booking.status);
+    }
+    return booking.status === 'pending';
+  };
 
   useEffect(() => {
     fetchBookings();
@@ -72,15 +79,15 @@ const BookingList = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Вы уверены, что хотите удалить это бронирование?')) {
+  const handleCancel = async (id) => {
+    if (!window.confirm('\u041e\u0442\u043c\u0435\u043d\u0438\u0442\u044c \u044d\u0442\u043e \u0431\u0440\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435? \u0418\u0441\u0442\u043e\u0440\u0438\u044f \u0431\u0440\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u044f \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u0441\u044f.')) {
       return;
     }
     try {
       await bookingsAPI.delete(id);
       fetchBookings();
     } catch (error) {
-      alert('Ошибка при удалении бронирования');
+      alert('\u041e\u0448\u0438\u0431\u043a\u0430 \u043f\u0440\u0438 \u043e\u0442\u043c\u0435\u043d\u0435 \u0431\u0440\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u044f');
     }
   };
 
@@ -531,13 +538,15 @@ const BookingList = () => {
                   Подтвердить возврат
                 </button>
               )}
-              <button
-                onClick={() => handleDelete(booking.id)}
-                className="btn btn-secondary"
-                style={{ fontSize: '12px', padding: '6px 12px' }}
-              >
-                Удалить
-              </button>
+              {canCancelBooking(booking) && (
+                <button
+                  onClick={() => handleCancel(booking.id)}
+                  className="btn btn-secondary"
+                  style={{ fontSize: '12px', padding: '6px 12px' }}
+                >
+                  {'\u041e\u0442\u043c\u0435\u043d\u0438\u0442\u044c'}
+                </button>
+              )}
             </div>
           </div>
         ))}
