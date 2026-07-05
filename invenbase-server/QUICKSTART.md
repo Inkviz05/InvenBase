@@ -44,6 +44,11 @@ cargo run
 
 При старте сервер автоматически применяет `sqlx` migrations из каталога `migrations/`.
 
+Для проверки старых данных перед строгой валидацией constraints:
+```bash
+psql "$DATABASE_URL" -f sql/audit_constraints.sql
+```
+
 ## Шаг 4: Доступ к системе
 
 1. Откройте браузер и перейдите на `http://localhost:8080`

@@ -58,7 +58,7 @@
    - `quantity > 0`
    - допустимые значения `role`, `status`, `permission_type`
 
-Выполнено: схема перенесена в `invenbase-server/migrations`, сервер применяет миграции через встроенный `sqlx` migrator при старте. Следующий шаг - провалидировать старые данные и после этого перевести `CHECK` constraints из `NOT VALID` в validated.
+Выполнено: схема перенесена в `invenbase-server/migrations`, сервер применяет миграции через встроенный `sqlx` migrator при старте. Добавлен SQL-аудит `invenbase-server/sql/audit_constraints.sql` для проверки старых данных. Следующий шаг - после очистки данных перевести `CHECK` constraints из `NOT VALID` в validated.
 
 ## Приоритет 3. Бронирования и бизнес-логика
 
