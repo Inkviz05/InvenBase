@@ -1,11 +1,15 @@
 use actix_web::{web, HttpResponse};
 use uuid::Uuid;
 
-use crate::models::{Booking, BookingWithDetails, CreateBookingRequest, CreateBulkBookingsRequest, UpdateBookingRequest};
+use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::app_state::AppState;
 use crate::handlers::push::send_push_to_user;
+use crate::models::{
+    Booking, BookingWithDetails, CreateBookingRequest, CreateBulkBookingsRequest,
+    UpdateBookingRequest,
+};
+use crate::services::booking_events;
 use crate::services::bookings as booking_service;
 
 pub async fn create_booking(
@@ -18,29 +22,38 @@ pub async fn create_booking(
     let booking = booking_service::create_reserved_booking(&state.db.pool, user_id, &req).await?;
     let booking_id = booking.id;
 
-    let notification_message = format!("Пользователь {} создал новое бронирование", claims.username);
+    let notification_message =
+        format!("Пользователь {} создал новое бронирование", claims.username);
 
     // Создаём уведомление в БД для каждого администратора и ответственного
-    let _ = sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO notifications (user_id, title, message, notification_type)
-         SELECT id, 'Новое бронирование', $1, 'booking_request'
-         FROM users WHERE role IN ('admin', 'responsible')"
+    booking_events::notify_reviewers_about_booking_request(
+        &state.db.pool,
+        "Новое бронирование",
+        &notification_message,
     )
-    .bind(&notification_message)
-    .execute(&state.db.pool)
     .await;
 
     // Отправляем push-уведомление администраторам и ответственным
     let admin_user_ids: Vec<(Uuid,)> = sqlx::query_as::<sqlx::Postgres, (Uuid,)>(
-        "SELECT id FROM users WHERE role IN ('admin', 'responsible')"
+        "SELECT id FROM users WHERE role IN ('admin', 'responsible')",
     )
     .fetch_all(&state.db.pool)
     .await
     .unwrap_or_default();
-    log::info!("Booking created: sending push to {} admin/responsible user(s) about new booking from {}", admin_user_ids.len(), claims.username);
+    log::info!(
+        "Booking created: sending push to {} admin/responsible user(s) about new booking from {}",
+        admin_user_ids.len(),
+        claims.username
+    );
     let mut data = serde_json::Map::new();
-    data.insert("type".to_string(), serde_json::Value::String("booking_request".to_string()));
-    data.insert("booking_id".to_string(), serde_json::Value::String(booking_id.to_string()));
+    data.insert(
+        "type".to_string(),
+        serde_json::Value::String("booking_request".to_string()),
+    );
+    data.insert(
+        "booking_id".to_string(),
+        serde_json::Value::String(booking_id.to_string()),
+    );
     for (admin_id,) in admin_user_ids {
         send_push_to_user(
             state.get_ref(),
@@ -48,18 +61,18 @@ pub async fn create_booking(
             "Новое бронирование",
             &notification_message,
             data.clone(),
-        ).await;
+        )
+        .await;
     }
 
     // Логирование
-    let _ = sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
-         VALUES ($1, 'create_booking', 'booking', $2, $3)"
+    booking_events::record_activity(
+        &state.db.pool,
+        user_id,
+        booking_id,
+        "create_booking",
+        serde_json::json!({"equipment_id": req.equipment_id, "quantity": req.quantity}),
     )
-    .bind(user_id)
-    .bind(booking_id)
-    .bind(serde_json::json!({"equipment_id": req.equipment_id, "quantity": req.quantity}))
-    .execute(&state.db.pool)
     .await;
     Ok(HttpResponse::Created().json(booking))
 }
@@ -72,34 +85,38 @@ pub async fn create_bulk_bookings(
 ) -> Result<HttpResponse, AppError> {
     let user_id = uuid::Uuid::parse_str(&claims.sub)
         .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
-    let created = booking_service::create_reserved_bookings(&state.db.pool, user_id, &req.bookings).await?;
+    let created =
+        booking_service::create_reserved_bookings(&state.db.pool, user_id, &req.bookings).await?;
 
     let count = created.len();
     let notification_message = format!(
         "Пользователь {} создал {} бронирований",
-        claims.username,
-        count
+        claims.username, count
     );
 
-    let _ = sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO notifications (user_id, title, message, notification_type)
-         SELECT id, 'Новые бронирования', $1, 'booking_request'
-         FROM users WHERE role IN ('admin', 'responsible')"
+    booking_events::notify_reviewers_about_booking_request(
+        &state.db.pool,
+        "Новые бронирования",
+        &notification_message,
     )
-    .bind(&notification_message)
-    .execute(&state.db.pool)
     .await;
 
     let admin_user_ids: Vec<(Uuid,)> = sqlx::query_as::<sqlx::Postgres, (Uuid,)>(
-        "SELECT id FROM users WHERE role IN ('admin', 'responsible')"
+        "SELECT id FROM users WHERE role IN ('admin', 'responsible')",
     )
     .fetch_all(&state.db.pool)
     .await
     .unwrap_or_default();
 
     let mut data = serde_json::Map::new();
-    data.insert("type".to_string(), serde_json::Value::String("booking_request".to_string()));
-    data.insert("count".to_string(), serde_json::Value::Number(serde_json::Number::from(count)));
+    data.insert(
+        "type".to_string(),
+        serde_json::Value::String("booking_request".to_string()),
+    );
+    data.insert(
+        "count".to_string(),
+        serde_json::Value::Number(serde_json::Number::from(count)),
+    );
     for (admin_id,) in admin_user_ids {
         send_push_to_user(
             state.get_ref(),
@@ -107,10 +124,15 @@ pub async fn create_bulk_bookings(
             "Новые бронирования",
             &notification_message,
             data.clone(),
-        ).await;
+        )
+        .await;
     }
 
-    log::info!("Bulk booking: {} bookings created by {}, one notification sent", count, claims.username);
+    log::info!(
+        "Bulk booking: {} bookings created by {}, one notification sent",
+        count,
+        claims.username
+    );
 
     Ok(HttpResponse::Created().json(created))
 }
@@ -122,10 +144,11 @@ pub async fn get_bookings(
     let user_id = uuid::Uuid::parse_str(&claims.sub)
         .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
 
-    let bookings: Vec<BookingWithDetails> = if claims.role == "admin" || claims.role == "responsible" {
-        // Админы и ответственные видят все бронирования
-        sqlx::query_as::<sqlx::Postgres, _>(
-            r#"
+    let bookings: Vec<BookingWithDetails> =
+        if claims.role == "admin" || claims.role == "responsible" {
+            // Админы и ответственные видят все бронирования
+            sqlx::query_as::<sqlx::Postgres, _>(
+                r#"
             SELECT 
                 b.id, b.user_id, u.username, u.full_name, b.equipment_id, e.name as equipment_name,
                 b.group_id, g.name as group_name, b.quantity, b.start_date, b.end_date,
@@ -135,14 +158,14 @@ pub async fn get_bookings(
             LEFT JOIN equipment e ON b.equipment_id = e.id
             LEFT JOIN equipment_groups g ON b.group_id = g.id
             ORDER BY b.created_at DESC
-            "#
-        )
-        .fetch_all(&state.db.pool)
-        .await?
-    } else {
-        // Обычные пользователи видят только свои бронирования
-        sqlx::query_as::<sqlx::Postgres, _>(
-            r#"
+            "#,
+            )
+            .fetch_all(&state.db.pool)
+            .await?
+        } else {
+            // Обычные пользователи видят только свои бронирования
+            sqlx::query_as::<sqlx::Postgres, _>(
+                r#"
             SELECT 
                 b.id, b.user_id, u.username, u.full_name, b.equipment_id, e.name as equipment_name,
                 b.group_id, g.name as group_name, b.quantity, b.start_date, b.end_date,
@@ -153,12 +176,12 @@ pub async fn get_bookings(
             LEFT JOIN equipment_groups g ON b.group_id = g.id
             WHERE b.user_id = $1
             ORDER BY b.created_at DESC
-            "#
-        )
-        .bind(user_id)
-        .fetch_all(&state.db.pool)
-        .await?
-    };
+            "#,
+            )
+            .bind(user_id)
+            .fetch_all(&state.db.pool)
+            .await?
+        };
 
     Ok(HttpResponse::Ok().json(bookings))
 }
@@ -183,7 +206,7 @@ pub async fn get_booking(
         LEFT JOIN equipment e ON b.equipment_id = e.id
         LEFT JOIN equipment_groups g ON b.group_id = g.id
         WHERE b.id = $1
-        "#
+        "#,
     )
     .bind(booking_id)
     .fetch_optional(&state.db.pool)
@@ -224,7 +247,8 @@ pub async fn update_booking(
     .await?
     .ok_or_else(|| AppError::NotFound("Booking not found".to_string()))?;
 
-    if booking.user_id != current_user_id && claims.role != "admin" && claims.role != "responsible" {
+    if booking.user_id != current_user_id && claims.role != "admin" && claims.role != "responsible"
+    {
         return Err(AppError::Unauthorized("Access denied".to_string()));
     }
 
@@ -255,14 +279,13 @@ pub async fn update_booking(
     .fetch_one(&state.db.pool)
     .await?;
 
-    let _ = sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
-         VALUES ($1, 'update_booking_dates', 'booking', $2, $3)",
+    booking_events::record_activity(
+        &state.db.pool,
+        current_user_id,
+        booking_id,
+        "update_booking_dates",
+        serde_json::json!({"start_date": start_date, "end_date": end_date}),
     )
-    .bind(current_user_id)
-    .bind(booking_id)
-    .bind(serde_json::json!({"start_date": start_date, "end_date": end_date}))
-    .execute(&state.db.pool)
     .await;
 
     Ok(HttpResponse::Ok().json(updated_booking))
@@ -278,19 +301,19 @@ pub async fn approve_booking(
     let current_user_id = uuid::Uuid::parse_str(&claims.sub)
         .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
 
-    let booking = booking_service::approve_booking(&state.db.pool, booking_id, current_user_id).await?;
+    let booking =
+        booking_service::approve_booking(&state.db.pool, booking_id, current_user_id).await?;
 
     // Создаём уведомление
     if let Some(equipment_id) = booking.equipment_id {
         // Получаем информацию об оборудовании для уведомления
-        let equipment_name: Option<(String,)> = sqlx::query_as::<sqlx::Postgres, (String,)>(
-            "SELECT name FROM equipment WHERE id = $1"
-        )
-        .bind(equipment_id)
-        .fetch_optional(&state.db.pool)
-        .await
-        .ok()
-        .flatten();
+        let equipment_name: Option<(String,)> =
+            sqlx::query_as::<sqlx::Postgres, (String,)>("SELECT name FROM equipment WHERE id = $1")
+                .bind(equipment_id)
+                .fetch_optional(&state.db.pool)
+                .await
+                .ok()
+                .flatten();
 
         let equipment_name_str = equipment_name
             .map(|(name,)| name)
@@ -303,20 +326,17 @@ pub async fn approve_booking(
         // Улучшенное тело уведомления с подробной информацией
         let notification_message = format!(
             "Оборудование: {}\nКоличество: {} шт.\nПериод: с {} по {}",
-            equipment_name_str,
-            booking.quantity,
-            start_date_str,
-            end_date_str
+            equipment_name_str, booking.quantity, start_date_str, end_date_str
         );
 
         // Создаём уведомление для пользователя
-        let _ = sqlx::query::<sqlx::Postgres>(
-            "INSERT INTO notifications (id, user_id, title, message, notification_type)
-             VALUES (gen_random_uuid(), $1, 'Бронирование одобрено', $2, 'booking_approved')"
+        booking_events::notify_user(
+            &state.db.pool,
+            booking.user_id,
+            "Бронирование одобрено",
+            &notification_message,
+            "booking_approved",
         )
-        .bind(booking.user_id)
-        .bind(&notification_message)
-        .execute(&state.db.pool)
         .await;
 
         // Отправляем push-уведомление пользователю
@@ -360,26 +380,18 @@ pub async fn approve_booking(
         let title = "Бронирование одобрено".to_string();
         let body = notification_message.clone();
         tokio::spawn(async move {
-            send_push_to_user(
-                &state_clone,
-                user_id_for_push,
-                &title,
-                &body,
-                data,
-            )
-            .await;
+            send_push_to_user(&state_clone, user_id_for_push, &title, &body, data).await;
         });
     }
 
     // Логирование
-    let _ = sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
-         VALUES ($1, 'approve_booking', 'booking', $2, $3)"
+    booking_events::record_activity(
+        &state.db.pool,
+        current_user_id,
+        booking_id,
+        "approve_booking",
+        serde_json::json!({"status": "approved"}),
     )
-    .bind(current_user_id)
-    .bind(booking_id)
-    .bind(serde_json::json!({"status": "approved"}))
-    .execute(&state.db.pool)
     .await;
     Ok(HttpResponse::Ok().json(booking))
 }
@@ -400,14 +412,13 @@ pub async fn reject_booking(
     // Создаём уведомление
     if let Some(equipment_id) = booking.equipment_id {
         // Получаем информацию об оборудовании для уведомления
-        let equipment_name: Option<(String,)> = sqlx::query_as::<sqlx::Postgres, (String,)>(
-            "SELECT name FROM equipment WHERE id = $1"
-        )
-        .bind(equipment_id)
-        .fetch_optional(&state.db.pool)
-        .await
-        .ok()
-        .flatten();
+        let equipment_name: Option<(String,)> =
+            sqlx::query_as::<sqlx::Postgres, (String,)>("SELECT name FROM equipment WHERE id = $1")
+                .bind(equipment_id)
+                .fetch_optional(&state.db.pool)
+                .await
+                .ok()
+                .flatten();
 
         let equipment_name_str = equipment_name
             .map(|(name,)| name)
@@ -420,20 +431,17 @@ pub async fn reject_booking(
         // Улучшенное тело уведомления с подробной информацией
         let notification_message = format!(
             "Оборудование: {}\nКоличество: {} шт.\nПериод: с {} по {}",
-            equipment_name_str,
-            booking.quantity,
-            start_date_str,
-            end_date_str
+            equipment_name_str, booking.quantity, start_date_str, end_date_str
         );
 
         // Создаём уведомление для пользователя
-        let _ = sqlx::query::<sqlx::Postgres>(
-            "INSERT INTO notifications (id, user_id, title, message, notification_type)
-             VALUES (gen_random_uuid(), $1, 'Бронирование отклонено', $2, 'booking_rejected')"
+        booking_events::notify_user(
+            &state.db.pool,
+            booking.user_id,
+            "Бронирование отклонено",
+            &notification_message,
+            "booking_rejected",
         )
-        .bind(booking.user_id)
-        .bind(&notification_message)
-        .execute(&state.db.pool)
         .await;
 
         // Отправляем push-уведомление пользователю
@@ -476,26 +484,18 @@ pub async fn reject_booking(
         let title = "Бронирование отклонено".to_string();
         let body = notification_message.clone();
         tokio::spawn(async move {
-            send_push_to_user(
-                &state_clone,
-                user_id_for_push,
-                &title,
-                &body,
-                data,
-            )
-            .await;
+            send_push_to_user(&state_clone, user_id_for_push, &title, &body, data).await;
         });
     }
 
     // Логирование
-    let _ = sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
-         VALUES ($1, 'reject_booking', 'booking', $2, $3)"
+    booking_events::record_activity(
+        &state.db.pool,
+        current_user_id,
+        booking_id,
+        "reject_booking",
+        serde_json::json!({"status": "rejected"}),
     )
-    .bind(current_user_id)
-    .bind(booking_id)
-    .bind(serde_json::json!({"status": "rejected"}))
-    .execute(&state.db.pool)
     .await;
     Ok(HttpResponse::Ok().json(booking))
 }
@@ -513,22 +513,22 @@ pub async fn confirm_booking_return(
 
     let booking = booking_service::confirm_return(&state.db.pool, booking_id).await?;
 
-    let _ = sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
-         VALUES ($1, 'confirm_booking_return', 'booking', $2, $3)",
+    booking_events::record_activity(
+        &state.db.pool,
+        current_user_id,
+        booking_id,
+        "confirm_booking_return",
+        serde_json::json!({"status": "returned"}),
     )
-    .bind(current_user_id)
-    .bind(booking_id)
-    .bind(serde_json::json!({"status": "returned"}))
-    .execute(&state.db.pool)
     .await;
 
-    let _ = sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO notifications (id, user_id, title, message, notification_type)
-         VALUES (gen_random_uuid(), $1, 'Возврат оборудования подтвержден', 'Оборудование возвращено и снова доступно для бронирования.', 'booking_returned')"
+    booking_events::notify_user(
+        &state.db.pool,
+        booking.user_id,
+        "Возврат оборудования подтвержден",
+        "Оборудование возвращено и снова доступно для бронирования.",
+        "booking_returned",
     )
-    .bind(booking.user_id)
-    .execute(&state.db.pool)
     .await;
 
     Ok(HttpResponse::Ok().json(booking))
@@ -577,19 +577,20 @@ async fn cancel_booking_for_claims(
     }
 
     if booking.status == "approved" && claims.role != "admin" && claims.role != "responsible" {
-        return Err(AppError::BadRequest("Cannot delete approved booking".to_string()));
+        return Err(AppError::BadRequest(
+            "Cannot delete approved booking".to_string(),
+        ));
     }
 
     let booking = booking_service::cancel_booking(&state.db.pool, booking_id).await?;
 
-    let _ = sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
-         VALUES ($1, 'cancel_booking', 'booking', $2, $3)",
+    booking_events::record_activity(
+        &state.db.pool,
+        user_id,
+        booking_id,
+        "cancel_booking",
+        serde_json::json!({"status": "cancelled"}),
     )
-    .bind(user_id)
-    .bind(booking_id)
-    .bind(serde_json::json!({"status": "cancelled"}))
-    .execute(&state.db.pool)
     .await;
 
     Ok(booking)
