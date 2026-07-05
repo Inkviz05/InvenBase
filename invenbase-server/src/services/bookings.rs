@@ -11,6 +11,8 @@ pub const STATUS_CANCELLED: &str = "cancelled";
 pub const STATUS_EXPIRED: &str = "expired";
 pub const STATUS_AWAITING_RETURN: &str = "awaiting_return";
 pub const STATUS_RETURNED: &str = "returned";
+pub const PERMISSION_TYPE_INTERNAL: &str = "internal";
+pub const PERMISSION_TYPE_EXTERNAL: &str = "external";
 
 pub fn booking_holds_equipment(status: &str) -> bool {
     matches!(
@@ -42,6 +44,14 @@ pub fn validate_booking_request(req: &CreateBookingRequest) -> Result<(), AppErr
         return Err(AppError::BadRequest(
             "Дата начала должна быть раньше даты окончания".to_string(),
         ));
+    }
+
+    if let Some(permission_type) = req.permission_type.as_deref() {
+        if !matches!(permission_type, PERMISSION_TYPE_INTERNAL | PERMISSION_TYPE_EXTERNAL) {
+            return Err(AppError::BadRequest(
+                "Invalid permission type".to_string(),
+            ));
+        }
     }
 
     Ok(())
@@ -91,7 +101,7 @@ async fn create_reserved_booking_in_tx(
     let permission_type = req
         .permission_type
         .as_deref()
-        .unwrap_or("internal")
+        .unwrap_or(PERMISSION_TYPE_INTERNAL)
         .to_string();
 
     sqlx::query::<Postgres>(
@@ -312,4 +322,84 @@ async fn update_booking_status(
     .await?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::{Duration, Utc};
+
+    fn valid_request() -> CreateBookingRequest {
+        let start_date = Utc::now();
+        CreateBookingRequest {
+            equipment_id: Some(Uuid::new_v4()),
+            group_id: None,
+            quantity: 1,
+            start_date,
+            end_date: start_date + Duration::hours(1),
+            purpose: Some("test".to_string()),
+            permission_type: Some(PERMISSION_TYPE_INTERNAL.to_string()),
+        }
+    }
+
+    fn assert_bad_request(result: Result<(), AppError>) {
+        assert!(matches!(result, Err(AppError::BadRequest(_))));
+    }
+
+    #[test]
+    fn booking_holds_equipment_only_for_active_stock_statuses() {
+        assert!(booking_holds_equipment(STATUS_PENDING));
+        assert!(booking_holds_equipment(STATUS_APPROVED));
+        assert!(booking_holds_equipment(STATUS_AWAITING_RETURN));
+
+        assert!(!booking_holds_equipment(STATUS_REJECTED));
+        assert!(!booking_holds_equipment(STATUS_CANCELLED));
+        assert!(!booking_holds_equipment(STATUS_EXPIRED));
+        assert!(!booking_holds_equipment(STATUS_RETURNED));
+    }
+
+    #[test]
+    fn validate_booking_request_accepts_valid_equipment_booking() {
+        assert!(validate_booking_request(&valid_request()).is_ok());
+    }
+
+    #[test]
+    fn validate_booking_request_rejects_missing_target() {
+        let mut req = valid_request();
+        req.equipment_id = None;
+
+        assert_bad_request(validate_booking_request(&req));
+    }
+
+    #[test]
+    fn validate_booking_request_rejects_multiple_targets() {
+        let mut req = valid_request();
+        req.group_id = Some(Uuid::new_v4());
+
+        assert_bad_request(validate_booking_request(&req));
+    }
+
+    #[test]
+    fn validate_booking_request_rejects_non_positive_quantity() {
+        let mut req = valid_request();
+        req.quantity = 0;
+
+        assert_bad_request(validate_booking_request(&req));
+    }
+
+    #[test]
+    fn validate_booking_request_rejects_invalid_date_order() {
+        let mut req = valid_request();
+        req.end_date = req.start_date;
+
+        assert_bad_request(validate_booking_request(&req));
+    }
+
+    #[test]
+    fn validate_booking_request_rejects_invalid_permission_type() {
+        let mut req = valid_request();
+        req.permission_type = Some("temporary".to_string());
+
+        assert_bad_request(validate_booking_request(&req));
+    }
 }
