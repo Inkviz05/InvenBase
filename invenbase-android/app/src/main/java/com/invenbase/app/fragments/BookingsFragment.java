@@ -5,11 +5,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +24,7 @@ import com.invenbase.app.models.Booking;
 import com.invenbase.app.utils.ApiErrorParser;
 import com.invenbase.app.utils.AuthManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -34,6 +37,15 @@ public class BookingsFragment extends Fragment {
     private BookingAdapter adapter;
     private ApiService apiService;
     private AuthManager authManager;
+    private final List<Booking> allBookings = new ArrayList<>();
+    private String currentFilter = "all";
+    private Button filterAll;
+    private Button filterPending;
+    private Button filterApproved;
+    private Button filterAwaitingReturn;
+    private Button filterReturned;
+    private Button filterRejected;
+    private Button filterCancelled;
 
     @Nullable
     @Override
@@ -43,6 +55,13 @@ public class BookingsFragment extends Fragment {
         
         recyclerBookings = view.findViewById(R.id.recycler_bookings);
         progressBar = view.findViewById(R.id.progress_bar);
+        filterAll = view.findViewById(R.id.filter_all);
+        filterPending = view.findViewById(R.id.filter_pending);
+        filterApproved = view.findViewById(R.id.filter_approved);
+        filterAwaitingReturn = view.findViewById(R.id.filter_awaiting_return);
+        filterReturned = view.findViewById(R.id.filter_returned);
+        filterRejected = view.findViewById(R.id.filter_rejected);
+        filterCancelled = view.findViewById(R.id.filter_cancelled);
         
         recyclerBookings.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new BookingAdapter();
@@ -50,6 +69,7 @@ public class BookingsFragment extends Fragment {
         
         apiService = ApiClient.getInstance(requireContext()).getApiService();
         authManager = AuthManager.getInstance(requireContext());
+        setupFilters();
         
         // Настраиваем адаптер
         boolean isAdminOrResponsible = authManager.isAdmin() || authManager.isResponsible();
@@ -96,7 +116,9 @@ public class BookingsFragment extends Fragment {
                 progressBar.setVisibility(View.GONE);
                 
                 if (response.isSuccessful() && response.body() != null) {
-                    adapter.setBookingList(response.body());
+                    allBookings.clear();
+                    allBookings.addAll(response.body());
+                    applyCurrentFilter();
                 } else {
                     Toast.makeText(requireContext(), ApiErrorParser.fromResponse(requireContext(), response), Toast.LENGTH_LONG).show();
                 }
@@ -109,6 +131,58 @@ public class BookingsFragment extends Fragment {
                 Toast.makeText(requireContext(), ApiErrorParser.fromThrowable(requireContext(), t), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void setupFilters() {
+        bindFilter(filterAll, "all");
+        bindFilter(filterPending, "pending");
+        bindFilter(filterApproved, "approved");
+        bindFilter(filterAwaitingReturn, "awaiting_return");
+        bindFilter(filterReturned, "returned");
+        bindFilter(filterRejected, "rejected");
+        bindFilter(filterCancelled, "cancelled");
+        updateFilterButtons();
+    }
+
+    private void bindFilter(Button button, String status) {
+        if (button == null) return;
+        button.setOnClickListener(v -> {
+            currentFilter = status;
+            applyCurrentFilter();
+        });
+    }
+
+    private void applyCurrentFilter() {
+        if ("all".equals(currentFilter)) {
+            adapter.setBookingList(new ArrayList<>(allBookings));
+        } else {
+            List<Booking> filtered = new ArrayList<>();
+            for (Booking booking : allBookings) {
+                if (booking != null && currentFilter.equals(booking.getStatus())) {
+                    filtered.add(booking);
+                }
+            }
+            adapter.setBookingList(filtered);
+        }
+        updateFilterButtons();
+    }
+
+    private void updateFilterButtons() {
+        updateFilterButton(filterAll, "all");
+        updateFilterButton(filterPending, "pending");
+        updateFilterButton(filterApproved, "approved");
+        updateFilterButton(filterAwaitingReturn, "awaiting_return");
+        updateFilterButton(filterReturned, "returned");
+        updateFilterButton(filterRejected, "rejected");
+        updateFilterButton(filterCancelled, "cancelled");
+    }
+
+    private void updateFilterButton(Button button, String status) {
+        if (button == null || getContext() == null) return;
+        boolean active = status.equals(currentFilter);
+        button.setSelected(active);
+        button.setTextColor(ContextCompat.getColor(requireContext(), active ? R.color.surface : R.color.text_primary));
+        button.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), active ? R.color.primary : R.color.surface));
     }
 
     // Метод approveBooking: выполняет основную бизнес- или UI-логику данного участка кода.

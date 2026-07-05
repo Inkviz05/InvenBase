@@ -460,10 +460,22 @@ const BookingList = () => {
           Ожидают возврата
         </button>
         <button
+          className={`btn ${filter === 'returned' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setFilter('returned')}
+        >
+          Возвращены
+        </button>
+        <button
           className={`btn ${filter === 'rejected' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setFilter('rejected')}
         >
           Отклонены
+        </button>
+        <button
+          className={`btn ${filter === 'cancelled' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setFilter('cancelled')}
+        >
+          Отменены
         </button>
       </div>
 
