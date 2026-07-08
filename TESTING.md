@@ -60,8 +60,30 @@ DB-тесты находятся в `invenbase-server/tests/database_schema.rs`.
 
 ## Web
 
-Сейчас у web-клиента нет отдельной тестовой инфраструктуры. Следующий практичный шаг:
+У web-клиента подключены Vitest, React Testing Library и jsdom.
 
-- добавить Vitest и React Testing Library;
-- покрыть API-клиент, авторизацию, выбор темы и основные формы;
+Запуск тестов:
+
+```powershell
+cd invenbase-client\web
+npm run test:run
+```
+
+Интерактивный watch-режим:
+
+```powershell
+cd invenbase-client\web
+npm run test
+```
+
+Что уже покрыто:
+
+- `src/config.js`: базовый API URL в dev/test-режиме и доменные константы;
+- `src/api/client.js`: base URL, bearer token, исключение для `/auth/login`, очистка auth-состояния на `401`;
+- `src/components/Layout.jsx`: тема по умолчанию, восстановление сохранённой темы, переключение на `neon-purple` через меню пользователя.
+
+Следующий практичный шаг:
+
+- покрыть `AuthContext` и формы логина;
+- добавить тесты для списка оборудования и формы создания бронирования;
 - затем добавить e2e smoke-тесты для входа, списка оборудования и создания бронирования.

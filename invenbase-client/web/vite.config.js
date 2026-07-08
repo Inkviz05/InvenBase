@@ -7,6 +7,12 @@ const API_PORT = process.env.VITE_API_PORT || 8080
 export default defineConfig({
   plugins: [react()],
   base: './',
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.js',
+    globals: true,
+    css: true,
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
