@@ -1,5 +1,5 @@
-use crate::models::User;
 use crate::errors::AppError;
+use crate::models::User;
 use actix_web::HttpRequest;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
@@ -28,6 +28,114 @@ impl Claims {
             role,
             exp,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::test::TestRequest;
+    use chrono::Utc;
+
+    fn test_user(role: &str) -> User {
+        User {
+            id: Uuid::new_v4(),
+            username: format!("test_{role}"),
+            password_hash: "hash-is-not-used".to_string(),
+            email: Some(format!("{role}@example.test")),
+            full_name: Some(format!("Test {role}")),
+            role: role.to_string(),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+        }
+    }
+
+    #[test]
+    fn generated_token_validates_to_original_claims() {
+        let user = test_user("responsible");
+        let auth = AuthService::new("test-secret-minimum-32-characters", 3600);
+
+        let token = auth
+            .generate_token(&user)
+            .expect("token should be generated");
+        let claims = auth.validate_token(&token).expect("token should validate");
+
+        assert_eq!(claims.sub, user.id.to_string());
+        assert_eq!(claims.username, user.username);
+        assert_eq!(claims.role, "responsible");
+    }
+
+    #[test]
+    fn token_signed_with_different_secret_is_rejected() {
+        let user = test_user("user");
+        let auth = AuthService::new("test-secret-minimum-32-characters", 3600);
+        let other_auth = AuthService::new("other-secret-minimum-32-characters", 3600);
+
+        let token = auth
+            .generate_token(&user)
+            .expect("token should be generated");
+        let result = other_auth.validate_token(&token);
+
+        assert!(matches!(result, Err(AppError::Unauthorized(_))));
+    }
+
+    #[test]
+    fn bearer_token_is_extracted_from_authorization_header() {
+        let request = TestRequest::default()
+            .insert_header(("Authorization", "Bearer abc.def.ghi"))
+            .to_http_request();
+
+        assert_eq!(
+            AuthService::extract_token_from_request(&request),
+            Some("abc.def.ghi".to_string())
+        );
+    }
+
+    #[test]
+    fn non_bearer_authorization_header_is_ignored() {
+        let request = TestRequest::default()
+            .insert_header(("Authorization", "Basic abc"))
+            .to_http_request();
+
+        assert_eq!(AuthService::extract_token_from_request(&request), None);
+    }
+
+    #[test]
+    fn admin_satisfies_role_requirements() {
+        let claims = Claims::new(
+            Uuid::new_v4(),
+            "admin".to_string(),
+            "admin".to_string(),
+            3600,
+        );
+
+        assert!(AuthService::require_role(&claims, "responsible").is_ok());
+        assert!(AuthService::require_any_role(&claims, &["responsible", "user"]).is_ok());
+    }
+
+    #[test]
+    fn missing_role_is_rejected() {
+        let claims = Claims::new(Uuid::new_v4(), "user".to_string(), "user".to_string(), 3600);
+
+        assert!(matches!(
+            AuthService::require_role(&claims, "responsible"),
+            Err(AppError::Unauthorized(_))
+        ));
+        assert!(matches!(
+            AuthService::require_any_role(&claims, &["admin", "responsible"]),
+            Err(AppError::Unauthorized(_))
+        ));
+    }
+
+    #[test]
+    fn password_hash_verifies_only_original_password() {
+        let hash =
+            AuthService::hash_password("correct-password").expect("password should be hashed");
+
+        assert!(
+            AuthService::verify_password("correct-password", &hash).expect("hash should verify")
+        );
+        assert!(!AuthService::verify_password("wrong-password", &hash).expect("hash should verify"));
     }
 }
 
@@ -110,4 +218,3 @@ impl AuthService {
         }
     }
 }
-

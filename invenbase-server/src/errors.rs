@@ -34,24 +34,18 @@ impl ResponseError for AppError {
                     "message": "An error occurred while processing your request"
                 }))
             }
-            AppError::NotFound(msg) => {
-                HttpResponse::NotFound().json(json!({
-                    "error": "Not found",
-                    "message": msg
-                }))
-            }
-            AppError::Unauthorized(msg) => {
-                HttpResponse::Unauthorized().json(json!({
-                    "error": "Unauthorized",
-                    "message": msg
-                }))
-            }
-            AppError::BadRequest(msg) => {
-                HttpResponse::BadRequest().json(json!({
-                    "error": "Bad request",
-                    "message": msg
-                }))
-            }
+            AppError::NotFound(msg) => HttpResponse::NotFound().json(json!({
+                "error": "Not found",
+                "message": msg
+            })),
+            AppError::Unauthorized(msg) => HttpResponse::Unauthorized().json(json!({
+                "error": "Unauthorized",
+                "message": msg
+            })),
+            AppError::BadRequest(msg) => HttpResponse::BadRequest().json(json!({
+                "error": "Bad request",
+                "message": msg
+            })),
             AppError::InternalError(msg) => {
                 log::error!("Internal error: {}", msg);
                 HttpResponse::InternalServerError().json(json!({
@@ -71,3 +65,36 @@ impl From<sqlx::Error> for AppError {
 
 impl std::error::Error for AppError {}
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::{http::StatusCode, ResponseError};
+
+    #[test]
+    fn not_found_maps_to_404_response() {
+        let response = AppError::NotFound("missing entity".to_string()).error_response();
+
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    }
+
+    #[test]
+    fn unauthorized_maps_to_401_response() {
+        let response = AppError::Unauthorized("no token".to_string()).error_response();
+
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    #[test]
+    fn bad_request_maps_to_400_response() {
+        let response = AppError::BadRequest("invalid input".to_string()).error_response();
+
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    }
+
+    #[test]
+    fn internal_error_maps_to_500_response() {
+        let response = AppError::InternalError("unexpected".to_string()).error_response();
+
+        assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    }
+}

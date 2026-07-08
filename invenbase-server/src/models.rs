@@ -1,6 +1,6 @@
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
-use chrono::{DateTime, Utc, NaiveDate};
 use uuid::Uuid;
 
 // ========== User Models ==========
@@ -485,3 +485,33 @@ pub struct AddSupportMessageRequest {
     pub message: String,
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::Utc;
+
+    #[test]
+    fn user_response_from_user_exposes_public_fields_only() {
+        let user_id = Uuid::new_v4();
+        let user = User {
+            id: user_id,
+            username: "teacher".to_string(),
+            password_hash: "secret-password-hash".to_string(),
+            email: Some("teacher@example.test".to_string()),
+            full_name: Some("Test Teacher".to_string()),
+            role: "responsible".to_string(),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+        };
+
+        let response = UserResponse::from(user);
+        let serialized = serde_json::to_value(&response).expect("response should serialize");
+
+        assert_eq!(response.id, user_id);
+        assert_eq!(response.username, "teacher");
+        assert_eq!(response.email.as_deref(), Some("teacher@example.test"));
+        assert_eq!(response.full_name.as_deref(), Some("Test Teacher"));
+        assert_eq!(response.role, "responsible");
+        assert!(serialized.get("password_hash").is_none());
+    }
+}
