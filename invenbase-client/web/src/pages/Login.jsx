@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,8 +7,14 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,23 +72,29 @@ const Login = () => {
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          <label className="label">Имя пользователя</label>
+          <label className="label" htmlFor="username">Имя пользователя</label>
           <input
+            id="username"
+            name="username"
             type="text"
             className="input"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
             autoFocus
+            aria-label="Username"
           />
 
-          <label className="label">Пароль</label>
+          <label className="label" htmlFor="password">Пароль</label>
           <input
+            id="password"
+            name="password"
             type="password"
             className="input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            aria-label="Password"
           />
 
           <button
