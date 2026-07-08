@@ -360,6 +360,7 @@ const BookingCreate = () => {
                   onChange={(e) => setManualQRCode(e.target.value)}
                   placeholder="Введите QR-код оборудования"
                   autoFocus
+                  aria-label="Manual QR code"
                 />
                 <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
                   <button 
@@ -403,6 +404,7 @@ const BookingCreate = () => {
               value={formData.equipment_id}
               onChange={(e) => setFormData({ ...formData, equipment_id: e.target.value })}
               required
+              aria-label="Equipment"
             >
               <option value="">Выберите оборудование</option>
               {equipment.map((eq) => (
@@ -443,6 +445,7 @@ const BookingCreate = () => {
           value={formData.quantity}
           onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
           required
+          aria-label="Quantity"
         />
 
         <label className="label">Дата начала *</label>
@@ -452,6 +455,7 @@ const BookingCreate = () => {
           value={formData.start_date}
           onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
           required
+          aria-label="Start date"
         />
 
         <label className="label">Дата окончания *</label>
@@ -461,6 +465,7 @@ const BookingCreate = () => {
           value={formData.end_date}
           onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
           required
+          aria-label="End date"
         />
 
         <label className="label">Тип разрешения *</label>
@@ -469,6 +474,7 @@ const BookingCreate = () => {
           value={formData.permission_type}
           onChange={(e) => setFormData({ ...formData, permission_type: e.target.value })}
           required
+          aria-label="Permission type"
         >
           <option value="internal">Внутреннее использование</option>
           <option value="external">Вынос за пределы учреждения</option>
@@ -481,6 +487,7 @@ const BookingCreate = () => {
           value={formData.purpose}
           onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
           placeholder="Опишите цель использования оборудования..."
+          aria-label="Purpose"
         />
 
         <div className="form-actions">
