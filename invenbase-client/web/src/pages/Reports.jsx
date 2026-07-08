@@ -4,7 +4,7 @@ import { reportsAPI } from '../api/reports';
 import { bookingsAPI } from '../api/bookings';
 import { equipmentAPI } from '../api/equipment';
 import { squadsAPI } from '../api/squads';
-import * as XLSX from 'xlsx';
+import { exportWorkbook } from '../utils/xlsxExport';
 
 const Reports = () => {
   const { isAdmin, isResponsible } = useAuth();
@@ -121,7 +121,7 @@ const Reports = () => {
   const exportReportXlsx = async () => {
     try {
       const periodStr = fromDate && toDate ? `с ${fromDate} по ${toDate}` : (fromDate || toDate) ? `с ${fromDate || '…'} по ${toDate || '…'}` : 'за всё время';
-      const wb = XLSX.utils.book_new();
+      const sheets = [];
       const filteredBookings = getFilteredBookingsByPeriod();
 
       let movementsList = [];
@@ -145,7 +145,7 @@ const Reports = () => {
       const statusEqRu = { available: 'Доступно', maintenance: 'На обслуживании' };
 
       // Лист 1 — Сводка (одна таблица: Показатель | Значение)
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      sheets.push({ name: 'Сводка', rows: [
         ['Сводка по системе'],
         ['Период выборки по бронированиям и перемещениям', periodStr],
         [],
@@ -167,10 +167,10 @@ const Reports = () => {
         ['——— За выбранный период ———', ''],
         ['Бронирований за период', filteredBookings.length],
         ['Перемещений оборудования за период', movementsList.length],
-      ]), 'Сводка');
+      ]});
 
       // Лист 2 — Оборудование (справочник)
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      sheets.push({ name: 'Оборудование', rows: [
         ['Справочник оборудования (текущее состояние)'],
         [],
         ['№', 'Название оборудования', 'Категория', 'Всего, шт.', 'Доступно, шт.', 'В бронировании, шт.', 'Статус', 'Местоположение'],
@@ -180,15 +180,15 @@ const Reports = () => {
           const booked = Math.max(0, total - available);
           return [i + 1, eq.name || '—', catById[eq.category_id] || 'Без категории', total, available, booked, statusEqRu[eq.status] || eq.status || '—', eq.location || '—'];
         }),
-      ]), 'Оборудование');
+      ]});
 
       // Лист 3 — Категории
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      sheets.push({ name: 'Категории', rows: [
         ['Оборудование по категориям'],
         [],
         ['Категория', 'Всего, шт.', 'Доступно, шт.', 'В бронировании, шт.'],
         ...(equipmentReport?.by_category || []).map((c) => [c.category_name || 'Без категории', c.total ?? 0, c.available ?? 0, c.booked ?? 0]),
-      ]), 'Категории');
+      ]});
 
       // Лист 4 — Бронирования за период
       const bookingRows = filteredBookings.filter((b) => b.equipment_id).map((b) => {
@@ -206,13 +206,13 @@ const Reports = () => {
           b.end_date ? new Date(b.end_date).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }) : '—',
         ];
       });
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      sheets.push({ name: 'Бронирования', rows: [
         ['Бронирования за период'],
         ['Период', periodStr],
         [],
         ['Оборудование', 'Категория', 'Пользователь', 'Статус заявки', 'Тип доступа', 'Кол-во, шт.', 'Цель использования', 'Дата и время начала', 'Дата и время окончания'],
         ...bookingRows,
-      ]), 'Бронирования');
+      ]});
 
       // Лист 5 — Перемещения (только названия, без ID/UUID)
       const moveRows = movementsList.map((e) => {
@@ -228,16 +228,16 @@ const Reports = () => {
           d.comment || '—',
         ];
       });
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      sheets.push({ name: 'Перемещения', rows: [
         ['Перемещения оборудования за период'],
         ['Период', periodStr],
         [],
         ['Дата и время', 'Кто выполнил', 'Название оборудования', 'Откуда (место/сквад)', 'Куда (место/сквад)', 'Комментарий'],
         ...moveRows,
-      ]), 'Перемещения');
+      ]});
 
       const fname = `otchet_${fromDate || 'vse'}_${toDate || 'vse'}.xlsx`.replace(/\s/g, '_');
-      XLSX.writeFile(wb, fname);
+      exportWorkbook(sheets, fname);
     } catch (e) {
       console.error(e);
       alert('Ошибка выгрузки отчёта');

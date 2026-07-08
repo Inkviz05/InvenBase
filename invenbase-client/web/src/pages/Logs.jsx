@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { reportsAPI } from '../api/reports';
 import { usersAPI } from '../api/users';
-import * as XLSX from 'xlsx';
+import { exportWorkbook } from '../utils/xlsxExport';
 import { format } from 'date-fns';
 
 const ACTION_LABELS = {
@@ -132,11 +132,8 @@ const Logs = () => {
       (e.entity_name && e.entity_name.trim()) ? e.entity_name.trim() : '—',
       formatDetails(e.details),
     ]);
-    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Журнал учёта');
     const name = fromDate || toDate ? `audit_${fromDate || '...'}_${toDate || '...'}.xlsx` : 'audit_report.xlsx';
-    XLSX.writeFile(wb, name);
+    exportWorkbook([{ name: 'Журнал учёта', rows: [headers, ...rows] }], name);
   };
 
   if (!canAccess) {
