@@ -279,6 +279,7 @@ const EquipmentList = () => {
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
                 autoFocus
+                aria-label="Manual equipment code"
                 style={{ marginBottom: '16px' }}
               />
               <div style={{ display: 'flex', gap: '12px' }}>
@@ -322,12 +323,14 @@ const EquipmentList = () => {
           placeholder="Поиск оборудования..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          aria-label="Search equipment"
           style={{ flex: '1', minWidth: '200px' }}
         />
         <select
           className="input"
           value={squadFilter}
           onChange={(e) => setSquadFilter(e.target.value)}
+          aria-label="Squad filter"
           style={{ minWidth: '200px' }}
         >
           <option value="">Все сквады</option>
@@ -398,6 +401,7 @@ const EquipmentList = () => {
                   addToCart(eq, 1);
                 }}
                 className={`btn ${isInCart(eq.id) ? 'btn-secondary' : 'btn-primary'}`}
+                aria-label={`Add ${eq.name} to booking cart`}
                 style={{ 
                   marginTop: '12px', 
                   width: '100%',
