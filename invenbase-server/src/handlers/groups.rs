@@ -1,10 +1,10 @@
 use actix_web::{web, HttpResponse};
 use uuid::Uuid;
 
-use crate::models::{EquipmentGroup, CreateEquipmentGroupRequest};
+use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::app_state::AppState;
+use crate::models::{CreateEquipmentGroupRequest, EquipmentGroup};
 
 pub async fn create_group(
     state: web::Data<AppState>,
@@ -17,7 +17,7 @@ pub async fn create_group(
 
     sqlx::query::<sqlx::Postgres>(
         "INSERT INTO equipment_groups (id, name, description)
-         VALUES ($1, $2, $3)"
+         VALUES ($1, $2, $3)",
     )
     .bind(group_id)
     .bind(&req.name)
@@ -29,7 +29,7 @@ pub async fn create_group(
     for item in &req.equipment_items {
         sqlx::query::<sqlx::Postgres>(
             "INSERT INTO equipment_group_items (group_id, equipment_id, quantity)
-             VALUES ($1, $2, $3)"
+             VALUES ($1, $2, $3)",
         )
         .bind(group_id)
         .bind(item.equipment_id)
@@ -39,7 +39,7 @@ pub async fn create_group(
     }
 
     let group: EquipmentGroup = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, name, description, created_at FROM equipment_groups WHERE id = $1"
+        "SELECT id, name, description, created_at FROM equipment_groups WHERE id = $1",
     )
     .bind(group_id)
     .fetch_one(&state.db.pool)
@@ -53,7 +53,7 @@ pub async fn get_groups(
     _claims: Claims,
 ) -> Result<HttpResponse, AppError> {
     let groups: Vec<EquipmentGroup> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, name, description, created_at FROM equipment_groups ORDER BY created_at DESC"
+        "SELECT id, name, description, created_at FROM equipment_groups ORDER BY created_at DESC",
     )
     .fetch_all(&state.db.pool)
     .await?;
@@ -69,7 +69,7 @@ pub async fn get_group(
     let group_id = path.into_inner();
 
     let group: Option<EquipmentGroup> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, name, description, created_at FROM equipment_groups WHERE id = $1"
+        "SELECT id, name, description, created_at FROM equipment_groups WHERE id = $1",
     )
     .bind(group_id)
     .fetch_optional(&state.db.pool)
@@ -92,7 +92,7 @@ pub async fn update_group(
 
     // Проверяем, что группа существует
     let exists: Option<(bool,)> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT EXISTS(SELECT 1 FROM equipment_groups WHERE id = $1)"
+        "SELECT EXISTS(SELECT 1 FROM equipment_groups WHERE id = $1)",
     )
     .bind(group_id)
     .fetch_optional(&state.db.pool)
@@ -104,7 +104,7 @@ pub async fn update_group(
 
     // Обновляем название и описание группы
     sqlx::query::<sqlx::Postgres>(
-        "UPDATE equipment_groups SET name = $1, description = $2 WHERE id = $3"
+        "UPDATE equipment_groups SET name = $1, description = $2 WHERE id = $3",
     )
     .bind(&req.name)
     .bind(&req.description)
@@ -113,18 +113,16 @@ pub async fn update_group(
     .await?;
 
     // Удаляем старые элементы группы
-    sqlx::query::<sqlx::Postgres>(
-        "DELETE FROM equipment_group_items WHERE group_id = $1"
-    )
-    .bind(group_id)
-    .execute(&state.db.pool)
-    .await?;
+    sqlx::query::<sqlx::Postgres>("DELETE FROM equipment_group_items WHERE group_id = $1")
+        .bind(group_id)
+        .execute(&state.db.pool)
+        .await?;
 
     // Добавляем новые элементы группы
     for item in &req.equipment_items {
         sqlx::query::<sqlx::Postgres>(
             "INSERT INTO equipment_group_items (group_id, equipment_id, quantity)
-             VALUES ($1, $2, $3)"
+             VALUES ($1, $2, $3)",
         )
         .bind(group_id)
         .bind(item.equipment_id)
@@ -134,7 +132,7 @@ pub async fn update_group(
     }
 
     let group: EquipmentGroup = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, name, description, created_at FROM equipment_groups WHERE id = $1"
+        "SELECT id, name, description, created_at FROM equipment_groups WHERE id = $1",
     )
     .bind(group_id)
     .fetch_one(&state.db.pool)
@@ -163,4 +161,3 @@ pub async fn delete_group(
 
     Ok(HttpResponse::NoContent().finish())
 }
-

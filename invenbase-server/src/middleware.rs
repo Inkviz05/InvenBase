@@ -1,9 +1,9 @@
-use actix_web::{web, HttpRequest, FromRequest, Error as ActixError};
+use actix_web::{web, Error as ActixError, FromRequest, HttpRequest};
 use futures::future::{ready, Ready};
 
+use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::app_state::AppState;
 
 // Middleware для проверки JWT токена
 pub struct Authenticated(Claims);
@@ -13,8 +13,11 @@ impl FromRequest for Authenticated {
     type Future = Ready<Result<Self, Self::Error>>;
 
     fn from_request(req: &HttpRequest, _: &mut actix_web::dev::Payload) -> Self::Future {
-        let app_state = req.app_data::<web::Data<AppState>>()
-            .ok_or_else(|| ActixError::from(AppError::InternalError("App state not found".to_string())))
+        let app_state = req
+            .app_data::<web::Data<AppState>>()
+            .ok_or_else(|| {
+                ActixError::from(AppError::InternalError("App state not found".to_string()))
+            })
             .map_err(ActixError::from);
 
         if let Err(e) = app_state {
@@ -22,7 +25,10 @@ impl FromRequest for Authenticated {
         }
 
         let app_state = app_state.unwrap();
-        let auth_service = AuthService::new(&app_state.config.jwt_secret, app_state.config.jwt_expiration);
+        let auth_service = AuthService::new(
+            &app_state.config.jwt_secret,
+            app_state.config.jwt_expiration,
+        );
 
         let token = match AuthService::extract_token_from_request(req) {
             Some(t) => t,
@@ -108,4 +114,3 @@ impl AdminOrResponsible {
         self.0.clone()
     }
 }
-

@@ -14,4 +14,3 @@ impl AppState {
         AppState { db, config }
     }
 }
-

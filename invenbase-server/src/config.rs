@@ -40,8 +40,18 @@ impl Config {
         // Логируем загруженные значения для отладки (до нормализации)
         log::info!("FCM configuration loaded:");
         log::info!("  FCM_PROJECT_ID: {:?}", fcm_project_id);
-        log::info!("  FCM_SERVICE_ACCOUNT_PATH (raw): {:?}", &fcm_service_account_path_raw);
-        log::info!("  FCM_SERVER_KEY: {}", if fcm_server_key.is_some() { "***SET***" } else { "NOT SET" });
+        log::info!(
+            "  FCM_SERVICE_ACCOUNT_PATH (raw): {:?}",
+            &fcm_service_account_path_raw
+        );
+        log::info!(
+            "  FCM_SERVER_KEY: {}",
+            if fcm_server_key.is_some() {
+                "***SET***"
+            } else {
+                "NOT SET"
+            }
+        );
 
         // Нормализуем путь к Service Account (преобразуем относительный в абсолютный, если нужно)
         let fcm_service_account_path = fcm_service_account_path_raw.map(|path| {
@@ -49,8 +59,15 @@ impl Config {
             if path.starts_with("./") || (!path.contains(':') && !path.starts_with('/')) {
                 // Относительный путь
                 if let Ok(current_dir) = std::env::current_dir() {
-                    let normalized = current_dir.join(path.trim_start_matches("./")).to_string_lossy().to_string();
-                    log::info!("  FCM_SERVICE_ACCOUNT_PATH normalized: {} -> {}", path, normalized);
+                    let normalized = current_dir
+                        .join(path.trim_start_matches("./"))
+                        .to_string_lossy()
+                        .to_string();
+                    log::info!(
+                        "  FCM_SERVICE_ACCOUNT_PATH normalized: {} -> {}",
+                        path,
+                        normalized
+                    );
                     normalized
                 } else {
                     path
@@ -60,12 +77,20 @@ impl Config {
                 path
             }
         });
-        
+
         // Дополнительная диагностика: проверяем все переменные окружения, начинающиеся с FCM_
         if std::env::var("RUST_LOG").is_ok() {
             for (key, value) in std::env::vars() {
                 if key.starts_with("FCM_") {
-                    log::debug!("  Env var {} = {:?}", key, if key.contains("KEY") { "***HIDDEN***" } else { &value });
+                    log::debug!(
+                        "  Env var {} = {:?}",
+                        key,
+                        if key.contains("KEY") {
+                            "***HIDDEN***"
+                        } else {
+                            &value
+                        }
+                    );
                 }
             }
         }
@@ -96,18 +121,22 @@ impl Config {
             }
 
             Some(DefaultAdminConfig {
-                username: env::var("DEFAULT_ADMIN_USERNAME").unwrap_or_else(|_| "admin".to_string()),
+                username: env::var("DEFAULT_ADMIN_USERNAME")
+                    .unwrap_or_else(|_| "admin".to_string()),
                 password,
-                email: env::var("DEFAULT_ADMIN_EMAIL").unwrap_or_else(|_| "admin@kvantoriym.local".to_string()),
-                full_name: env::var("DEFAULT_ADMIN_FULL_NAME").unwrap_or_else(|_| "Administrator".to_string()),
+                email: env::var("DEFAULT_ADMIN_EMAIL")
+                    .unwrap_or_else(|_| "admin@kvantoriym.local".to_string()),
+                full_name: env::var("DEFAULT_ADMIN_FULL_NAME")
+                    .unwrap_or_else(|_| "Administrator".to_string()),
             })
         } else {
             None
         };
 
         Ok(Config {
-            database_url: env::var("DATABASE_URL")
-                .unwrap_or_else(|_| "postgresql://postgres:postgres@localhost:5432/kvantoriym".to_string()),
+            database_url: env::var("DATABASE_URL").unwrap_or_else(|_| {
+                "postgresql://postgres:postgres@localhost:5432/kvantoriym".to_string()
+            }),
             host: env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string()),
             port: env::var("PORT")
                 .unwrap_or_else(|_| "8080".to_string())
@@ -132,4 +161,3 @@ impl Config {
         })
     }
 }
-

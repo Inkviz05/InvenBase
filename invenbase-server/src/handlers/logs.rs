@@ -1,10 +1,10 @@
 use actix_web::{web, HttpResponse};
 use uuid::Uuid;
 
-use crate::models::ActivityLog;
+use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::app_state::AppState;
+use crate::models::ActivityLog;
 
 pub async fn get_logs(
     state: web::Data<AppState>,
@@ -18,11 +18,11 @@ pub async fn get_logs(
 
     let logs: Vec<ActivityLog> = if let Some(user_id) = query.user_id {
         sqlx::query_as::<sqlx::Postgres, _>(
-            "SELECT id, user_id, action, entity_type, entity_id, details, created_at 
-             FROM activity_logs 
-             WHERE user_id = $1 
-             ORDER BY created_at DESC 
-             LIMIT $2 OFFSET $3"
+            "SELECT id, user_id, action, entity_type, entity_id, details, created_at
+             FROM activity_logs
+             WHERE user_id = $1
+             ORDER BY created_at DESC
+             LIMIT $2 OFFSET $3",
         )
         .bind(user_id)
         .bind(limit as i64)
@@ -31,11 +31,11 @@ pub async fn get_logs(
         .await?
     } else if let Some(entity_type) = &query.entity_type {
         sqlx::query_as::<sqlx::Postgres, _>(
-            "SELECT id, user_id, action, entity_type, entity_id, details, created_at 
-             FROM activity_logs 
-             WHERE entity_type = $1 
-             ORDER BY created_at DESC 
-             LIMIT $2 OFFSET $3"
+            "SELECT id, user_id, action, entity_type, entity_id, details, created_at
+             FROM activity_logs
+             WHERE entity_type = $1
+             ORDER BY created_at DESC
+             LIMIT $2 OFFSET $3",
         )
         .bind(entity_type)
         .bind(limit as i64)
@@ -44,10 +44,10 @@ pub async fn get_logs(
         .await?
     } else {
         sqlx::query_as::<sqlx::Postgres, _>(
-            "SELECT id, user_id, action, entity_type, entity_id, details, created_at 
-             FROM activity_logs 
-             ORDER BY created_at DESC 
-             LIMIT $1 OFFSET $2"
+            "SELECT id, user_id, action, entity_type, entity_id, details, created_at
+             FROM activity_logs
+             ORDER BY created_at DESC
+             LIMIT $1 OFFSET $2",
         )
         .bind(limit as i64)
         .bind(offset as i64)
@@ -65,4 +65,3 @@ pub struct LogQuery {
     pub limit: Option<usize>,
     pub offset: Option<usize>,
 }
-

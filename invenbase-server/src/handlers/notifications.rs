@@ -1,10 +1,10 @@
 use actix_web::{web, HttpResponse};
 use uuid::Uuid;
 
-use crate::models::{Notification, CreateNotificationRequest};
+use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::app_state::AppState;
+use crate::models::{CreateNotificationRequest, Notification};
 
 pub async fn get_notifications(
     state: web::Data<AppState>,
@@ -14,10 +14,10 @@ pub async fn get_notifications(
         .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
 
     let notifications: Vec<Notification> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, user_id, title, message, notification_type, is_read, created_at 
-         FROM notifications WHERE user_id = $1 
-         ORDER BY created_at DESC 
-         LIMIT 50"
+        "SELECT id, user_id, title, message, notification_type, is_read, created_at
+         FROM notifications WHERE user_id = $1
+         ORDER BY created_at DESC
+         LIMIT 50",
     )
     .bind(user_id)
     .fetch_all(&state.db.pool)
@@ -34,7 +34,7 @@ pub async fn get_unread_count(
         .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
 
     let count: (i64,) = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT COUNT(*) FROM notifications WHERE user_id = $1 AND is_read = FALSE"
+        "SELECT COUNT(*) FROM notifications WHERE user_id = $1 AND is_read = FALSE",
     )
     .bind(user_id)
     .fetch_one(&state.db.pool)
@@ -52,11 +52,13 @@ pub async fn mark_as_read(
     let user_id = uuid::Uuid::parse_str(&claims.sub)
         .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
 
-    sqlx::query::<sqlx::Postgres>("UPDATE notifications SET is_read = TRUE WHERE id = $1 AND user_id = $2")
-        .bind(notification_id)
-        .bind(user_id)
-        .execute(&state.db.pool)
-        .await?;
+    sqlx::query::<sqlx::Postgres>(
+        "UPDATE notifications SET is_read = TRUE WHERE id = $1 AND user_id = $2",
+    )
+    .bind(notification_id)
+    .bind(user_id)
+    .execute(&state.db.pool)
+    .await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -87,7 +89,7 @@ pub async fn create_notification(
 
     sqlx::query::<sqlx::Postgres>(
         "INSERT INTO notifications (id, user_id, title, message, notification_type)
-         VALUES ($1, $2, $3, $4, $5)"
+         VALUES ($1, $2, $3, $4, $5)",
     )
     .bind(notification_id)
     .bind(req.user_id)
@@ -98,8 +100,8 @@ pub async fn create_notification(
     .await?;
 
     let notification: Notification = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, user_id, title, message, notification_type, is_read, created_at 
-         FROM notifications WHERE id = $1"
+        "SELECT id, user_id, title, message, notification_type, is_read, created_at
+         FROM notifications WHERE id = $1",
     )
     .bind(notification_id)
     .fetch_one(&state.db.pool)
@@ -107,4 +109,3 @@ pub async fn create_notification(
 
     Ok(HttpResponse::Created().json(notification))
 }
-

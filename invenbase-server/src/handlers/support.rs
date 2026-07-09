@@ -1,13 +1,13 @@
 use actix_web::{web, HttpResponse};
 
-use crate::models::{
-    SupportRequest, SupportRequestWithUser, SupportRequestWithMessages, SupportRequestMessage,
-    CreateSupportRequestRequest, UpdateSupportRequestRequest, AddSupportMessageRequest,
-};
+use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::app_state::AppState;
 use crate::handlers::push::send_push_to_user;
+use crate::models::{
+    AddSupportMessageRequest, CreateSupportRequestRequest, SupportRequest, SupportRequestMessage,
+    SupportRequestWithMessages, SupportRequestWithUser, UpdateSupportRequestRequest,
+};
 
 pub async fn create_support_request(
     state: web::Data<AppState>,
@@ -27,19 +27,25 @@ pub async fn create_support_request(
     let subject = req.subject.trim();
     let message = req.message.trim();
     if subject.is_empty() {
-        return Err(AppError::BadRequest("Тема заявки не может быть пустой.".to_string()));
+        return Err(AppError::BadRequest(
+            "Тема заявки не может быть пустой.".to_string(),
+        ));
     }
     if message.is_empty() {
-        return Err(AppError::BadRequest("Сообщение не может быть пустым.".to_string()));
+        return Err(AppError::BadRequest(
+            "Сообщение не может быть пустым.".to_string(),
+        ));
     }
     if subject.len() > 500 {
-        return Err(AppError::BadRequest("Тема заявки слишком длинная.".to_string()));
+        return Err(AppError::BadRequest(
+            "Тема заявки слишком длинная.".to_string(),
+        ));
     }
 
     let id = uuid::Uuid::new_v4();
     sqlx::query::<sqlx::Postgres>(
         "INSERT INTO support_requests (id, user_id, subject, message, status)
-         VALUES ($1, $2, $3, $4, 'open')"
+         VALUES ($1, $2, $3, $4, 'open')",
     )
     .bind(id)
     .bind(user_id)
@@ -50,7 +56,7 @@ pub async fn create_support_request(
 
     let row: SupportRequest = sqlx::query_as::<sqlx::Postgres, _>(
         "SELECT id, user_id, subject, message, status, created_at, updated_at, admin_comment
-         FROM support_requests WHERE id = $1"
+         FROM support_requests WHERE id = $1",
     )
     .bind(id)
     .fetch_one(&state.db.pool)
@@ -61,12 +67,16 @@ pub async fn create_support_request(
     let notif_message = format!(
         "Пользователь {} оставил заявку: {}",
         claims.username,
-        if subject.len() > 80 { format!("{}…", &subject[..80]) } else { subject.to_string() }
+        if subject.len() > 80 {
+            format!("{}…", &subject[..80])
+        } else {
+            subject.to_string()
+        }
     );
     let _ = sqlx::query::<sqlx::Postgres>(
         "INSERT INTO notifications (user_id, title, message, notification_type)
          SELECT id, $1, $2, 'support_new'
-         FROM users WHERE role = 'admin' AND id != $3"
+         FROM users WHERE role = 'admin' AND id != $3",
     )
     .bind(&notif_title)
     .bind(&notif_message)
@@ -74,18 +84,30 @@ pub async fn create_support_request(
     .execute(&state.db.pool)
     .await;
 
-    let admin_ids: Vec<(uuid::Uuid,)> = sqlx::query_as(
-        "SELECT id FROM users WHERE role = 'admin' AND id != $1"
-    )
-    .bind(user_id)
-    .fetch_all(&state.db.pool)
-    .await
-    .unwrap_or_default();
+    let admin_ids: Vec<(uuid::Uuid,)> =
+        sqlx::query_as("SELECT id FROM users WHERE role = 'admin' AND id != $1")
+            .bind(user_id)
+            .fetch_all(&state.db.pool)
+            .await
+            .unwrap_or_default();
     let mut data = serde_json::Map::new();
-    data.insert("type".to_string(), serde_json::Value::String("support_new".to_string()));
-    data.insert("support_request_id".to_string(), serde_json::Value::String(id.to_string()));
+    data.insert(
+        "type".to_string(),
+        serde_json::Value::String("support_new".to_string()),
+    );
+    data.insert(
+        "support_request_id".to_string(),
+        serde_json::Value::String(id.to_string()),
+    );
     for (admin_id,) in admin_ids {
-        send_push_to_user(state.get_ref(), admin_id, notif_title, &notif_message, data.clone()).await;
+        send_push_to_user(
+            state.get_ref(),
+            admin_id,
+            notif_title,
+            &notif_message,
+            data.clone(),
+        )
+        .await;
     }
 
     Ok(HttpResponse::Created().json(row))
@@ -106,7 +128,7 @@ pub async fn get_support_requests(
                     sr.status, sr.created_at, sr.updated_at, sr.admin_comment
              FROM support_requests sr
              LEFT JOIN users u ON sr.user_id = u.id
-             ORDER BY sr.created_at DESC"
+             ORDER BY sr.created_at DESC",
         )
         .fetch_all(&state.db.pool)
         .await?
@@ -117,7 +139,7 @@ pub async fn get_support_requests(
              FROM support_requests sr
              LEFT JOIN users u ON sr.user_id = u.id
              WHERE sr.user_id = $1
-             ORDER BY sr.created_at DESC"
+             ORDER BY sr.created_at DESC",
         )
         .bind(user_id)
         .fetch_all(&state.db.pool)
@@ -180,12 +202,11 @@ pub async fn update_support_request(
     AuthService::require_role(&claims, "admin")?;
     let request_id = path.into_inner();
 
-    let current: Option<(String,)> = sqlx::query_as(
-        "SELECT status FROM support_requests WHERE id = $1"
-    )
-    .bind(request_id)
-    .fetch_optional(&state.db.pool)
-    .await?;
+    let current: Option<(String,)> =
+        sqlx::query_as("SELECT status FROM support_requests WHERE id = $1")
+            .bind(request_id)
+            .fetch_optional(&state.db.pool)
+            .await?;
     let current_status = current.as_ref().map(|c| c.0.as_str());
     if current_status.is_none() {
         return Err(AppError::NotFound("Заявка не найдена".to_string()));
@@ -201,7 +222,11 @@ pub async fn update_support_request(
 
     let new_status = req.status.as_deref().unwrap_or(current_status);
     // При переводе в «закрыта» не принимаем ответ в этом запросе — только смена статуса
-    let allow_comment = req.admin_comment.as_ref().map(|s| !s.is_empty()).unwrap_or(false)
+    let allow_comment = req
+        .admin_comment
+        .as_ref()
+        .map(|s| !s.is_empty())
+        .unwrap_or(false)
         && new_status != "closed";
 
     let mut conditions = Vec::new();
@@ -262,7 +287,7 @@ pub async fn update_support_request(
                 sr.status, sr.created_at, sr.updated_at, sr.admin_comment
          FROM support_requests sr
          LEFT JOIN users u ON sr.user_id = u.id
-         WHERE sr.id = $1"
+         WHERE sr.id = $1",
     )
     .bind(request_id)
     .fetch_one(&state.db.pool)
@@ -283,7 +308,7 @@ pub async fn update_support_request(
         );
         let _ = sqlx::query::<sqlx::Postgres>(
             "INSERT INTO notifications (user_id, title, message, notification_type)
-             VALUES ($1, $2, $3, 'support_reply')"
+             VALUES ($1, $2, $3, 'support_reply')",
         )
         .bind(updated.user_id)
         .bind(&notif_title)
@@ -292,15 +317,22 @@ pub async fn update_support_request(
         .await;
 
         let mut data = serde_json::Map::new();
-        data.insert("type".to_string(), serde_json::Value::String("support_reply".to_string()));
-        data.insert("support_request_id".to_string(), serde_json::Value::String(request_id.to_string()));
+        data.insert(
+            "type".to_string(),
+            serde_json::Value::String("support_reply".to_string()),
+        );
+        data.insert(
+            "support_request_id".to_string(),
+            serde_json::Value::String(request_id.to_string()),
+        );
         send_push_to_user(
             state.get_ref(),
             updated.user_id,
             &notif_title,
             &notif_message,
             data,
-        ).await;
+        )
+        .await;
     }
 
     Ok(HttpResponse::Ok().json(updated))
@@ -319,18 +351,19 @@ pub async fn add_support_message(
 
     let message = req.message.trim();
     if message.is_empty() {
-        return Err(AppError::BadRequest("Сообщение не может быть пустым.".to_string()));
+        return Err(AppError::BadRequest(
+            "Сообщение не может быть пустым.".to_string(),
+        ));
     }
 
-    let row: Option<(uuid::Uuid, String)> = sqlx::query_as(
-        "SELECT user_id, status FROM support_requests WHERE id = $1"
-    )
-    .bind(request_id)
-    .fetch_optional(&state.db.pool)
-    .await?;
+    let row: Option<(uuid::Uuid, String)> =
+        sqlx::query_as("SELECT user_id, status FROM support_requests WHERE id = $1")
+            .bind(request_id)
+            .fetch_optional(&state.db.pool)
+            .await?;
 
-    let (owner_id, status) = row
-        .ok_or_else(|| AppError::NotFound("Заявка не найдена".to_string()))?;
+    let (owner_id, status) =
+        row.ok_or_else(|| AppError::NotFound("Заявка не найдена".to_string()))?;
     if owner_id != user_id {
         return Err(AppError::Unauthorized(
             "Добавлять сообщения может только автор заявки.".to_string(),
@@ -366,7 +399,7 @@ pub async fn add_support_message(
 
     let created: SupportRequestMessage = sqlx::query_as::<sqlx::Postgres, _>(
         "SELECT id, support_request_id, author_user_id, is_staff, message, created_at
-         FROM support_request_messages WHERE id = $1"
+         FROM support_request_messages WHERE id = $1",
     )
     .bind(msg_id)
     .fetch_one(&state.db.pool)
@@ -384,12 +417,11 @@ pub async fn delete_support_request(
     AuthService::require_role(&claims, "admin")?;
     let request_id = path.into_inner();
 
-    let row: Option<(String,)> = sqlx::query_as(
-        "SELECT status FROM support_requests WHERE id = $1"
-    )
-    .bind(request_id)
-    .fetch_optional(&state.db.pool)
-    .await?;
+    let row: Option<(String,)> =
+        sqlx::query_as("SELECT status FROM support_requests WHERE id = $1")
+            .bind(request_id)
+            .fetch_optional(&state.db.pool)
+            .await?;
 
     let (status,) = row.ok_or_else(|| AppError::NotFound("Заявка не найдена".to_string()))?;
     if status != "closed" {

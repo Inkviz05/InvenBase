@@ -7,7 +7,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
     cfg
         // Аутентификация (публичные endpoints)
         .route("/auth/login", web::post().to(auth::login))
-        
+
         // Пользователи
         .service(
             web::scope("/users")
@@ -30,7 +30,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                     users::delete_user(state, auth.claims(), path).await
                 }))
         )
-        
+
         // Оборудование
         .service(
             web::scope("/equipment")
@@ -59,7 +59,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                     equipment::delete_equipment(state, auth.claims(), path).await
                 }))
         )
-        
+
         // Категории
         .service(
             web::scope("/categories")
@@ -79,7 +79,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                     categories::delete_category(state, auth.claims(), path).await
                 }))
         )
-        
+
         // Группы оборудования
         .service(
             web::scope("/groups")
@@ -99,7 +99,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                     groups::delete_group(state, auth.claims(), path).await
                 }))
         )
-        
+
         // Сквады (для разделения кабинетов и зон ответственности)
         .service(
             web::scope("/squads")
@@ -122,7 +122,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                     squads::delete_squad(state, auth.claims(), path).await
                 }))
         )
-        
+
         // Бронирования
         .service(
             web::scope("/bookings")
@@ -157,7 +157,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                     bookings::delete_booking(state, auth.claims(), path).await
                 }))
         )
-        
+
         // Разрешения
         .service(
             web::scope("/permissions")
@@ -171,7 +171,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                     permissions::revoke_permission(state, auth.claims(), path).await
                 }))
         )
-        
+
         // Уведомления
         .service(
             web::scope("/notifications")
@@ -196,7 +196,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                     notifications::create_notification(state, auth.claims(), req).await
                 }))
         )
-        
+
         // Логи
         .service(
             web::scope("/logs")
@@ -204,7 +204,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                     logs::get_logs(state, auth.claims(), query).await
                 }))
         )
-        
+
         // Отчёты
         .service(
             web::scope("/reports")
@@ -221,7 +221,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                     reports::get_audit_report(state, auth.claims(), query).await
                 }))
         )
-        
+
         // QR-коды
         .service(
             web::scope("/qr")
@@ -266,9 +266,7 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
 pub fn configure_web(cfg: &mut web::ServiceConfig) {
     cfg.route(
         "/health",
-        web::get().to(|| async {
-            HttpResponse::Ok().json(serde_json::json!({ "status": "ok" }))
-        }),
+        web::get().to(|| async { HttpResponse::Ok().json(serde_json::json!({ "status": "ok" })) }),
     )
     .route(
         "/",

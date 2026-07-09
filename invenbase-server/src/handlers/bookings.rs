@@ -149,7 +149,7 @@ pub async fn get_bookings(
             // Админы и ответственные видят все бронирования
             sqlx::query_as::<sqlx::Postgres, _>(
                 r#"
-            SELECT 
+            SELECT
                 b.id, b.user_id, u.username, u.full_name, b.equipment_id, e.name as equipment_name,
                 b.group_id, g.name as group_name, b.quantity, b.start_date, b.end_date,
                 b.purpose, b.status, b.permission_type, b.created_at, b.updated_at
@@ -166,7 +166,7 @@ pub async fn get_bookings(
             // Обычные пользователи видят только свои бронирования
             sqlx::query_as::<sqlx::Postgres, _>(
                 r#"
-            SELECT 
+            SELECT
                 b.id, b.user_id, u.username, u.full_name, b.equipment_id, e.name as equipment_name,
                 b.group_id, g.name as group_name, b.quantity, b.start_date, b.end_date,
                 b.purpose, b.status, b.permission_type, b.created_at, b.updated_at
@@ -197,7 +197,7 @@ pub async fn get_booking(
 
     let booking: Option<BookingWithDetails> = sqlx::query_as::<sqlx::Postgres, _>(
         r#"
-        SELECT 
+        SELECT
             b.id, b.user_id, u.username, u.full_name, b.equipment_id, e.name as equipment_name,
             b.group_id, g.name as group_name, b.quantity, b.start_date, b.end_date,
             b.purpose, b.status, b.permission_type, b.created_at, b.updated_at
@@ -239,7 +239,7 @@ pub async fn update_booking(
     }
 
     let booking: Booking = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, user_id, equipment_id, group_id, quantity, start_date, end_date, purpose, status, permission_type, created_at, updated_at 
+        "SELECT id, user_id, equipment_id, group_id, quantity, start_date, end_date, purpose, status, permission_type, created_at, updated_at
          FROM bookings WHERE id = $1"
     )
     .bind(booking_id)
@@ -564,7 +564,7 @@ async fn cancel_booking_for_claims(
         .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
 
     let booking: Booking = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, user_id, equipment_id, group_id, quantity, start_date, end_date, purpose, status, permission_type, created_at, updated_at 
+        "SELECT id, user_id, equipment_id, group_id, quantity, start_date, end_date, purpose, status, permission_type, created_at, updated_at
          FROM bookings WHERE id = $1"
     )
     .bind(booking_id)

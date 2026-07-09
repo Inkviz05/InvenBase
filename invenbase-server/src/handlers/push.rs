@@ -1,10 +1,10 @@
 use actix_web::{web, HttpResponse};
+use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
 use serde::Deserialize;
 use serde_json::json;
-use uuid::Uuid;
-use std::fs;
 use std::collections::{HashMap, HashSet};
-use jsonwebtoken::{encode, Header, EncodingKey, Algorithm};
+use std::fs;
+use uuid::Uuid;
 
 use crate::app_state::AppState;
 use crate::auth::Claims;
@@ -29,17 +29,14 @@ pub async fn register_push_token(
 
     // Сохраняем токен, если настроен хотя бы один способ отправки: Legacy (FCM_SERVER_KEY) или HTTP v1 (FCM_PROJECT_ID + FCM_SERVICE_ACCOUNT_PATH)
     let fcm_configured = state.config.fcm_server_key.is_some()
-        || (state.config.fcm_project_id.is_some() && state.config.fcm_service_account_path.is_some());
+        || (state.config.fcm_project_id.is_some()
+            && state.config.fcm_service_account_path.is_some());
     if !fcm_configured {
         log::warn!("FCM not configured: token not saved. Set FCM_SERVER_KEY or FCM_PROJECT_ID+FCM_SERVICE_ACCOUNT_PATH.");
         return Ok(HttpResponse::NoContent().finish());
     }
 
-    let platform = body
-        .platform
-        .as_deref()
-        .unwrap_or("android")
-        .to_string();
+    let platform = body.platform.as_deref().unwrap_or("android").to_string();
 
     // Таблица user_devices должна существовать в БД:
     //
@@ -71,7 +68,11 @@ pub async fn register_push_token(
     .execute(&state.db.pool)
     .await?;
 
-    log::info!("Push token registered for user {} (platform: {})", user_id, platform);
+    log::info!(
+        "Push token registered for user {} (platform: {})",
+        user_id,
+        platform
+    );
     Ok(HttpResponse::NoContent().finish())
 }
 
@@ -101,12 +102,20 @@ pub async fn send_push_to_user(
     };
 
     if devices.is_empty() {
-        log::warn!("No devices found for user {}, push notification skipped", user_id);
+        log::warn!(
+            "No devices found for user {}, push notification skipped",
+            user_id
+        );
         return;
     }
 
-    log::info!("Sending push notification to user {} ({} devices): title='{}', body='{}'", 
-               user_id, devices.len(), title, body);
+    log::info!(
+        "Sending push notification to user {} ({} devices): title='{}', body='{}'",
+        user_id,
+        devices.len(),
+        title,
+        body
+    );
 
     // Общие поля data
     data.insert(
@@ -123,17 +132,34 @@ pub async fn send_push_to_user(
         state.config.fcm_project_id.clone(),
         state.config.fcm_service_account_path.clone(),
     ) {
-        match send_push_v1(&state.db.pool, &project_id, &service_account_path, title, body, &data, &devices, user_id).await {
+        match send_push_v1(
+            &state.db.pool,
+            &project_id,
+            &service_account_path,
+            title,
+            body,
+            &data,
+            &devices,
+            user_id,
+        )
+        .await
+        {
             Ok(sent_count) => {
                 if sent_count > 0 {
                     log::info!("Push notifications sent successfully via HTTP v1 API to user {} ({} devices)", user_id, sent_count);
                     return;
                 } else {
-                    log::warn!("No valid devices found for user {}, falling back to Legacy API", user_id);
+                    log::warn!(
+                        "No valid devices found for user {}, falling back to Legacy API",
+                        user_id
+                    );
                 }
             }
             Err(e) => {
-                log::error!("Failed to send push via HTTP v1 API: {:?}, falling back to Legacy API", e);
+                log::error!(
+                    "Failed to send push via HTTP v1 API: {:?}, falling back to Legacy API",
+                    e
+                );
                 // Fallback to Legacy API
             }
         }
@@ -154,7 +180,8 @@ pub async fn send_push_to_user(
     for (token,) in devices {
         // Преобразуем data из Map в правильный формат для FCM Legacy API
         // В Legacy API все значения в data должны быть строками
-        let mut fcm_data: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+        let mut fcm_data: std::collections::HashMap<String, String> =
+            std::collections::HashMap::new();
         for (key, value) in &data {
             let value_str = match value {
                 serde_json::Value::String(s) => s.clone(),
@@ -183,7 +210,10 @@ pub async fn send_push_to_user(
             "time_to_live": 86400
         });
 
-        log::debug!("FCM Legacy API payload: {}", serde_json::to_string(&payload).unwrap_or_default());
+        log::debug!(
+            "FCM Legacy API payload: {}",
+            serde_json::to_string(&payload).unwrap_or_default()
+        );
 
         let res = client
             .post("https://fcm.googleapis.com/fcm/send")
@@ -196,12 +226,15 @@ pub async fn send_push_to_user(
         match res {
             Ok(resp) => {
                 if resp.status().is_success() {
-                    log::info!("FCM push sent successfully to user {} (token: {}...)", 
-                               user_id, &token[..std::cmp::min(20, token.len())]);
+                    log::info!(
+                        "FCM push sent successfully to user {} (token: {}...)",
+                        user_id,
+                        &token[..std::cmp::min(20, token.len())]
+                    );
                 } else {
                     let status = resp.status();
                     let error_text = resp.text().await.unwrap_or_else(|_| "unknown".to_string());
-                    
+
                     // Если 404, Legacy API отключен
                     if status == 404 {
                         log::error!(
@@ -305,7 +338,11 @@ pub async fn send_push_to_user_excluding_tokens(
         .await
         {
             if sent_count > 0 {
-                log::info!("Push sent via HTTP v1 to user {} ({} devices)", user_id, sent_count);
+                log::info!(
+                    "Push sent via HTTP v1 to user {} ({} devices)",
+                    user_id,
+                    sent_count
+                );
                 return;
             }
         }
@@ -317,7 +354,8 @@ pub async fn send_push_to_user_excluding_tokens(
     };
     let client = reqwest::Client::new();
     for (token,) in devices {
-        let mut fcm_data: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+        let mut fcm_data: std::collections::HashMap<String, String> =
+            std::collections::HashMap::new();
         for (key, value) in &data {
             let value_str = match value {
                 serde_json::Value::String(s) => s.clone(),
@@ -362,16 +400,16 @@ async fn send_push_v1(
     // Нормализуем путь (для Windows обрабатываем обратные слэши)
     let normalized_path = service_account_path.replace('\\', "/");
     log::debug!("Reading Service Account from: {}", normalized_path);
-    
+
     // Проверяем существование файла
     if !std::path::Path::new(&normalized_path).exists() {
         return Err(format!("Service Account file not found: {}", normalized_path).into());
     }
-    
+
     // Читаем Service Account JSON
     let service_account_json = fs::read_to_string(&normalized_path)?;
     let service_account: serde_json::Value = serde_json::from_str(&service_account_json)?;
-    
+
     let client_email = service_account["client_email"]
         .as_str()
         .ok_or("Missing client_email in service account")?;
@@ -381,9 +419,12 @@ async fn send_push_v1(
 
     // Получаем OAuth access token
     let access_token = get_oauth_token(client_email, private_key_pem).await?;
-    
+
     let client = reqwest::Client::new();
-    let url = format!("https://fcm.googleapis.com/v1/projects/{}/messages:send", project_id);
+    let url = format!(
+        "https://fcm.googleapis.com/v1/projects/{}/messages:send",
+        project_id
+    );
 
     // Преобразуем data в формат для FCM v1 (все значения должны быть строками)
     let mut fcm_data = HashMap::new();
@@ -401,7 +442,7 @@ async fn send_push_v1(
     // Отправляем на каждое устройство
     let mut sent_count = 0;
     let mut invalid_tokens = Vec::new();
-    
+
     for (token,) in devices {
         let payload = json!({
             "message": {
@@ -441,29 +482,38 @@ async fn send_push_v1(
             .await?;
 
         if response.status().is_success() {
-            log::info!("FCM v1 push sent successfully to user {} (token: {}...)", 
-                       user_id, &token[..std::cmp::min(20, token.len())]);
+            log::info!(
+                "FCM v1 push sent successfully to user {} (token: {}...)",
+                user_id,
+                &token[..std::cmp::min(20, token.len())]
+            );
             sent_count += 1;
         } else {
             let status = response.status();
-            let error_text = response.text().await.unwrap_or_else(|_| "unknown".to_string());
-            
+            let error_text = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "unknown".to_string());
+
             // Парсим ошибку для проверки на UNREGISTERED
             let error_json: Result<serde_json::Value, _> = serde_json::from_str(&error_text);
-            let is_unregistered = error_json.as_ref().ok()
+            let is_unregistered = error_json
+                .as_ref()
+                .ok()
                 .and_then(|json| json.get("error"))
                 .and_then(|err| err.get("details"))
                 .and_then(|details| details.as_array())
                 .map(|details| {
                     details.iter().any(|detail| {
-                        detail.get("errorCode")
+                        detail
+                            .get("errorCode")
                             .and_then(|code| code.as_str())
                             .map(|code| code == "UNREGISTERED")
                             .unwrap_or(false)
                     })
                 })
                 .unwrap_or(false);
-            
+
             if is_unregistered {
                 log::warn!(
                     "FCM token is unregistered (device may have uninstalled app or token expired) for user {}: token={}...",
@@ -484,13 +534,17 @@ async fn send_push_v1(
             }
         }
     }
-    
+
     // Удаляем недействительные токены из БД
     if !invalid_tokens.is_empty() {
-        log::info!("Removing {} invalid FCM tokens from database for user {}", invalid_tokens.len(), user_id);
+        log::info!(
+            "Removing {} invalid FCM tokens from database for user {}",
+            invalid_tokens.len(),
+            user_id
+        );
         for token in &invalid_tokens {
             if let Err(e) = sqlx::query::<sqlx::Postgres>(
-                "DELETE FROM user_devices WHERE user_id = $1 AND fcm_token = $2"
+                "DELETE FROM user_devices WHERE user_id = $1 AND fcm_token = $2",
             )
             .bind(user_id)
             .bind(token)
@@ -506,13 +560,16 @@ async fn send_push_v1(
 }
 
 /// Получение OAuth 2.0 access token из Service Account
-async fn get_oauth_token(client_email: &str, private_key_pem: &str) -> Result<String, Box<dyn std::error::Error>> {
+async fn get_oauth_token(
+    client_email: &str,
+    private_key_pem: &str,
+) -> Result<String, Box<dyn std::error::Error>> {
     use chrono::Utc;
-    
+
     // Создаём JWT claims
     let now = Utc::now();
     let exp = now + chrono::Duration::hours(1);
-    
+
     #[derive(serde::Serialize)]
     struct Claims {
         iss: String,
@@ -521,7 +578,7 @@ async fn get_oauth_token(client_email: &str, private_key_pem: &str) -> Result<St
         exp: i64,
         iat: i64,
     }
-    
+
     let claims = Claims {
         iss: client_email.to_string(),
         scope: "https://www.googleapis.com/auth/firebase.messaging".to_string(),
@@ -532,11 +589,11 @@ async fn get_oauth_token(client_email: &str, private_key_pem: &str) -> Result<St
 
     // Используем jsonwebtoken для создания JWT с RS256
     let header = Header::new(Algorithm::RS256);
-    
+
     // Создаём EncodingKey из PEM строки
     let encoding_key = EncodingKey::from_rsa_pem(private_key_pem.as_bytes())
         .map_err(|e| format!("Failed to create encoding key from PEM: {}", e))?;
-    
+
     // Кодируем JWT
     let jwt = encode(&header, &claims, &encoding_key)
         .map_err(|e| format!("Failed to encode JWT: {}", e))?;
@@ -554,7 +611,10 @@ async fn get_oauth_token(client_email: &str, private_key_pem: &str) -> Result<St
 
     let status = token_response.status();
     if !status.is_success() {
-        let error_text = token_response.text().await.unwrap_or_else(|_| "unknown".to_string());
+        let error_text = token_response
+            .text()
+            .await
+            .unwrap_or_else(|_| "unknown".to_string());
         return Err(format!("Failed to get OAuth token: {} - {}", status, error_text).into());
     }
 
@@ -565,6 +625,3 @@ async fn get_oauth_token(client_email: &str, private_key_pem: &str) -> Result<St
 
     Ok(access_token.to_string())
 }
-
-
-

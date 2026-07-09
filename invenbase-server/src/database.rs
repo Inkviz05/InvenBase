@@ -20,7 +20,10 @@ impl Database {
         Ok(Database { pool })
     }
 
-    pub async fn init(&self, default_admin: Option<&DefaultAdminConfig>) -> Result<(), sqlx::Error> {
+    pub async fn init(
+        &self,
+        default_admin: Option<&DefaultAdminConfig>,
+    ) -> Result<(), sqlx::Error> {
         MIGRATOR.run(&self.pool).await?;
 
         if let Some(default_admin) = default_admin {

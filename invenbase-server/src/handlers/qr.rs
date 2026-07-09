@@ -1,11 +1,11 @@
 use actix_web::{web, HttpResponse};
-use uuid::Uuid;
-use qrcode::{QrCode, Color};
 use image::{codecs::png::PngEncoder, GrayImage, ImageEncoder, Luma};
+use qrcode::{Color, QrCode};
+use uuid::Uuid;
 
+use crate::app_state::AppState;
 use crate::auth::Claims;
 use crate::errors::AppError;
-use crate::app_state::AppState;
 
 const MODULE_SIZE: u32 = 8;
 const QUIET_ZONE: u32 = 4;
@@ -17,14 +17,15 @@ pub async fn generate_qr_code(
 ) -> Result<HttpResponse, AppError> {
     let equipment_id = path.into_inner();
 
-    let qr_code: Option<(String,)> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT qr_code FROM equipment WHERE id = $1"
-    )
-    .bind(equipment_id)
-    .fetch_optional(&state.db.pool)
-    .await?;
+    let qr_code: Option<(String,)> =
+        sqlx::query_as::<sqlx::Postgres, _>("SELECT qr_code FROM equipment WHERE id = $1")
+            .bind(equipment_id)
+            .fetch_optional(&state.db.pool)
+            .await?;
 
-    let qr_code_str = qr_code.ok_or_else(|| AppError::NotFound("Equipment not found".to_string()))?.0;
+    let qr_code_str = qr_code
+        .ok_or_else(|| AppError::NotFound("Equipment not found".to_string()))?
+        .0;
 
     let code = QrCode::new(qr_code_str.as_bytes())
         .map_err(|e| AppError::InternalError(format!("Failed to generate QR code: {}", e)))?;
@@ -53,9 +54,7 @@ pub async fn generate_qr_code(
         .write_image(img.as_raw(), width, height, image::ColorType::L8)
         .map_err(|e| AppError::InternalError(format!("Failed to encode PNG: {}", e)))?;
 
-    Ok(HttpResponse::Ok()
-        .content_type("image/png")
-        .body(png_bytes))
+    Ok(HttpResponse::Ok().content_type("image/png").body(png_bytes))
 }
 
 pub async fn get_qr_code_data(
@@ -65,14 +64,16 @@ pub async fn get_qr_code_data(
 ) -> Result<HttpResponse, AppError> {
     let equipment_id = path.into_inner();
 
-    let row: Option<(String, Option<String>, Option<String>)> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT qr_code, name, description FROM equipment WHERE id = $1"
-    )
-    .bind(equipment_id)
-    .fetch_optional(&state.db.pool)
-    .await?;
+    let row: Option<(String, Option<String>, Option<String>)> =
+        sqlx::query_as::<sqlx::Postgres, _>(
+            "SELECT qr_code, name, description FROM equipment WHERE id = $1",
+        )
+        .bind(equipment_id)
+        .fetch_optional(&state.db.pool)
+        .await?;
 
-    let (qr_code, name, description) = row.ok_or_else(|| AppError::NotFound("Equipment not found".to_string()))?;
+    let (qr_code, name, description) =
+        row.ok_or_else(|| AppError::NotFound("Equipment not found".to_string()))?;
 
     Ok(HttpResponse::Ok().json(serde_json::json!({
         "equipment_id": equipment_id,

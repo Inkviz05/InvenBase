@@ -1,10 +1,10 @@
 use actix_web::{web, HttpResponse};
 use uuid::Uuid;
 
-use crate::models::{CreateUserRequest, UpdateUserRequest, User, UserResponse};
+use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::app_state::AppState;
+use crate::models::{CreateUserRequest, UpdateUserRequest, User, UserResponse};
 
 pub async fn create_user(
     state: web::Data<AppState>,
@@ -25,7 +25,7 @@ pub async fn create_user(
 
     sqlx::query::<sqlx::Postgres>(
         "INSERT INTO users (id, username, password_hash, email, full_name, role)
-         VALUES ($1, $2, $3, $4, $5, $6)"
+         VALUES ($1, $2, $3, $4, $5, $6)",
     )
     .bind(user_id)
     .bind(&req.username)
@@ -39,7 +39,7 @@ pub async fn create_user(
     // Логирование
     let _ = sqlx::query::<sqlx::Postgres>(
         "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
-         VALUES ($1, 'create_user', 'user', $2, $3)"
+         VALUES ($1, 'create_user', 'user', $2, $3)",
     )
     .bind(uuid::Uuid::parse_str(&claims.sub).unwrap())
     .bind(user_id)
@@ -48,8 +48,8 @@ pub async fn create_user(
     .await;
 
     let user: User = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, username, password_hash, email, full_name, role, created_at, updated_at 
-         FROM users WHERE id = $1"
+        "SELECT id, username, password_hash, email, full_name, role, created_at, updated_at
+         FROM users WHERE id = $1",
     )
     .bind(user_id)
     .fetch_one(&state.db.pool)
@@ -65,8 +65,8 @@ pub async fn get_users(
     AuthService::require_any_role(&claims, &["admin", "responsible"])?;
 
     let users: Vec<User> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, username, password_hash, email, full_name, role, created_at, updated_at 
-         FROM users ORDER BY created_at DESC"
+        "SELECT id, username, password_hash, email, full_name, role, created_at, updated_at
+         FROM users ORDER BY created_at DESC",
     )
     .fetch_all(&state.db.pool)
     .await?;
@@ -87,15 +87,15 @@ pub async fn get_user(
     if claims.role != "admin" && claims.role != "responsible" {
         let current_user_id = uuid::Uuid::parse_str(&claims.sub)
             .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
-        
+
         if current_user_id != user_id {
             return Err(AppError::Unauthorized("Access denied".to_string()));
         }
     }
 
     let user: Option<User> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, username, password_hash, email, full_name, role, created_at, updated_at 
-         FROM users WHERE id = $1"
+        "SELECT id, username, password_hash, email, full_name, role, created_at, updated_at
+         FROM users WHERE id = $1",
     )
     .bind(user_id)
     .fetch_optional(&state.db.pool)
@@ -123,14 +123,15 @@ pub async fn update_user(
 
     // Проверяем, что пользователь существует
     let existing_user: Option<User> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, username, password_hash, email, full_name, role, created_at, updated_at 
-         FROM users WHERE id = $1"
+        "SELECT id, username, password_hash, email, full_name, role, created_at, updated_at
+         FROM users WHERE id = $1",
     )
     .bind(user_id)
     .fetch_optional(&state.db.pool)
     .await?;
 
-    let existing_user = existing_user.ok_or_else(|| AppError::NotFound("User not found".to_string()))?;
+    let existing_user =
+        existing_user.ok_or_else(|| AppError::NotFound("User not found".to_string()))?;
 
     // Обновляем поля
     let mut updates = Vec::new();
@@ -140,7 +141,7 @@ pub async fn update_user(
         // Проверяем уникальность username, если он изменился
         if username != &existing_user.username {
             let exists: bool = sqlx::query_scalar::<sqlx::Postgres, _>(
-                "SELECT EXISTS(SELECT 1 FROM users WHERE username = $1 AND id != $2)"
+                "SELECT EXISTS(SELECT 1 FROM users WHERE username = $1 AND id != $2)",
             )
             .bind(username)
             .bind(user_id)
@@ -184,7 +185,7 @@ pub async fn update_user(
     } else {
         None
     };
-    
+
     if password_hash.is_some() {
         updates.push(format!("password_hash = ${}", param_count));
         param_count += 1;
@@ -197,7 +198,7 @@ pub async fn update_user(
     }
 
     updates.push("updated_at = CURRENT_TIMESTAMP".to_string());
-    
+
     let query = format!(
         "UPDATE users SET {} WHERE id = ${} RETURNING id, username, password_hash, email, full_name, role, created_at, updated_at",
         updates.join(", "),
@@ -205,11 +206,11 @@ pub async fn update_user(
     );
 
     log::debug!("Update user query: {}", query);
-    log::debug!("Updating user {} with: username={:?}, email={:?}, full_name={:?}, role={:?}, password_changed={}", 
+    log::debug!("Updating user {} with: username={:?}, email={:?}, full_name={:?}, role={:?}, password_changed={}",
         user_id, req.username, req.email, req.full_name, req.role, req.password.is_some());
 
     let mut query_builder = sqlx::query_as::<sqlx::Postgres, User>(&query);
-    
+
     // Привязываем параметры в том же порядке, в котором они добавлены в updates
     if let Some(ref username) = req.username {
         query_builder = query_builder.bind(username);
@@ -228,23 +229,20 @@ pub async fn update_user(
     if let Some(ref hash) = password_hash {
         query_builder = query_builder.bind(hash);
     }
-    
+
     query_builder = query_builder.bind(user_id);
 
-    let user: User = query_builder
-        .fetch_one(&state.db.pool)
-        .await
-        .map_err(|e| {
-            log::error!("Error updating user {}: {:?}", user_id, e);
-            AppError::DatabaseError(e)
-        })?;
-    
+    let user: User = query_builder.fetch_one(&state.db.pool).await.map_err(|e| {
+        log::error!("Error updating user {}: {:?}", user_id, e);
+        AppError::DatabaseError(e)
+    })?;
+
     log::info!("Successfully updated user {}", user_id);
 
     // Логирование
     let _ = sqlx::query::<sqlx::Postgres>(
         "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
-         VALUES ($1, 'update_user', 'user', $2, $3)"
+         VALUES ($1, 'update_user', 'user', $2, $3)",
     )
     .bind(current_user_id)
     .bind(user_id)
@@ -282,7 +280,7 @@ pub async fn delete_user(
     // Логирование
     let _ = sqlx::query::<sqlx::Postgres>(
         "INSERT INTO activity_logs (user_id, action, entity_type, entity_id)
-         VALUES ($1, 'delete_user', 'user', $2)"
+         VALUES ($1, 'delete_user', 'user', $2)",
     )
     .bind(uuid::Uuid::parse_str(&claims.sub).unwrap())
     .bind(user_id)
@@ -291,4 +289,3 @@ pub async fn delete_user(
 
     Ok(HttpResponse::NoContent().finish())
 }
-

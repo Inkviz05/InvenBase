@@ -1,10 +1,12 @@
 use actix_web::{web, HttpResponse};
 use uuid::Uuid;
 
-use crate::models::{Squad, SquadWithDetails, CreateSquadRequest, UpdateSquadRequest, EquipmentWithDetails};
+use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::app_state::AppState;
+use crate::models::{
+    CreateSquadRequest, EquipmentWithDetails, Squad, SquadWithDetails, UpdateSquadRequest,
+};
 
 pub async fn create_squad(
     state: web::Data<AppState>,
@@ -14,12 +16,10 @@ pub async fn create_squad(
     AuthService::require_any_role(&claims, &["admin", "responsible"])?;
 
     if let Some(resp_id) = req.responsible_user_id {
-        let role: Option<(String,)> = sqlx::query_as(
-            "SELECT role FROM users WHERE id = $1"
-        )
-        .bind(resp_id)
-        .fetch_optional(&state.db.pool)
-        .await?;
+        let role: Option<(String,)> = sqlx::query_as("SELECT role FROM users WHERE id = $1")
+            .bind(resp_id)
+            .fetch_optional(&state.db.pool)
+            .await?;
         match role.as_ref().map(|r| r.0.as_str()) {
             Some("admin") | Some("responsible") => {}
             _ => return Err(AppError::BadRequest(
@@ -32,7 +32,7 @@ pub async fn create_squad(
 
     sqlx::query::<sqlx::Postgres>(
         "INSERT INTO squads (id, name, description, location, responsible_user_id)
-         VALUES ($1, $2, $3, $4, $5)"
+         VALUES ($1, $2, $3, $4, $5)",
     )
     .bind(squad_id)
     .bind(&req.name)
@@ -43,8 +43,8 @@ pub async fn create_squad(
     .await?;
 
     let squad: Squad = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, name, description, location, responsible_user_id, created_at, updated_at 
-         FROM squads WHERE id = $1"
+        "SELECT id, name, description, location, responsible_user_id, created_at, updated_at
+         FROM squads WHERE id = $1",
     )
     .bind(squad_id)
     .fetch_one(&state.db.pool)
@@ -58,11 +58,11 @@ pub async fn get_squads(
     _claims: Claims,
 ) -> Result<HttpResponse, AppError> {
     let squads: Vec<SquadWithDetails> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT s.id, s.name, s.description, s.location, s.responsible_user_id, 
+        "SELECT s.id, s.name, s.description, s.location, s.responsible_user_id,
                 u.full_name as responsible_name, s.created_at, s.updated_at
          FROM squads s
          LEFT JOIN users u ON s.responsible_user_id = u.id
-         ORDER BY s.created_at DESC"
+         ORDER BY s.created_at DESC",
     )
     .fetch_all(&state.db.pool)
     .await?;
@@ -78,11 +78,11 @@ pub async fn get_squad(
     let squad_id = path.into_inner();
 
     let squad: Option<SquadWithDetails> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT s.id, s.name, s.description, s.location, s.responsible_user_id, 
+        "SELECT s.id, s.name, s.description, s.location, s.responsible_user_id,
                 u.full_name as responsible_name, s.created_at, s.updated_at
          FROM squads s
          LEFT JOIN users u ON s.responsible_user_id = u.id
-         WHERE s.id = $1"
+         WHERE s.id = $1",
     )
     .bind(squad_id)
     .fetch_optional(&state.db.pool)
@@ -104,24 +104,21 @@ pub async fn update_squad(
     let squad_id = path.into_inner();
 
     // Проверяем, что сквад существует
-    let exists: Option<(bool,)> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT EXISTS(SELECT 1 FROM squads WHERE id = $1)"
-    )
-    .bind(squad_id)
-    .fetch_optional(&state.db.pool)
-    .await?;
+    let exists: Option<(bool,)> =
+        sqlx::query_as::<sqlx::Postgres, _>("SELECT EXISTS(SELECT 1 FROM squads WHERE id = $1)")
+            .bind(squad_id)
+            .fetch_optional(&state.db.pool)
+            .await?;
 
     if exists.is_none() || !exists.unwrap().0 {
         return Err(AppError::NotFound("Squad not found".to_string()));
     }
 
     if let Some(resp_id) = req.responsible_user_id {
-        let role: Option<(String,)> = sqlx::query_as(
-            "SELECT role FROM users WHERE id = $1"
-        )
-        .bind(resp_id)
-        .fetch_optional(&state.db.pool)
-        .await?;
+        let role: Option<(String,)> = sqlx::query_as("SELECT role FROM users WHERE id = $1")
+            .bind(resp_id)
+            .fetch_optional(&state.db.pool)
+            .await?;
         match role.as_ref().map(|r| r.0.as_str()) {
             Some("admin") | Some("responsible") => {}
             _ => return Err(AppError::BadRequest(
@@ -157,10 +154,14 @@ pub async fn update_squad(
     }
 
     conditions.push("updated_at = CURRENT_TIMESTAMP".to_string());
-    let update_query = format!("UPDATE squads SET {} WHERE id = ${}", conditions.join(", "), bind_count);
+    let update_query = format!(
+        "UPDATE squads SET {} WHERE id = ${}",
+        conditions.join(", "),
+        bind_count
+    );
 
     let mut query_builder = sqlx::query::<sqlx::Postgres>(&update_query);
-    
+
     if let Some(ref name) = req.name {
         query_builder = query_builder.bind(name);
     }
@@ -178,11 +179,11 @@ pub async fn update_squad(
     query_builder.execute(&state.db.pool).await?;
 
     let squad: SquadWithDetails = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT s.id, s.name, s.description, s.location, s.responsible_user_id, 
+        "SELECT s.id, s.name, s.description, s.location, s.responsible_user_id,
                 u.full_name as responsible_name, s.created_at, s.updated_at
          FROM squads s
          LEFT JOIN users u ON s.responsible_user_id = u.id
-         WHERE s.id = $1"
+         WHERE s.id = $1",
     )
     .bind(squad_id)
     .fetch_one(&state.db.pool)
@@ -220,12 +221,11 @@ pub async fn get_squad_equipment(
 ) -> Result<HttpResponse, AppError> {
     let squad_id = path.into_inner();
 
-    let _exists: Option<(bool,)> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT EXISTS(SELECT 1 FROM squads WHERE id = $1)"
-    )
-    .bind(squad_id)
-    .fetch_optional(&state.db.pool)
-    .await?;
+    let _exists: Option<(bool,)> =
+        sqlx::query_as::<sqlx::Postgres, _>("SELECT EXISTS(SELECT 1 FROM squads WHERE id = $1)")
+            .bind(squad_id)
+            .fetch_optional(&state.db.pool)
+            .await?;
 
     if _exists.map(|(e,)| e).unwrap_or(false) == false {
         return Err(AppError::NotFound("Squad not found".to_string()));
@@ -233,11 +233,11 @@ pub async fn get_squad_equipment(
 
     let equipment: Vec<EquipmentWithDetails> = sqlx::query_as::<sqlx::Postgres, _>(
         r#"
-        SELECT 
-            e.id, e.name, e.description, e.category_id, 
+        SELECT
+            e.id, e.name, e.description, e.category_id,
             c.name as category_name,
             e.squad_id, s.name as squad_name,
-            e.quantity, e.available_quantity, COALESCE(e.is_unique, false) as is_unique, e.location, e.qr_code, 
+            e.quantity, e.available_quantity, COALESCE(e.is_unique, false) as is_unique, e.location, e.qr_code,
             e.responsible_user_id, u.full_name as responsible_name,
             e.status, e.created_at, e.updated_at
         FROM equipment e

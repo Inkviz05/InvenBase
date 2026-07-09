@@ -47,10 +47,11 @@ pub fn validate_booking_request(req: &CreateBookingRequest) -> Result<(), AppErr
     }
 
     if let Some(permission_type) = req.permission_type.as_deref() {
-        if !matches!(permission_type, PERMISSION_TYPE_INTERNAL | PERMISSION_TYPE_EXTERNAL) {
-            return Err(AppError::BadRequest(
-                "Invalid permission type".to_string(),
-            ));
+        if !matches!(
+            permission_type,
+            PERMISSION_TYPE_INTERNAL | PERMISSION_TYPE_EXTERNAL
+        ) {
+            return Err(AppError::BadRequest("Invalid permission type".to_string()));
         }
     }
 

@@ -34,7 +34,7 @@ pub async fn get_equipment_report(
     // Статистика по категориям
     let category_stats: Vec<CategoryStatistics> = sqlx::query_as::<sqlx::Postgres, _>(
         r#"
-        SELECT 
+        SELECT
             c.id as category_id,
             c.name as category_name,
             COALESCE(SUM(e.quantity), 0) as total,
@@ -143,7 +143,7 @@ pub async fn get_booking_detailed_report(
 
     let bookings: Vec<BookingWithDetails> = sqlx::query_as::<sqlx::Postgres, _>(
         r#"
-        SELECT 
+        SELECT
             b.id, b.user_id, u.username, b.equipment_id, e.name as equipment_name,
             b.group_id, g.name as group_name, b.quantity, b.start_date, b.end_date,
             b.purpose, b.status, b.permission_type, b.created_at, b.updated_at

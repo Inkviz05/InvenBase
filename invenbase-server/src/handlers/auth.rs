@@ -1,19 +1,19 @@
 use actix_web::{web, HttpResponse};
 
-use crate::models::{LoginRequest, LoginResponse, User, UserResponse};
+use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::app_state::AppState;
+use crate::models::{LoginRequest, LoginResponse, User, UserResponse};
 
 pub async fn login(
     state: web::Data<AppState>,
     req: web::Json<LoginRequest>,
 ) -> Result<HttpResponse, AppError> {
     log::info!("Login attempt for username: {}", req.username);
-    
+
     let user: Option<User> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, username, password_hash, email, full_name, role, created_at, updated_at 
-         FROM users WHERE username = $1"
+        "SELECT id, username, password_hash, email, full_name, role, created_at, updated_at
+         FROM users WHERE username = $1",
     )
     .bind(&req.username)
     .fetch_optional(&state.db.pool)
@@ -29,20 +29,21 @@ pub async fn login(
     })?;
 
     log::info!("User found: {} (role: {})", user.username, user.role);
-    
+
     // Проверяем, что JWT_SECRET не пустой
     if state.config.jwt_secret.is_empty() {
         log::error!("JWT_SECRET is empty!");
-        return Err(AppError::InternalError("JWT_SECRET is not configured".to_string()));
+        return Err(AppError::InternalError(
+            "JWT_SECRET is not configured".to_string(),
+        ));
     }
-    
+
     let auth_service = AuthService::new(&state.config.jwt_secret, state.config.jwt_expiration);
-    
-    if !AuthService::verify_password(&req.password, &user.password_hash)
-        .map_err(|e| {
-            log::error!("Password verification error: {:?}", e);
-            AppError::InternalError(format!("Password verification failed: {}", e))
-        })? {
+
+    if !AuthService::verify_password(&req.password, &user.password_hash).map_err(|e| {
+        log::error!("Password verification error: {:?}", e);
+        AppError::InternalError(format!("Password verification failed: {}", e))
+    })? {
         log::info!("Login failed: invalid password for user - {}", req.username);
         return Err(AppError::Unauthorized("Invalid credentials".to_string()));
     }
@@ -55,7 +56,7 @@ pub async fn login(
     // Логирование входа
     let _ = sqlx::query::<sqlx::Postgres>(
         "INSERT INTO activity_logs (user_id, action, entity_type, details)
-         VALUES ($1, 'login', 'user', $2)"
+         VALUES ($1, 'login', 'user', $2)",
     )
     .bind(user.id)
     .bind(serde_json::json!({"username": user.username}))
@@ -73,12 +74,15 @@ pub async fn get_current_user(
     claims: Claims,
 ) -> Result<HttpResponse, AppError> {
     let user: Option<User> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, username, password_hash, email, full_name, role, created_at, updated_at 
-         FROM users WHERE id = $1"
+        "SELECT id, username, password_hash, email, full_name, role, created_at, updated_at
+         FROM users WHERE id = $1",
     )
-    .bind(claims.sub.parse::<uuid::Uuid>().map_err(|_| {
-        AppError::BadRequest("Invalid user ID".to_string())
-    })?)
+    .bind(
+        claims
+            .sub
+            .parse::<uuid::Uuid>()
+            .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?,
+    )
     .fetch_optional(&state.db.pool)
     .await?;
 
@@ -86,4 +90,3 @@ pub async fn get_current_user(
 
     Ok(HttpResponse::Ok().json(UserResponse::from(user)))
 }
-

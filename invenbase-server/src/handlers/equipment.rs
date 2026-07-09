@@ -2,17 +2,13 @@ use actix_web::{web, HttpResponse};
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::models::{
-    Equipment,
-    EquipmentWithDetails,
-    CreateEquipmentRequest,
-    UpdateEquipmentRequest,
-    EquipmentMovement,
-    CreateEquipmentMovementRequest,
-};
+use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::app_state::AppState;
+use crate::models::{
+    CreateEquipmentMovementRequest, CreateEquipmentRequest, Equipment, EquipmentMovement,
+    EquipmentWithDetails, UpdateEquipmentRequest,
+};
 
 pub async fn create_equipment(
     state: web::Data<AppState>,
@@ -22,7 +18,15 @@ pub async fn create_equipment(
     AuthService::require_any_role(&claims, &["admin", "responsible"])?;
 
     let equipment_id = uuid::Uuid::new_v4();
-    let qr_code = format!("EQ-{}", equipment_id.to_string().replace("-", "").chars().take(12).collect::<String>());
+    let qr_code = format!(
+        "EQ-{}",
+        equipment_id
+            .to_string()
+            .replace("-", "")
+            .chars()
+            .take(12)
+            .collect::<String>()
+    );
 
     let (quantity, is_unique) = if req.is_unique {
         (1i32, true)
@@ -50,7 +54,7 @@ pub async fn create_equipment(
     // Логирование
     let _ = sqlx::query::<sqlx::Postgres>(
         "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
-         VALUES ($1, 'create_equipment', 'equipment', $2, $3)"
+         VALUES ($1, 'create_equipment', 'equipment', $2, $3)",
     )
     .bind(uuid::Uuid::parse_str(&claims.sub).unwrap())
     .bind(equipment_id)
@@ -59,7 +63,7 @@ pub async fn create_equipment(
     .await;
 
     let equipment: Equipment = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, name, description, category_id, squad_id, quantity, available_quantity, COALESCE(is_unique, false) as is_unique, location, qr_code, responsible_user_id, status, created_at, updated_at 
+        "SELECT id, name, description, category_id, squad_id, quantity, available_quantity, COALESCE(is_unique, false) as is_unique, location, qr_code, responsible_user_id, status, created_at, updated_at
          FROM equipment WHERE id = $1"
     )
     .bind(equipment_id)
@@ -80,11 +84,11 @@ pub async fn get_equipment_list(
     query: web::Query<EquipmentListQuery>,
 ) -> Result<HttpResponse, AppError> {
     let sql = r#"
-        SELECT 
-            e.id, e.name, e.description, e.category_id, 
+        SELECT
+            e.id, e.name, e.description, e.category_id,
             c.name as category_name,
             e.squad_id, s.name as squad_name,
-            e.quantity, e.available_quantity, COALESCE(e.is_unique, false) as is_unique, e.location, e.qr_code, 
+            e.quantity, e.available_quantity, COALESCE(e.is_unique, false) as is_unique, e.location, e.qr_code,
             e.responsible_user_id, u.full_name as responsible_name,
             e.status, e.created_at, e.updated_at
         FROM equipment e
@@ -117,11 +121,11 @@ pub async fn get_equipment(
 
     let equipment: Option<EquipmentWithDetails> = sqlx::query_as::<sqlx::Postgres, _>(
         r#"
-        SELECT 
-            e.id, e.name, e.description, e.category_id, 
+        SELECT
+            e.id, e.name, e.description, e.category_id,
             c.name as category_name,
             e.squad_id, s.name as squad_name,
-            e.quantity, e.available_quantity, COALESCE(e.is_unique, false) as is_unique, e.location, e.qr_code, 
+            e.quantity, e.available_quantity, COALESCE(e.is_unique, false) as is_unique, e.location, e.qr_code,
             e.responsible_user_id, u.full_name as responsible_name,
             e.status, e.created_at, e.updated_at
         FROM equipment e
@@ -135,7 +139,8 @@ pub async fn get_equipment(
     .fetch_optional(&state.db.pool)
     .await?;
 
-    let equipment = equipment.ok_or_else(|| AppError::NotFound("Equipment not found".to_string()))?;
+    let equipment =
+        equipment.ok_or_else(|| AppError::NotFound("Equipment not found".to_string()))?;
 
     Ok(HttpResponse::Ok().json(equipment))
 }
@@ -149,11 +154,11 @@ pub async fn get_equipment_by_qr(
 
     let equipment: Option<EquipmentWithDetails> = sqlx::query_as::<sqlx::Postgres, _>(
         r#"
-        SELECT 
-            e.id, e.name, e.description, e.category_id, 
+        SELECT
+            e.id, e.name, e.description, e.category_id,
             c.name as category_name,
             e.squad_id, s.name as squad_name,
-            e.quantity, e.available_quantity, COALESCE(e.is_unique, false) as is_unique, e.location, e.qr_code, 
+            e.quantity, e.available_quantity, COALESCE(e.is_unique, false) as is_unique, e.location, e.qr_code,
             e.responsible_user_id, u.full_name as responsible_name,
             e.status, e.created_at, e.updated_at
         FROM equipment e
@@ -167,7 +172,8 @@ pub async fn get_equipment_by_qr(
     .fetch_optional(&state.db.pool)
     .await?;
 
-    let equipment = equipment.ok_or_else(|| AppError::NotFound("Equipment not found".to_string()))?;
+    let equipment =
+        equipment.ok_or_else(|| AppError::NotFound("Equipment not found".to_string()))?;
 
     Ok(HttpResponse::Ok().json(equipment))
 }
@@ -183,12 +189,11 @@ pub async fn update_equipment(
     let equipment_id = path.into_inner();
 
     // Проверяем, что оборудование существует
-    let exists: Option<(bool,)> = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT EXISTS(SELECT 1 FROM equipment WHERE id = $1)"
-    )
-    .bind(equipment_id)
-    .fetch_optional(&state.db.pool)
-    .await?;
+    let exists: Option<(bool,)> =
+        sqlx::query_as::<sqlx::Postgres, _>("SELECT EXISTS(SELECT 1 FROM equipment WHERE id = $1)")
+            .bind(equipment_id)
+            .fetch_optional(&state.db.pool)
+            .await?;
 
     if exists.is_none() || !exists.unwrap().0 {
         return Err(AppError::NotFound("Equipment not found".to_string()));
@@ -196,27 +201,33 @@ pub async fn update_equipment(
 
     // Обновляем поля
     if let Some(name) = &req.name {
-        sqlx::query::<sqlx::Postgres>("UPDATE equipment SET name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2")
-            .bind(name)
-            .bind(equipment_id)
-            .execute(&state.db.pool)
-            .await?;
+        sqlx::query::<sqlx::Postgres>(
+            "UPDATE equipment SET name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+        )
+        .bind(name)
+        .bind(equipment_id)
+        .execute(&state.db.pool)
+        .await?;
     }
 
     if req.description.is_some() {
-        sqlx::query::<sqlx::Postgres>("UPDATE equipment SET description = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2")
-            .bind(&req.description)
-            .bind(equipment_id)
-            .execute(&state.db.pool)
-            .await?;
+        sqlx::query::<sqlx::Postgres>(
+            "UPDATE equipment SET description = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+        )
+        .bind(&req.description)
+        .bind(equipment_id)
+        .execute(&state.db.pool)
+        .await?;
     }
 
     if req.category_id.is_some() {
-        sqlx::query::<sqlx::Postgres>("UPDATE equipment SET category_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2")
-            .bind(&req.category_id)
-            .bind(equipment_id)
-            .execute(&state.db.pool)
-            .await?;
+        sqlx::query::<sqlx::Postgres>(
+            "UPDATE equipment SET category_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+        )
+        .bind(&req.category_id)
+        .bind(equipment_id)
+        .execute(&state.db.pool)
+        .await?;
     }
 
     // Уникальное оборудование: всегда 1 экземпляр
@@ -227,11 +238,13 @@ pub async fn update_equipment(
             .await?;
     } else {
         if let Some(quantity) = req.quantity {
-            sqlx::query::<sqlx::Postgres>("UPDATE equipment SET quantity = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2")
-                .bind(quantity)
-                .bind(equipment_id)
-                .execute(&state.db.pool)
-                .await?;
+            sqlx::query::<sqlx::Postgres>(
+                "UPDATE equipment SET quantity = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+            )
+            .bind(quantity)
+            .bind(equipment_id)
+            .execute(&state.db.pool)
+            .await?;
         }
         if let Some(available_quantity) = req.available_quantity {
             sqlx::query::<sqlx::Postgres>("UPDATE equipment SET available_quantity = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2")
@@ -249,11 +262,13 @@ pub async fn update_equipment(
     }
 
     if req.location.is_some() {
-        sqlx::query::<sqlx::Postgres>("UPDATE equipment SET location = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2")
-            .bind(&req.location)
-            .bind(equipment_id)
-            .execute(&state.db.pool)
-            .await?;
+        sqlx::query::<sqlx::Postgres>(
+            "UPDATE equipment SET location = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+        )
+        .bind(&req.location)
+        .bind(equipment_id)
+        .execute(&state.db.pool)
+        .await?;
     }
 
     if req.responsible_user_id.is_some() {
@@ -265,24 +280,28 @@ pub async fn update_equipment(
     }
 
     if req.squad_id.is_some() {
-        sqlx::query::<sqlx::Postgres>("UPDATE equipment SET squad_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2")
-            .bind(&req.squad_id)
-            .bind(equipment_id)
-            .execute(&state.db.pool)
-            .await?;
+        sqlx::query::<sqlx::Postgres>(
+            "UPDATE equipment SET squad_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+        )
+        .bind(&req.squad_id)
+        .bind(equipment_id)
+        .execute(&state.db.pool)
+        .await?;
     }
 
     if let Some(status) = &req.status {
-        sqlx::query::<sqlx::Postgres>("UPDATE equipment SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2")
-            .bind(status)
-            .bind(equipment_id)
-            .execute(&state.db.pool)
-            .await?;
+        sqlx::query::<sqlx::Postgres>(
+            "UPDATE equipment SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+        )
+        .bind(status)
+        .bind(equipment_id)
+        .execute(&state.db.pool)
+        .await?;
     }
 
     // Получаем обновлённое оборудование из БД
     let equipment: Equipment = sqlx::query_as::<sqlx::Postgres, Equipment>(
-        "SELECT id, name, description, category_id, squad_id, quantity, available_quantity, COALESCE(is_unique, false) as is_unique, location, qr_code, responsible_user_id, status, created_at, updated_at 
+        "SELECT id, name, description, category_id, squad_id, quantity, available_quantity, COALESCE(is_unique, false) as is_unique, location, qr_code, responsible_user_id, status, created_at, updated_at
          FROM equipment WHERE id = $1"
     )
     .bind(equipment_id)
@@ -292,7 +311,7 @@ pub async fn update_equipment(
     // Логирование
     let _ = sqlx::query::<sqlx::Postgres>(
         "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
-         VALUES ($1, 'update_equipment', 'equipment', $2, $3)"
+         VALUES ($1, 'update_equipment', 'equipment', $2, $3)",
     )
     .bind(uuid::Uuid::parse_str(&claims.sub).unwrap())
     .bind(equipment_id)
@@ -324,7 +343,7 @@ pub async fn delete_equipment(
     // Логирование
     let _ = sqlx::query::<sqlx::Postgres>(
         "INSERT INTO activity_logs (user_id, action, entity_type, entity_id)
-         VALUES ($1, 'delete_equipment', 'equipment', $2)"
+         VALUES ($1, 'delete_equipment', 'equipment', $2)",
     )
     .bind(uuid::Uuid::parse_str(&claims.sub).unwrap())
     .bind(equipment_id)
@@ -416,7 +435,7 @@ pub async fn move_equipment(
             comment
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        "#
+        "#,
     )
     .bind(movement_id)
     .bind(equipment_id)
@@ -430,7 +449,10 @@ pub async fn move_equipment(
     .await?;
 
     // Названия сквадов для отчёта (без ID в логе)
-    let squad_ids: Vec<Uuid> = [from_squad_id, req.to_squad_id].into_iter().flatten().collect();
+    let squad_ids: Vec<Uuid> = [from_squad_id, req.to_squad_id]
+        .into_iter()
+        .flatten()
+        .collect();
     let squad_names: std::collections::HashMap<Uuid, String> = if squad_ids.is_empty() {
         std::collections::HashMap::new()
     } else {
@@ -457,7 +479,7 @@ pub async fn move_equipment(
     });
     let _ = sqlx::query::<sqlx::Postgres>(
         "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
-         VALUES ($1, 'equipment_move', 'equipment', $2, $3)"
+         VALUES ($1, 'equipment_move', 'equipment', $2, $3)",
     )
     .bind(user_id)
     .bind(equipment_id)
@@ -481,7 +503,7 @@ pub async fn move_equipment(
         FROM equipment_movements m
         LEFT JOIN users u ON m.moved_by = u.id
         WHERE m.id = $1
-        "#
+        "#,
     )
     .bind(movement_id)
     .fetch_one(&state.db.pool)
@@ -523,4 +545,3 @@ pub async fn get_equipment_movements(
 
     Ok(HttpResponse::Ok().json(movements))
 }
-

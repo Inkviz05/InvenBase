@@ -1,15 +1,14 @@
 pub mod auth;
-pub mod users;
-pub mod equipment;
-pub mod categories;
-pub mod groups;
-pub mod squads;
 pub mod bookings;
-pub mod permissions;
-pub mod notifications;
+pub mod categories;
+pub mod equipment;
+pub mod groups;
 pub mod logs;
-pub mod reports;
-pub mod qr;
+pub mod notifications;
+pub mod permissions;
 pub mod push;
+pub mod qr;
+pub mod reports;
+pub mod squads;
 pub mod support;
-
+pub mod users;

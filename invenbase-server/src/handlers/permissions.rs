@@ -1,10 +1,10 @@
 use actix_web::{web, HttpResponse};
 use uuid::Uuid;
 
-use crate::models::{Permission, CreatePermissionRequest};
+use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::app_state::AppState;
+use crate::models::{CreatePermissionRequest, Permission};
 
 pub async fn create_permission(
     state: web::Data<AppState>,
@@ -32,7 +32,7 @@ pub async fn create_permission(
     .await?;
 
     let permission: Permission = sqlx::query_as::<sqlx::Postgres, _>(
-        "SELECT id, booking_id, equipment_id, permission_type, issued_by, issued_at, expires_at, status 
+        "SELECT id, booking_id, equipment_id, permission_type, issued_by, issued_at, expires_at, status
          FROM permissions WHERE id = $1"
     )
     .bind(permission_id)
@@ -51,7 +51,7 @@ pub async fn get_permissions(
 
     let permissions: Vec<Permission> = if claims.role == "admin" || claims.role == "responsible" {
         sqlx::query_as::<sqlx::Postgres, _>(
-            "SELECT id, booking_id, equipment_id, permission_type, issued_by, issued_at, expires_at, status 
+            "SELECT id, booking_id, equipment_id, permission_type, issued_by, issued_at, expires_at, status
              FROM permissions ORDER BY issued_at DESC"
         )
         .fetch_all(&state.db.pool)
@@ -91,4 +91,3 @@ pub async fn revoke_permission(
 
     Ok(HttpResponse::NoContent().finish())
 }
-
