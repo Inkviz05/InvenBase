@@ -1,21 +1,23 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const webPort = process.env.SMOKE_WEB_PORT || '3100';
+
 export default defineConfig({
   testDir: './tests/e2e',
-  testIgnore: /real-smoke\.spec\.js/,
-  timeout: 30_000,
+  testMatch: /real-smoke\.spec\.js/,
+  timeout: 45_000,
   expect: {
-    timeout: 5_000,
+    timeout: 10_000,
   },
-  fullyParallel: true,
+  fullyParallel: false,
   reporter: [['list']],
   use: {
-    baseURL: 'http://127.0.0.1:3000',
+    baseURL: `http://127.0.0.1:${webPort}`,
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npm run dev -- --host 127.0.0.1',
-    url: 'http://127.0.0.1:3000',
+    command: `npm run dev -- --host 127.0.0.1 --port ${webPort}`,
+    url: `http://127.0.0.1:${webPort}`,
     reuseExistingServer: true,
     timeout: 120_000,
   },

@@ -10,7 +10,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:e2e": "playwright test",
-    "test:e2e:smoke": "playwright test tests/e2e/smoke.spec.js"
+    "test:e2e:smoke": "playwright test tests/e2e/smoke.spec.js",
+    "test:e2e:real-smoke": "playwright test --config playwright.real.config.js"
   },
   "dependencies": {
     "axios": "^1.6.2",
