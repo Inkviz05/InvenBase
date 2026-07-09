@@ -22,6 +22,8 @@ target/
 # Node / web
 node_modules/
 dist/
+playwright-report/
+test-results/
 
 # Android / Gradle
 .gradle/
