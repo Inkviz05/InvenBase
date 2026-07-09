@@ -409,6 +409,7 @@ const BookingList = () => {
                     value={manualCode}
                     onChange={(e) => setManualCode(e.target.value)}
                     autoFocus
+                    aria-label="Manual equipment code"
                     style={{ marginBottom: '16px' }}
                   />
                   <div style={{ display: 'flex', gap: '12px' }}>
@@ -438,42 +439,49 @@ const BookingList = () => {
         <button
           className={`btn ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setFilter('all')}
+          aria-label="Filter all bookings"
         >
           Все
         </button>
         <button
           className={`btn ${filter === 'pending' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setFilter('pending')}
+          aria-label="Filter pending bookings"
         >
           Ожидают
         </button>
         <button
           className={`btn ${filter === 'approved' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setFilter('approved')}
+          aria-label="Filter approved bookings"
         >
           Одобрены
         </button>
         <button
           className={`btn ${filter === 'awaiting_return' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setFilter('awaiting_return')}
+          aria-label="Filter awaiting return bookings"
         >
           Ожидают возврата
         </button>
         <button
           className={`btn ${filter === 'returned' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setFilter('returned')}
+          aria-label="Filter returned bookings"
         >
           Возвращены
         </button>
         <button
           className={`btn ${filter === 'rejected' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setFilter('rejected')}
+          aria-label="Filter rejected bookings"
         >
           Отклонены
         </button>
         <button
           className={`btn ${filter === 'cancelled' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setFilter('cancelled')}
+          aria-label="Filter cancelled bookings"
         >
           Отменены
         </button>
@@ -537,6 +545,7 @@ const BookingList = () => {
                   <button
                     onClick={() => handleApprove(booking.id)}
                     className="btn btn-primary"
+                    aria-label={`Approve booking ${booking.id}`}
                     style={{ fontSize: '12px', padding: '6px 12px' }}
                   >
                     Одобрить
@@ -544,6 +553,7 @@ const BookingList = () => {
                   <button
                     onClick={() => handleReject(booking.id)}
                     className="btn btn-danger"
+                    aria-label={`Reject booking ${booking.id}`}
                     style={{ fontSize: '12px', padding: '6px 12px' }}
                   >
                     Отклонить
@@ -554,6 +564,7 @@ const BookingList = () => {
                 <button
                   onClick={() => handleConfirmReturn(booking.id)}
                   className="btn btn-primary"
+                  aria-label={`Confirm return for booking ${booking.id}`}
                   style={{ fontSize: '12px', padding: '6px 12px' }}
                 >
                   Подтвердить возврат
@@ -563,6 +574,7 @@ const BookingList = () => {
                 <button
                   onClick={() => handleCancel(booking.id)}
                   className="btn btn-secondary"
+                  aria-label={`Cancel booking ${booking.id}`}
                   style={{ fontSize: '12px', padding: '6px 12px' }}
                 >
                   {'\u041e\u0442\u043c\u0435\u043d\u0438\u0442\u044c'}
