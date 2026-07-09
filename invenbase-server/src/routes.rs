@@ -265,6 +265,12 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
 
 pub fn configure_web(cfg: &mut web::ServiceConfig) {
     cfg.route(
+        "/health",
+        web::get().to(|| async {
+            HttpResponse::Ok().json(serde_json::json!({ "status": "ok" }))
+        }),
+    )
+    .route(
         "/",
         web::get().to(|| async {
             HttpResponse::Ok()
