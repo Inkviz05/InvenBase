@@ -368,15 +368,18 @@ pub async fn move_equipment(
         .map_err(|_| AppError::Unauthorized("Invalid user id in token".to_string()))?;
 
     // Получаем текущее состояние оборудования и ответственного сквада
-    let row = sqlx::query!(
+    let row = sqlx::query_as::<
+        sqlx::Postgres,
+        (String, Option<Uuid>, Option<String>, Option<Uuid>),
+    >(
         r#"
         SELECT e.name as equipment_name, e.squad_id, e.location, s.responsible_user_id
         FROM equipment e
         LEFT JOIN squads s ON e.squad_id = s.id
         WHERE e.id = $1
         "#,
-        equipment_id
     )
+    .bind(equipment_id)
     .fetch_optional(&state.db.pool)
     .await?;
 
@@ -387,7 +390,7 @@ pub async fn move_equipment(
 
     // Ответственный может перемещать только оборудование своего сквада
     if claims.role == "responsible" {
-        if let Some(responsible_id) = row.responsible_user_id {
+        if let Some(responsible_id) = row.3 {
             if responsible_id != user_id {
                 return Err(AppError::BadRequest(
                     "Вы можете перемещать только оборудование своего сквада".to_string(),
@@ -400,9 +403,9 @@ pub async fn move_equipment(
         }
     }
 
-    let equipment_name = row.equipment_name.clone();
-    let from_squad_id = row.squad_id;
-    let from_location = row.location.clone();
+    let equipment_name = row.0;
+    let from_squad_id = row.1;
+    let from_location = row.2;
 
     // Обновляем оборудование
     sqlx::query::<sqlx::Postgres>(

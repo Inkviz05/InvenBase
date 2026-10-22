@@ -100,10 +100,22 @@ This keeps browser API calls on the same origin as the web app and lets nginx pr
 
 ## Smoke Tests
 
-The separate real smoke test stack remains available:
+To build the production-shaped images and run the browser flow through nginx:
+
+```powershell
+cd invenbase-client\web
+npm ci
+npx playwright install chromium
+cd ..\..
+.\scripts\test-docker-compose-smoke.ps1
+```
+
+The script uses an isolated Compose project and disposable PostgreSQL volume. It verifies `/health`, then runs the login, equipment creation and booking flow through the public nginx port. Containers and the volume are removed after the test unless `-KeepDocker` is specified.
+
+The separate development-oriented real smoke test remains available:
 
 ```powershell
 .\scripts\test-web-real-smoke.ps1
 ```
 
-It uses `docker-compose.smoke.yml` and a disposable PostgreSQL database on port `55432`.
+It uses `docker-compose.smoke.yml`, a disposable PostgreSQL database on port `55432`, `cargo run` and the Vite development server. The Docker Compose smoke test above is the deployment verification used by CI.

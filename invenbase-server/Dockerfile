@@ -12,7 +12,7 @@ COPY invenbase-server/migrations ./migrations
 COPY invenbase-server/static ./static
 COPY invenbase-server/src ./src
 
-RUN cargo build --release
+RUN cargo build --release --locked
 
 FROM debian:bookworm-slim AS runtime
 

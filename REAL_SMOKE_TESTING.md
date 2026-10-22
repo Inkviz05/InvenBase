@@ -1,5 +1,21 @@
 # Real Web Smoke Testing
 
+## Full Docker Compose stack
+
+The deployment-shaped smoke test builds the backend and web images, waits for the nginx `/health` endpoint, and runs Playwright against the public Compose port:
+
+```powershell
+cd invenbase-client\web
+npm ci
+npx playwright install chromium
+cd ..\..
+.\scripts\test-docker-compose-smoke.ps1
+```
+
+Use `-KeepDocker` to leave the stack running after the test or `-SkipBuild` to reuse existing images.
+
+## Development stack
+
 Run from the project root:
 
 ```powershell
