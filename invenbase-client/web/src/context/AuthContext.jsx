@@ -18,7 +18,6 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      console.log('AuthProvider: Initializing auth...');
       const storedToken = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
       
@@ -30,21 +29,16 @@ export const AuthProvider = ({ children }) => {
           console.error('AuthProvider: Error parsing stored user:', e);
         }
         try {
-          console.log('AuthProvider: Validating token...');
           const currentUser = await authAPI.getCurrentUser();
           setUser(currentUser);
           localStorage.setItem('user', JSON.stringify(currentUser));
-          console.log('AuthProvider: Token validated successfully');
         } catch (error) {
           console.error('AuthProvider: Token validation failed:', error);
           // Токен невалиден, очищаем
           logout();
         }
-      } else {
-        console.log('AuthProvider: No stored credentials found');
       }
       setLoading(false);
-      console.log('AuthProvider: Initialization complete');
     };
 
     initAuth();
@@ -57,7 +51,6 @@ export const AuthProvider = ({ children }) => {
       setUser(response.user);
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
-      console.log('AuthProvider: User logged in successfully');
       return response;
     } catch (error) {
       console.error('AuthProvider: Login failed:', error);

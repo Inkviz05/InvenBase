@@ -1,6 +1,7 @@
 use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
 use std::sync::Arc;
+use std::time::Duration;
 
 use kvantoriym_server::app_state::AppState;
 use kvantoriym_server::background_tasks;
@@ -11,7 +12,7 @@ use kvantoriym_server::routes;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Инициализация логирования
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     log::info!("Запуск сервера Кванториум...");
 
@@ -20,18 +21,22 @@ async fn main() -> std::io::Result<()> {
 
     // Подключение к базе данных
     let db = Arc::new(
-        Database::new(&config.database_url)
-            .await
-            .map_err(|e| {
-                eprintln!("Ошибка подключения к базе данных: {:?}", e);
-                eprintln!("Проверьте:");
-                eprintln!("  1. PostgreSQL запущен");
-                eprintln!("  2. База данных 'kvantoriym' создана");
-                eprintln!("  3. DATABASE_URL в .env файле правильный");
-                eprintln!("  4. Учетные данные верные");
-                std::process::exit(1);
-            })
-            .unwrap(),
+        Database::with_options(
+            &config.database_url,
+            config.database_max_connections,
+            Duration::from_secs(config.database_acquire_timeout_seconds),
+        )
+        .await
+        .map_err(|e| {
+            eprintln!("Ошибка подключения к базе данных: {:?}", e);
+            eprintln!("Проверьте:");
+            eprintln!("  1. PostgreSQL запущен");
+            eprintln!("  2. База данных 'kvantoriym' создана");
+            eprintln!("  3. DATABASE_URL в .env файле правильный");
+            eprintln!("  4. Учетные данные верные");
+            std::process::exit(1);
+        })
+        .unwrap(),
     );
 
     // Инициализация базы данных (создание таблиц)
@@ -71,7 +76,7 @@ async fn main() -> std::io::Result<()> {
             }))
             .wrap(cors)
             .wrap(actix_web::middleware::Logger::default())
-            .service(actix_files::Files::new("/static", "./static").show_files_listing())
+            .service(actix_files::Files::new("/static", "./static"))
             .service(web::scope("/api").configure(routes::configure_api))
             .service(web::scope("").configure(routes::configure_web))
     })

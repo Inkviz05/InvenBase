@@ -30,7 +30,6 @@ function initApp() {
         <App />
       </React.StrictMode>
     );
-    console.log('React app initialized successfully');
   } catch (error) {
     console.error('Error initializing React app:', error);
     rootElement.innerHTML = '<div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;"><h1>Ошибка загрузки приложения</h1><p>Пожалуйста, перезагрузите страницу</p><p style="color: #666; font-size: 12px;">' + error.message + '</p></div>';

@@ -22,9 +22,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      console.log('Login: Attempting to login with username:', username);
-      const response = await login(username, password);
-      console.log('Login: Login successful, navigating to home');
+      await login(username, password);
       navigate('/');
     } catch (err) {
       console.error('Login: Login failed:', err);

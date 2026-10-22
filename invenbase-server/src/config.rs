@@ -11,6 +11,8 @@ pub struct DefaultAdminConfig {
 #[derive(Clone)]
 pub struct Config {
     pub database_url: String,
+    pub database_max_connections: u32,
+    pub database_acquire_timeout_seconds: u64,
     pub host: String,
     pub port: u16,
     pub jwt_secret: String,
@@ -133,10 +135,28 @@ impl Config {
             None
         };
 
+        let database_max_connections = env::var("DATABASE_MAX_CONNECTIONS")
+            .unwrap_or_else(|_| "10".to_string())
+            .parse::<u32>()
+            .map_err(|_| "DATABASE_MAX_CONNECTIONS must be a positive integer")?;
+        if database_max_connections == 0 {
+            return Err("DATABASE_MAX_CONNECTIONS must be greater than zero".into());
+        }
+
+        let database_acquire_timeout_seconds = env::var("DATABASE_ACQUIRE_TIMEOUT_SECONDS")
+            .unwrap_or_else(|_| "5".to_string())
+            .parse::<u64>()
+            .map_err(|_| "DATABASE_ACQUIRE_TIMEOUT_SECONDS must be a positive integer")?;
+        if database_acquire_timeout_seconds == 0 {
+            return Err("DATABASE_ACQUIRE_TIMEOUT_SECONDS must be greater than zero".into());
+        }
+
         Ok(Config {
             database_url: env::var("DATABASE_URL").unwrap_or_else(|_| {
                 "postgresql://postgres:postgres@localhost:5432/kvantoriym".to_string()
             }),
+            database_max_connections,
+            database_acquire_timeout_seconds,
             host: env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string()),
             port: env::var("PORT")
                 .unwrap_or_else(|_| "8080".to_string())

@@ -21,6 +21,8 @@ Edit `.env` and set strong values for:
 - `JWT_SECRET`
 - `DEFAULT_ADMIN_PASSWORD`
 
+Database pool tuning is available through `DATABASE_MAX_CONNECTIONS` and `DATABASE_ACQUIRE_TIMEOUT_SECONDS`. The defaults are `10` connections and a `5` second acquisition timeout.
+
 Start the stack:
 
 ```powershell

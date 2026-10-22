@@ -73,8 +73,6 @@ const AppRoutes = () => {
 };
 
 function App() {
-  console.log('App component rendering...');
-  
   return (
     <AuthProvider>
       <CartProvider>

@@ -11,9 +11,17 @@ pub struct Database {
 
 impl Database {
     pub async fn new(database_url: &str) -> Result<Self, sqlx::Error> {
+        Self::with_options(database_url, 10, Duration::from_secs(5)).await
+    }
+
+    pub async fn with_options(
+        database_url: &str,
+        max_connections: u32,
+        acquire_timeout: Duration,
+    ) -> Result<Self, sqlx::Error> {
         let pool = PgPoolOptions::new()
-            .max_connections(10)
-            .acquire_timeout(Duration::from_secs(5))
+            .max_connections(max_connections)
+            .acquire_timeout(acquire_timeout)
             .connect(database_url)
             .await?;
 

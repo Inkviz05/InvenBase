@@ -9,6 +9,62 @@ permissions:
   contents: read
 
 jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: invenbase-client/web/package-lock.json
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Install web dependencies
+        working-directory: invenbase-client/web
+        run: npm ci
+
+      - name: Audit web dependencies
+        working-directory: invenbase-client/web
+        run: npm audit --audit-level=high
+
+      - name: Test web client
+        working-directory: invenbase-client/web
+        run: npm run test:run
+
+      - name: Build web client
+        working-directory: invenbase-client/web
+        run: npm run build
+
+      - name: Check Rust formatting
+        working-directory: invenbase-server
+        run: cargo fmt --check
+
+      - name: Test backend library
+        working-directory: invenbase-server
+        run: cargo test --locked --lib
+
+      - name: Enforce production hardening
+        shell: bash
+        run: |
+          if grep -R "console\.log" invenbase-client/web/src; then
+            echo "Production console.log calls are not allowed"
+            exit 1
+          fi
+          if grep -R "show_files_listing" invenbase-server/src; then
+            echo "Static directory listing must stay disabled"
+            exit 1
+          fi
+
   compose-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 30

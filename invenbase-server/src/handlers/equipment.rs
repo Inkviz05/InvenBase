@@ -368,20 +368,18 @@ pub async fn move_equipment(
         .map_err(|_| AppError::Unauthorized("Invalid user id in token".to_string()))?;
 
     // Получаем текущее состояние оборудования и ответственного сквада
-    let row = sqlx::query_as::<
-        sqlx::Postgres,
-        (String, Option<Uuid>, Option<String>, Option<Uuid>),
-    >(
-        r#"
+    let row =
+        sqlx::query_as::<sqlx::Postgres, (String, Option<Uuid>, Option<String>, Option<Uuid>)>(
+            r#"
         SELECT e.name as equipment_name, e.squad_id, e.location, s.responsible_user_id
         FROM equipment e
         LEFT JOIN squads s ON e.squad_id = s.id
         WHERE e.id = $1
         "#,
-    )
-    .bind(equipment_id)
-    .fetch_optional(&state.db.pool)
-    .await?;
+        )
+        .bind(equipment_id)
+        .fetch_optional(&state.db.pool)
+        .await?;
 
     let row = match row {
         Some(r) => r,

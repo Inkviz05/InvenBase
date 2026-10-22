@@ -14,17 +14,7 @@ apiClient.interceptors.request.use(
   (config) => {
     // Динамически получаем актуальный API URL
     const currentApiUrl = getApiBaseUrl();
-    console.log('API Request:', {
-      method: config.method,
-      url: config.url,
-      baseURL: config.baseURL,
-      currentApiUrl: currentApiUrl,
-      fullURL: currentApiUrl + config.url,
-      data: config.data,
-      headers: config.headers
-    });
     if (config.baseURL !== currentApiUrl) {
-      console.log('Updating API baseURL from', config.baseURL, 'to', currentApiUrl);
       config.baseURL = currentApiUrl;
     }
     return config;
