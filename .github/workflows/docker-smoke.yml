@@ -9,6 +9,41 @@ permissions:
   contents: read
 
 jobs:
+  backend-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: invenbase_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d invenbase_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/invenbase_test
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Run backend tests against clean PostgreSQL
+        working-directory: invenbase-server
+        run: cargo test --locked
+
   android-build:
     runs-on: ubuntu-latest
     timeout-minutes: 20

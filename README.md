@@ -96,7 +96,7 @@ cd ..\..
 
 - `/health` проверяет только HTTP-процесс; отдельного `/ready` с запросом к БД нет.
 - OpenAPI/Swagger в репозитории нет.
-- CI не собирает Android и не запускает DB integration tests backend; в CI выполняются Rust library tests, web tests/build/audit и Docker browser smoke.
+- CI собирает Android debug APK, запускает Rust library tests, полный backend DB/HTTP integration suite на чистом PostgreSQL 16, web tests/build/audit и Docker browser smoke.
 - Release Android собирается без минификации (`minifyEnabled false`), API URL не разделён по build flavors.
 - Миграции запускаются самим backend; отдельной production-команды migrate/rollback нет.
 

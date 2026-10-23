@@ -9,7 +9,7 @@ cd invenbase-server
 cargo test --locked --lib
 ```
 
-Проверяются JWT/auth helpers, модели и часть правил бронирования. Именно эту команду выполняет текущий GitHub Actions quality job.
+Проверяются JWT/auth helpers, модели и часть правил бронирования. Эту команду выполняет GitHub Actions quality job; полный набор отдельно запускается в backend integration job.
 
 ### Полный набор с PostgreSQL
 
@@ -36,7 +36,7 @@ cargo test --locked
 
 Если `TEST_DATABASE_URL` не задана, скрипт берёт `DATABASE_URL` из `invenbase-server/.env`. Это допускается кодом, но небезопасно для важных локальных данных; предпочтительна отдельная тестовая БД.
 
-DB tests проверяют migrations, ключевые таблицы/индексы/constraints/foreign keys и lifecycle бронирования, включая approve, reject, cancel, awaiting return, return, нехватку остатка и недоступное оборудование. HTTP-тест push API проверяет обязательную авторизацию, регистрацию и обновление устройства, несколько устройств одной учётной записи, перенос push-токена при смене пользователя и деактивацию текущего устройства.
+DB tests проверяют migrations, ключевые таблицы/индексы/constraints/foreign keys и lifecycle бронирования, включая approve, reject, cancel, awaiting return, return, нехватку остатка и недоступное оборудование. HTTP-тесты проверяют успешный и неуспешный login, регистрацию и обновление устройства, несколько устройств одной учётной записи, перенос push-токена при смене пользователя, деактивацию текущего устройства и сценарий login → два устройства → notification/outbox для обоих устройств.
 
 Остальные HTTP routes и middleware через `actix_web::test` пока не покрыты.
 
@@ -112,4 +112,6 @@ Compose smoke job:
 - выполняет login → создание equipment → создание booking;
 - на failure загружает Playwright artifacts.
 
-CI не выполняет полный backend DB test suite, Android unit/instrumentation tests, lint или secret scan.
+Backend integration job поднимает отдельный чистый PostgreSQL 16, задаёт `TEST_DATABASE_URL`, применяет migrations и выполняет полный `cargo test --locked`, включая тесты из `invenbase-server/tests/`.
+
+CI не выполняет Android unit/instrumentation tests, lint или secret scan.

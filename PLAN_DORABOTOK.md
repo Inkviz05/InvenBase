@@ -9,7 +9,7 @@
 - Добавлены SQLx migrations, ограничения и внешние ключи PostgreSQL.
 - Основная логика жизненного цикла бронирования вынесена в services и покрыта unit/DB integration tests.
 - Добавлены Dockerfiles, Compose, nginx reverse proxy, healthchecks и browser smoke полного стека.
-- Добавлен GitHub Actions workflow: Android debug build, web audit/tests/build, `cargo fmt`, backend library tests и Compose smoke.
+- Добавлен GitHub Actions workflow: Android debug build, web audit/tests/build, `cargo fmt`, backend library tests, полный backend integration suite на чистом PostgreSQL 16 и Compose smoke.
 - Убраны production `console.log`, directory listing отключён, параметры пула БД вынесены в env.
 - Web использует локальный XLSX writer вместо зависимости `xlsx`.
 - Завершён первый этап multi-device push: provider-aware `user_devices`, стабильный `device_id`, active/last-seen lifecycle, register/unregister, деактивация невалидных FCM-токенов и рабочий `FcmTransport`.
@@ -30,7 +30,7 @@
 1. Не использовать основную БД для integration tests: создавать отдельную БД и задавать `TEST_DATABASE_URL`.
 2. Добавить явную production-процедуру backup, migrate и restore. Сейчас migrations выполняются при запуске backend.
 3. Проверить исторические данные перед валидацией оставшихся `NOT VALID` constraints.
-4. Добавить CI job с чистой PostgreSQL для полного `cargo test --locked`.
+4. [Выполнено] Добавлен CI job с отдельным чистым PostgreSQL 16 для полного `cargo test --locked`, включая migrations и HTTP/DB integration tests.
 
 ### 3. Архитектура backend
 
@@ -52,7 +52,7 @@
 7. Добавить SSE для мгновенного обновления открытых web/Android-клиентов. WebSocket использовать только если появится реальный двусторонний сценарий, например live-чат поддержки.
 8. [Выполнено] Android WorkManager каждые 15 минут синхронизирует непрочитанные уведомления при наличии сети; immediate sync запускается после login и `onDeletedMessages` FCM/RuStore. Локальный реестр `notification_id` предотвращает повторный показ уже обработанных push.
 9. Не использовать foreground service для постоянного соединения без отдельной продуктовой необходимости: он расходует батарею и требует постоянного системного уведомления.
-10. [Частично выполнено] Миграции, multi-device/deactivation lifecycle, атомарное создание notification/outbox и outbox claim/retry/complete покрыты PostgreSQL integration tests, backoff и нормализация FCM env — unit tests. HTTP lifecycle register/update/unregister покрыт через `actix_web::test`; ещё нужны contract tests новых transports.
+10. [Частично выполнено] Миграции, multi-device/deactivation lifecycle, атомарное создание notification/outbox и outbox claim/retry/complete покрыты PostgreSQL integration tests, backoff и нормализация FCM env — unit tests. HTTP lifecycle login → два устройства → notification/outbox, а также register/update/unregister покрыт через `actix_web::test` и выполняется в CI; ещё нужны contract tests новых transports.
 11. [Отложено] Провести end-to-end проверку уведомлений на реальных Android-устройствах: доставка на несколько устройств одной учётной записи, восстановление после потери сети и `onDeletedMessages`, а также прекращение доставки после logout. Вернуться к проверке, когда будет готово реальное устройство и пользователь решит продолжить ручное тестирование.
 
 ### 5. Web

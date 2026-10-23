@@ -73,6 +73,33 @@ async fn create_user(db: &Database, label: &str) -> Result<User> {
     Ok(user)
 }
 
+async fn create_login_user(db: &Database, label: &str, role: &str, password: &str) -> Result<User> {
+    let user = User {
+        id: Uuid::new_v4(),
+        username: format!("login_{label}_{}", Uuid::new_v4().simple()),
+        password_hash: AuthService::hash_password(password)?,
+        email: None,
+        full_name: Some(format!("Login API {label}")),
+        role: role.to_string(),
+        created_at: Utc::now(),
+        updated_at: Utc::now(),
+    };
+
+    sqlx::query(
+        "INSERT INTO users (id, username, password_hash, full_name, role)
+         VALUES ($1, $2, $3, $4, $5)",
+    )
+    .bind(user.id)
+    .bind(&user.username)
+    .bind(&user.password_hash)
+    .bind(&user.full_name)
+    .bind(&user.role)
+    .execute(&db.pool)
+    .await?;
+
+    Ok(user)
+}
+
 fn bearer_token(user: &User) -> Result<String> {
     Ok(AuthService::new(JWT_SECRET, 3600).generate_token(user)?)
 }
@@ -222,6 +249,128 @@ async fn push_device_http_lifecycle_is_user_scoped() -> Result<()> {
 
     sqlx::query("DELETE FROM users WHERE id = ANY($1)")
         .bind(vec![first_user.id, second_user.id])
+        .execute(&pool)
+        .await?;
+
+    Ok(())
+}
+
+#[actix_web::test]
+async fn login_and_notification_flow_targets_all_account_devices() -> Result<()> {
+    let Some((db, database_url)) = connect_test_db().await? else {
+        return Ok(());
+    };
+
+    let password = "integration-password";
+    let user = create_login_user(&db, "recipient", "user", password).await?;
+    let admin = create_login_user(&db, "admin", "admin", password).await?;
+    let state = AppState::new(Arc::new(db), test_config(database_url));
+    let pool = state.db.pool.clone();
+    let app = test::init_service(
+        App::new()
+            .app_data(web::Data::new(state))
+            .service(web::scope("/api").configure(routes::configure_api)),
+    )
+    .await;
+
+    let invalid_login = test::TestRequest::post()
+        .uri("/api/auth/login")
+        .set_json(serde_json::json!({
+            "username": user.username,
+            "password": "wrong-password"
+        }))
+        .to_request();
+    assert_eq!(
+        test::call_service(&app, invalid_login).await.status(),
+        StatusCode::UNAUTHORIZED
+    );
+
+    let user_login = test::TestRequest::post()
+        .uri("/api/auth/login")
+        .set_json(serde_json::json!({
+            "username": user.username,
+            "password": password
+        }))
+        .to_request();
+    let user_login_response = test::call_service(&app, user_login).await;
+    assert_eq!(user_login_response.status(), StatusCode::OK);
+    let user_login_body: serde_json::Value = test::read_body_json(user_login_response).await;
+    let user_token = user_login_body["token"]
+        .as_str()
+        .expect("user login response must contain a token")
+        .to_string();
+
+    let admin_login = test::TestRequest::post()
+        .uri("/api/auth/login")
+        .set_json(serde_json::json!({
+            "username": admin.username,
+            "password": password
+        }))
+        .to_request();
+    let admin_login_response = test::call_service(&app, admin_login).await;
+    assert_eq!(admin_login_response.status(), StatusCode::OK);
+    let admin_login_body: serde_json::Value = test::read_body_json(admin_login_response).await;
+    let admin_token = admin_login_body["token"]
+        .as_str()
+        .expect("admin login response must contain a token")
+        .to_string();
+
+    for device in ["phone", "tablet"] {
+        let request = test::TestRequest::post()
+            .uri("/api/push/register-token")
+            .insert_header(("Authorization", format!("Bearer {user_token}")))
+            .set_json(serde_json::json!({
+                "token": format!("{device}-token-{}", user.id),
+                "platform": "android",
+                "device_id": format!("{device}-{}", user.id),
+                "provider": "fcm"
+            }))
+            .to_request();
+        assert_eq!(
+            test::call_service(&app, request).await.status(),
+            StatusCode::NO_CONTENT
+        );
+    }
+
+    let create_notification = test::TestRequest::post()
+        .uri("/api/notifications")
+        .insert_header(("Authorization", format!("Bearer {admin_token}")))
+        .set_json(serde_json::json!({
+            "user_id": user.id,
+            "title": "Integration notification",
+            "message": "Delivered through the account outbox",
+            "notification_type": "integration"
+        }))
+        .to_request();
+    assert_eq!(
+        test::call_service(&app, create_notification).await.status(),
+        StatusCode::CREATED
+    );
+
+    let get_notifications = test::TestRequest::get()
+        .uri("/api/notifications")
+        .insert_header(("Authorization", format!("Bearer {user_token}")))
+        .to_request();
+    let response = test::call_service(&app, get_notifications).await;
+    assert_eq!(response.status(), StatusCode::OK);
+    let notifications: serde_json::Value = test::read_body_json(response).await;
+    assert_eq!(notifications.as_array().map(Vec::len), Some(1));
+    assert_eq!(notifications[0]["title"], "Integration notification");
+
+    let queued_recipients: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*)
+         FROM notification_outbox outbox
+         JOIN user_devices device
+           ON device.user_id = outbox.user_id AND device.active = TRUE
+         WHERE outbox.user_id = $1 AND outbox.status = 'pending'",
+    )
+    .bind(user.id)
+    .fetch_one(&pool)
+    .await?;
+    assert_eq!(queued_recipients, 2);
+
+    sqlx::query("DELETE FROM users WHERE id = ANY($1)")
+        .bind(vec![user.id, admin.id])
         .execute(&pool)
         .await?;
 

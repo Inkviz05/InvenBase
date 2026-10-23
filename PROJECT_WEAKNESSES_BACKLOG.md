@@ -8,7 +8,7 @@
 2. **Нет документированной процедуры backup/restore и отдельного migrate job.** Backend автоматически применяет migrations при старте.
 3. **Нет readiness-проверки БД.** `/health` всегда отвечает `200`, если HTTP-процесс работает.
 4. **Нет полного API-контракта.** OpenAPI/Swagger и contract tests отсутствуют.
-5. **CI не выполняет DB integration tests.** Workflow запускает `cargo test --locked --lib`, но не тесты из `invenbase-server/tests/`.
+5. [Закрыто] CI поднимает чистый PostgreSQL 16 и выполняет полный `cargo test --locked`, включая DB/HTTP integration tests.
 
 ## Высокий приоритет
 
@@ -23,6 +23,7 @@
 9. [Закрыто] Добавлен HTTP integration test register/update/unregister устройства, нескольких устройств одной учётной записи и смены пользователя на одном физическом устройстве.
 10. [Закрыто] Transactional outbox, retries/backoff и журнал доставки добавлены; in-app уведомление и outbox создаются одной транзакцией, payload содержит `notification_id`.
 11. [Отложено] End-to-end проверка уведомлений на реальных Android-устройствах: multi-device доставка, восстановление WorkManager после потери сети и `onDeletedMessages`, деактивация устройства после logout. Выполнить позже по решению пользователя.
+12. [Закрыто] Добавлен CI integration job с чистым PostgreSQL и HTTP-сценарий login → регистрация двух устройств → создание и чтение уведомления → outbox для обоих устройств.
 
 ## Средний приоритет
 
