@@ -74,6 +74,7 @@ public class AuthManager {
             String deviceId = DeviceIdentity.get(appContext);
             unregisterPushDevice(token, deviceId, PushManager.PROVIDER_FCM);
             unregisterPushDevice(token, deviceId, PushManager.PROVIDER_RUSTORE);
+            unregisterPushDevice(token, deviceId, PushManager.PROVIDER_HUAWEI);
         }
 
         prefs.edit()

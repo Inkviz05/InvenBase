@@ -24,6 +24,7 @@ public class PushManager {
 
     public static final String PROVIDER_FCM = "fcm";
     public static final String PROVIDER_RUSTORE = "rustore";
+    public static final String PROVIDER_HUAWEI = "huawei";
     private static final String PREF_TOKEN_PREFIX = "push_token_";
     private static final String LEGACY_FCM_TOKEN = "fcm_token";
 
@@ -68,7 +69,8 @@ public class PushManager {
         if (token == null || token.isEmpty()) {
             return;
         }
-        if (!PROVIDER_FCM.equals(provider) && !PROVIDER_RUSTORE.equals(provider)) {
+        if (!PROVIDER_FCM.equals(provider) && !PROVIDER_RUSTORE.equals(provider)
+                && !PROVIDER_HUAWEI.equals(provider)) {
             Log.w("Push", "Unsupported push provider: " + provider);
             return;
         }
@@ -90,7 +92,7 @@ public class PushManager {
         if (!authManager.isAuthenticated()) {
             return;
         }
-        for (String provider : new String[]{PROVIDER_FCM, PROVIDER_RUSTORE}) {
+        for (String provider : new String[]{PROVIDER_FCM, PROVIDER_RUSTORE, PROVIDER_HUAWEI}) {
             String token = prefs.getString(PREF_TOKEN_PREFIX + provider, null);
             if (token != null) {
                 sendTokenToServer(provider, token);

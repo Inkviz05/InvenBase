@@ -20,6 +20,19 @@ public class InvenBaseApplication extends Application {
         createNotificationChannel();
         NotificationSyncScheduler.schedulePeriodic(this);
         FirebaseApp.initializeApp(this);
+        if (BuildConfig.HUAWEI_ENABLED) {
+            new Thread(() -> {
+                try {
+                    String appId = com.huawei.agconnect.config.AGConnectServicesConfig
+                            .fromContext(this).getString("client/app_id");
+                    String token = com.huawei.hms.aaid.HmsInstanceId.getInstance(this)
+                            .getToken(appId, "HCM");
+                    PushManager.getInstance(this).registerToken(PushManager.PROVIDER_HUAWEI, token);
+                } catch (Exception error) {
+                    android.util.Log.w("HuaweiPush", "Unable to obtain push token", error);
+                }
+            }, "huawei-push-token").start();
+        }
 
         if (!BuildConfig.RUSTORE_PROJECT_ID.isEmpty()) {
             RuStorePushClient.INSTANCE.init(this, BuildConfig.RUSTORE_PROJECT_ID);

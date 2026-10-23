@@ -45,8 +45,8 @@
 
 1. Ввести единое серверное событие `NotificationEvent` и сохранять каждое уведомление в PostgreSQL как источник истины.
 2. [Выполнено] Расширить модель устройств: `user_id`, стабильный `device_id`, `provider`, `push_token`, `platform`, `active`, `last_seen_at`. Одна учётная запись поддерживает несколько устройств и провайдеров на уровне схемы.
-3. [Выполнено] Добавить API регистрации, обновления и удаления устройства. Android logout деактивирует только текущее FCM-устройство.
-4. [Выполнено на backend] Введены интерфейс `PushTransport`, `FcmTransport`, `RuStoreTransport` и `HuaweiTransport`. Android-клиент ещё не получает и не регистрирует Huawei Push token.
+3. [Выполнено] Добавить API регистрации, обновления и удаления устройства. Android logout деактивирует текущее устройство для FCM, RuStore и Huawei.
+4. [Выполнено] Введены интерфейс `PushTransport`, `FcmTransport`, `RuStoreTransport` и `HuaweiTransport`; Android получает и регистрирует токены всех трёх providers.
 5. [Выполнено на backend] Событие рассылается на все активные устройства пользователя соответствующих providers; FCM `UNREGISTERED`, RuStore `NOT_FOUND` и Huawei `80300007` деактивируют токен.
 6. [Выполнено] Добавлена PostgreSQL transactional outbox: in-app запись и outbox создаются одной транзакцией, payload включает `notification_id`, worker выполняет retries с exponential backoff и сохраняет статус/последнюю ошибку. Полное содержимое доступно из авторизованного notifications API.
 7. Добавить SSE для мгновенного обновления открытых web/Android-клиентов. WebSocket использовать только если появится реальный двусторонний сценарий, например live-чат поддержки.
@@ -69,7 +69,7 @@
 3. Ввести repository/ViewModel слой и сократить API/UI-логику в Activity/Fragment.
 4. Добавить unit и instrumentation tests; сейчас Gradle содержит зависимости JUnit/Espresso, но тестовых исходников в проекте нет.
 5. Проверить release signing, включить и протестировать R8/ProGuard.
-6. [Частично выполнено] Android RuStore Push SDK 7.5.0 подключён: init через build-конфигурацию, получение/обновление token, регистрация provider/device и деактивация при logout. WorkManager-сверка пропущенных уведомлений реализована. Остаются проверка на реальном RuStore-устройстве, Huawei Push token и SSE.
+6. [Частично выполнено] Android RuStore Push SDK 7.5.0 и Huawei Push SDK подключены: получение/обновление token, регистрация provider/device и деактивация при logout. Huawei включается при наличии `app/agconnect-services.json`. WorkManager-сверка пропущенных уведомлений реализована. Остаются проверка RuStore/Huawei на реальных устройствах и SSE.
 
 ### 7. Delivery
 
