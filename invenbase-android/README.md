@@ -7,7 +7,7 @@
 - Android Gradle Plugin 8.1.0, Gradle Wrapper 8.7.
 - `compileSdk 34`, `targetSdk 34`, `minSdk 24`.
 - Java source/target compatibility 8; для запуска Gradle рекомендуется JDK 17 или 21.
-- Retrofit/Gson/OkHttp, Material/AndroidX, ZXing, Glide и Firebase Messaging.
+- Retrofit/Gson/OkHttp, Material/AndroidX, ZXing, Glide, Firebase Messaging и RuStore Push SDK 7.5.0.
 - Package/application ID: `com.invenbase.app`.
 
 ## Сборка
@@ -51,12 +51,13 @@ JWT, сериализованный пользователь и API URL сохр
 Приложение:
 
 - подключает Firebase Messaging;
+- подключает RuStore Push SDK при заданном build-параметре `RUSTORE_PROJECT_ID`;
 - подписывается на topic `all` при старте;
-- обрабатывает `onNewToken` и `onMessageReceived`;
-- после авторизации регистрирует token через `POST /api/push/register-token`.
-- перед локальным logout вызывает `POST /api/push/unregister-device`, поэтому отключается только текущее устройство, а остальные устройства учётной записи остаются активными.
+- обрабатывает обновление FCM/RuStore tokens и входящие сообщения;
+- после авторизации регистрирует оба доступных token через `POST /api/push/register-token` с соответствующим provider;
+- перед локальным logout вызывает `POST /api/push/unregister-device` для FCM и RuStore, поэтому отключается только текущее устройство, а остальные устройства учётной записи остаются активными.
 
-Для сборки Firebase нужен `app/google-services.json`; он не должен попадать в git. Подробности: [FIREBASE_SETUP.md](FIREBASE_SETUP.md) и [PUSH_NOTIFICATIONS_SERVER.md](PUSH_NOTIFICATIONS_SERVER.md).
+Для сборки Firebase нужен `app/google-services.json`; он не должен попадать в git. RuStore project ID задаётся через Gradle property или одноимённую переменную окружения `RUSTORE_PROJECT_ID`. Подробности: [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md), [FIREBASE_SETUP.md](FIREBASE_SETUP.md) и [PUSH_NOTIFICATIONS_SERVER.md](PUSH_NOTIFICATIONS_SERVER.md).
 
 ## Тесты и ограничения
 

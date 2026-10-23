@@ -6,8 +6,18 @@
 - JDK 17 или 21.
 - Интернет при первой Gradle sync для загрузки зависимостей.
 - `app/google-services.json` от Firebase-проекта `com.invenbase.app`.
+- ID проекта Push из RuStore Console, если требуется RuStore transport.
 
 JDK 25 для текущего Gradle/Android toolchain не рекомендуется.
+
+RuStore project ID передаётся без сохранения в git:
+
+```powershell
+$env:RUSTORE_PROJECT_ID="your-rustore-project-id"
+.\gradlew.bat assembleDebug
+```
+
+Либо задайте `RUSTORE_PROJECT_ID` в пользовательском `~/.gradle/gradle.properties`. При пустом значении RuStore SDK не инициализируется, FCM продолжает работать.
 
 ## Debug APK
 

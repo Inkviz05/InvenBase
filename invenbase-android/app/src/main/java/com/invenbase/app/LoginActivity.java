@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 
 import com.google.firebase.messaging.FirebaseMessaging;
+import ru.rustore.sdk.pushclient.RuStorePushClient;
 import com.invenbase.app.api.ApiClient;
 import com.invenbase.app.api.ApiService;
 import com.invenbase.app.models.LoginRequest;
@@ -109,6 +110,20 @@ public class LoginActivity extends BaseActivity {
                                     android.util.Log.e("FCM", "Failed to get FCM token: " + (task.getException() != null ? task.getException().getMessage() : "unknown error"));
                                 }
                             });
+
+                    if (!BuildConfig.RUSTORE_PROJECT_ID.isEmpty()) {
+                        RuStorePushClient.INSTANCE.getToken()
+                                .addOnSuccessListener(token ->
+                                        com.invenbase.app.utils.PushManager
+                                                .getInstance(LoginActivity.this)
+                                                .registerToken(
+                                                        com.invenbase.app.utils.PushManager.PROVIDER_RUSTORE,
+                                                        token))
+                                .addOnFailureListener(error -> android.util.Log.w(
+                                        "RuStorePush",
+                                        "Failed to get RuStore token after login",
+                                        error));
+                    }
 
                     Toast.makeText(LoginActivity.this, R.string.success, Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));

@@ -19,7 +19,7 @@
 5. Защитить Android auth storage, разделить API URL по build type и настроить release signing/minification.
 6. Добавить Android build/tests в CI.
 7. Добавить role guards на маршрутах web, не полагаясь только на скрытие пунктов меню и backend `403`.
-8. Продолжить provider-independent архитектуру: серверные `FcmTransport` и `RuStoreTransport` готовы; остаются `NotificationEvent`, Android RuStore SDK и `HuaweiTransport`.
+8. Продолжить provider-independent архитектуру: FCM и RuStore реализованы на сервере и Android; остаются проверка RuStore на реальном устройстве, `NotificationEvent` и `HuaweiTransport`.
 9. Добавить HTTP integration tests для реализованных register/update/unregister устройства и проверить смену пользователя на одном физическом устройстве.
 10. [Закрыто] Transactional outbox, retries/backoff и журнал доставки добавлены; in-app уведомление и outbox создаются одной транзакцией, payload содержит `notification_id`.
 
@@ -47,7 +47,7 @@
 - Android release build имеет `minifyEnabled false`.
 - Автоматической ротации JWT/refresh token нет: API выдаёт один JWT с временем жизни из `JWT_EXPIRATION`.
 - Отдельного logout endpoint на backend нет; клиенты удаляют локальный токен.
-- `user_devices` моделирует provider/device lifecycle и несколько устройств; сервер реализует FCM и RuStore, но Android пока получает только FCM token, а Huawei transport отсутствует.
+- `user_devices` моделирует provider/device lifecycle и несколько устройств; сервер и Android реализуют FCM/RuStore, но RuStore ещё не проверен на зарегистрированной сборке реального устройства, а Huawei transport отсутствует.
 - Для открытых клиентов нет SSE/WebSocket, для Android нет WorkManager-сверки уведомлений. Серверная очередь повторной push-доставки уже атомарно связана с созданием in-app уведомления.
 
 Приоритетный порядок: readiness и production DB-процедура → HTTP/API tests и контракт → multi-device notifications/outbox/transports → CI с PostgreSQL → Android security/build → SSE/WorkManager → архитектурные рефакторинги.

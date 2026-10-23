@@ -68,7 +68,7 @@
 3. Ввести repository/ViewModel слой и сократить API/UI-логику в Activity/Fragment.
 4. Добавить unit и instrumentation tests; сейчас Gradle содержит зависимости JUnit/Espresso, но тестовых исходников в проекте нет.
 5. Проверить release signing, включить и протестировать R8/ProGuard.
-6. Подключить Android RuStore Push SDK и получение его token (backend registration уже принимает provider `rustore`), затем Huawei Push token, SSE в активном приложении и WorkManager-синхронизацию в фоне.
+6. [Частично выполнено] Android RuStore Push SDK 7.5.0 подключён: init через build-конфигурацию, получение/обновление token, регистрация provider/device и деактивация при logout. Остаются проверка на реальном RuStore-устройстве, Huawei Push token, SSE и WorkManager-синхронизация.
 
 ### 7. Delivery
 

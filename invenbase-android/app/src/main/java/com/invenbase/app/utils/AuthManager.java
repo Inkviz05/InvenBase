@@ -72,31 +72,36 @@ public class AuthManager {
         String token = getToken();
         if (token != null) {
             String deviceId = DeviceIdentity.get(appContext);
-            Map<String, String> body = new HashMap<>();
-            body.put("device_id", deviceId);
-            body.put("provider", "fcm");
-            ApiClient.getInstance(appContext)
-                .getApiService()
-                .unregisterPushDevice("Bearer " + token, body)
-                .enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (!response.isSuccessful()) {
-                            Log.w("Auth", "Push device unregister returned " + response.code());
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable throwable) {
-                        Log.w("Auth", "Push device unregister failed", throwable);
-                    }
-                });
+            unregisterPushDevice(token, deviceId, PushManager.PROVIDER_FCM);
+            unregisterPushDevice(token, deviceId, PushManager.PROVIDER_RUSTORE);
         }
 
         prefs.edit()
             .remove(Config.PREF_TOKEN)
             .remove(Config.PREF_USER)
             .apply();
+    }
+
+    private void unregisterPushDevice(String authToken, String deviceId, String provider) {
+        Map<String, String> body = new HashMap<>();
+        body.put("device_id", deviceId);
+        body.put("provider", provider);
+        ApiClient.getInstance(appContext)
+                .getApiService()
+                .unregisterPushDevice("Bearer " + authToken, body)
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (!response.isSuccessful()) {
+                            Log.w("Auth", provider + " device unregister returned " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable throwable) {
+                        Log.w("Auth", provider + " device unregister failed", throwable);
+                    }
+                });
     }
 
     // Метод isAdmin: проверяет условие и возвращает логический результат.

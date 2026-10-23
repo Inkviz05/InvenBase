@@ -35,7 +35,7 @@ RUSTORE_PROJECT_ID=your-rustore-project-id
 RUSTORE_SERVICE_TOKEN=your-service-token
 ```
 
-Backend отправляет токены provider `rustore` через `https://vkpns.rustore.ru/v1/projects/{project_id}/messages:send`. Ответ `NOT_FOUND` деактивирует токен. Android-клиент пока не подключает RuStore Push SDK и не получает RuStore token — это следующий этап.
+Backend отправляет токены provider `rustore` через `https://vkpns.rustore.ru/v1/projects/{project_id}/messages:send`. Ответ `NOT_FOUND` деактивирует токен. Android использует RuStore Push SDK 7.5.0, получает token при старте и через `onNewToken`, сохраняет его до авторизации и регистрирует с provider `rustore`. Для инициализации задайте Gradle property или переменную окружения `RUSTORE_PROJECT_ID`; при пустом значении интеграция отключена.
 
 ## Реальные маршруты
 
@@ -49,7 +49,7 @@ Backend отправляет токены provider `rustore` через `https:/
 
 ## Ограничения
 
-- Android-клиент пока регистрирует только FCM token; серверный RuStore transport уже реализован.
+- RuStore требует отдельный проект для каждой комбинации package name и подписи; реальная доставка должна быть проверена debug/release сборками, зарегистрированными в RuStore Console.
 - Huawei transport и клиентский Huawei Push Kit отсутствуют.
 - Отдельных network contract tests FCM/OAuth и RuStore API пока нет.
 - Service account rotation и secret mounting должны настраиваться вне приложения.

@@ -16,13 +16,16 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Отвечает за регистрацию FCM-токена на backend-е.
+ * Отвечает за регистрацию push-токенов разных providers на backend-е.
  * Ожидается, что сервер реализует POST /api/push/register-token
  * и свяжет токен с текущим пользователем по токену авторизации.
  */
 public class PushManager {
 
-    private static final String PREF_FCM_TOKEN = "fcm_token";
+    public static final String PROVIDER_FCM = "fcm";
+    public static final String PROVIDER_RUSTORE = "rustore";
+    private static final String PREF_TOKEN_PREFIX = "push_token_";
+    private static final String LEGACY_FCM_TOKEN = "fcm_token";
 
     private static PushManager instance;
     private final SharedPreferences prefs;
@@ -37,6 +40,12 @@ public class PushManager {
         this.apiService = ApiClient.getInstance(appContext).getApiService();
         this.authManager = AuthManager.getInstance(appContext);
         this.deviceId = DeviceIdentity.get(appContext);
+        if (!prefs.contains(PREF_TOKEN_PREFIX + PROVIDER_FCM) && prefs.contains(LEGACY_FCM_TOKEN)) {
+            prefs.edit()
+                    .putString(PREF_TOKEN_PREFIX + PROVIDER_FCM, prefs.getString(LEGACY_FCM_TOKEN, null))
+                    .remove(LEGACY_FCM_TOKEN)
+                    .apply();
+        }
     }
 
     // Метод getInstance: возвращает нужное значение для текущего контекста.
@@ -52,55 +61,67 @@ public class PushManager {
      * Если пользователь еще не авторизован, токен будет отправлен при следующем успешном входе.
      */
     public void registerToken(String token) {
+        registerToken(PROVIDER_FCM, token);
+    }
+
+    public void registerToken(String provider, String token) {
         if (token == null || token.isEmpty()) {
             return;
         }
-        prefs.edit().putString(PREF_FCM_TOKEN, token).apply();
+        if (!PROVIDER_FCM.equals(provider) && !PROVIDER_RUSTORE.equals(provider)) {
+            Log.w("Push", "Unsupported push provider: " + provider);
+            return;
+        }
+        prefs.edit().putString(PREF_TOKEN_PREFIX + provider, token).apply();
 
         if (!authManager.isAuthenticated()) {
             // Пользователь пока не залогинен — отправим позже.
-            Log.d("FCM", "User not authenticated yet, will send token after login");
+            Log.d("Push", "User not authenticated yet, will send " + provider + " token after login");
             return;
         }
 
-        sendTokenToServer(token);
+        sendTokenToServer(provider, token);
     }
 
     /**
      * Вызывается после успешного логина, чтобы убедиться, что токен отправлен на сервер.
      */
     public void sendStoredTokenIfNeeded() {
-        String token = prefs.getString(PREF_FCM_TOKEN, null);
-        if (token != null && authManager.isAuthenticated()) {
-            sendTokenToServer(token);
+        if (!authManager.isAuthenticated()) {
+            return;
+        }
+        for (String provider : new String[]{PROVIDER_FCM, PROVIDER_RUSTORE}) {
+            String token = prefs.getString(PREF_TOKEN_PREFIX + provider, null);
+            if (token != null) {
+                sendTokenToServer(provider, token);
+            }
         }
     }
 
     // Метод sendTokenToServer: выполняет основную бизнес- или UI-логику данного участка кода.
-    private void sendTokenToServer(String token) {
+    private void sendTokenToServer(String provider, String token) {
         Map<String, String> body = new HashMap<>();
         body.put("token", token);
         body.put("platform", "android");
-        body.put("provider", "fcm");
+        body.put("provider", provider);
         body.put("device_id", deviceId);
 
-        Log.d("FCM", "Sending push token to server: " + token.substring(0, Math.min(20, token.length())) + "...");
-        Log.d("FCM", "API endpoint: POST /api/push/register-token");
+        Log.d("Push", "Sending " + provider + " push token to server");
         
         apiService.registerPushToken(body).enqueue(new Callback<Void>() {
             @Override
             // Метод onResponse: обрабатывает соответствующее событие приложения.
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Log.d("FCM", "Push token registered successfully on server (status: " + response.code() + ")");
+                    Log.d("Push", provider + " token registered on server (status: " + response.code() + ")");
                 } else {
-                    Log.e("FCM", "Failed to register push token. Code=" + response.code());
+                    Log.e("Push", "Failed to register " + provider + " token. Code=" + response.code());
                     if (response.errorBody() != null) {
                         try {
                             String errorBody = response.errorBody().string();
-                            Log.e("FCM", "Error response: " + errorBody);
+                            Log.e("Push", "Error response: " + errorBody);
                         } catch (Exception e) {
-                            Log.e("FCM", "Could not read error body", e);
+                            Log.e("Push", "Could not read error body", e);
                         }
                     }
                 }
@@ -109,8 +130,7 @@ public class PushManager {
             @Override
             // Метод onFailure: обрабатывает соответствующее событие приложения.
             public void onFailure(Call<Void> call, Throwable t) {
-                Log.e("FCM", "Error registering push token: " + t.getMessage(), t);
-                Log.e("FCM", "Request URL: " + (call.request() != null ? call.request().url() : "null"));
+                Log.e("Push", "Error registering " + provider + " token", t);
             }
         });
     }
