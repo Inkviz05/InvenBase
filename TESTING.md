@@ -1,106 +1,113 @@
-# Тестирование проекта
+# Тестирование InvenBase
 
 ## Backend
 
-Основная команда для локального запуска backend-тестов из корня проекта:
+### Library tests без PostgreSQL
+
+```powershell
+cd invenbase-server
+cargo test --locked --lib
+```
+
+Проверяются JWT/auth helpers, модели и часть правил бронирования. Именно эту команду выполняет текущий GitHub Actions quality job.
+
+### Полный набор с PostgreSQL
+
+Integration tests находятся в:
+
+- `invenbase-server/tests/booking_lifecycle.rs`;
+- `invenbase-server/tests/database_schema.rs`.
+
+Они требуют `TEST_DATABASE_URL`, применяют migrations и создают/удаляют тестовые записи:
+
+```powershell
+$env:TEST_DATABASE_URL = "postgresql://postgres:password@localhost:5432/kvantoriym_test"
+cd invenbase-server
+cargo test --locked
+```
+
+Либо из корня:
 
 ```powershell
 .\scripts\test-backend.ps1
-```
-
-Скрипт делает следующее:
-
-- читает `DATABASE_URL` из `invenbase-server/.env`;
-- если `TEST_DATABASE_URL` не задан, подставляет в него `DATABASE_URL`;
-- запускает `cargo test` в `invenbase-server`;
-- прогоняет unit-тесты, интеграционные тесты логики бронирований и тесты схемы PostgreSQL.
-
-Сейчас можно использовать основную локальную базу, потому что production-окружения ещё нет. Важно учитывать, что DB-тесты применяют SQLx migrations и создают временные тестовые записи.
-
-Если нужна отдельная база для тестов, задайте `TEST_DATABASE_URL` перед запуском:
-
-```powershell
-$env:TEST_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/kvantoriym_test"
-.\scripts\test-backend.ps1
-```
-
-Для вывода `println!`/`eprintln!` из Rust-тестов:
-
-```powershell
 .\scripts\test-backend.ps1 -NoCapture
 ```
 
-## Что проверяют DB-тесты
+Если `TEST_DATABASE_URL` не задана, скрипт берёт `DATABASE_URL` из `invenbase-server/.env`. Это допускается кодом, но небезопасно для важных локальных данных; предпочтительна отдельная тестовая БД.
 
-DB-тесты находятся в `invenbase-server/tests/database_schema.rs`.
+DB tests проверяют migrations, ключевые таблицы/индексы/constraints/foreign keys и lifecycle бронирования, включая approve, reject, cancel, awaiting return, return, нехватку остатка и недоступное оборудование.
 
-Они проверяют:
+HTTP routes и middleware через `actix_web::test` сейчас не покрыты.
 
-- создание ключевых таблиц миграциями;
-- наличие критичных индексов;
-- доменные `CHECK` constraints для ролей, статусов и бизнес-состояний;
-- foreign key constraints между основными сущностями;
-- отказ БД принимать некорректные значения;
-- запрет бронирования без оборудования или группы оборудования.
-
-## Попадают ли тесты в production
-
-Нет. Rust-тесты не входят в обычный production build:
-
-- unit-тесты под `#[cfg(test)]` компилируются только для `cargo test`;
-- интеграционные тесты из `invenbase-server/tests/` запускаются только через `cargo test`;
-- `cargo build --release` собирает production-бинарник без test harness.
-
-Для Docker/CI правильная схема такая:
-
-1. В build/CI-этапе поднять PostgreSQL.
-2. Запустить `.\scripts\test-backend.ps1` или аналогичную Linux-команду.
-3. Если тесты прошли, собрать `cargo build --release`.
-4. В runtime-образ копировать только release-бинарник и необходимые runtime-файлы.
-
-## Web
-
-У web-клиента подключены Vitest, React Testing Library и jsdom.
-
-Запуск тестов:
+## Web unit/component tests
 
 ```powershell
 cd invenbase-client\web
+npm ci
 npm run test:run
 ```
 
-Интерактивный watch-режим:
+Watch mode:
 
 ```powershell
-cd invenbase-client\web
 npm run test
 ```
 
-Что уже покрыто:
+Покрыты config, API client, AuthContext, login, layout/theme, equipment list, booking create/list и XLSX writer. Reports, support и полный набор booking actions отдельными component tests не покрыты.
 
-- `src/config.js`: базовый API URL в dev/test-режиме и доменные константы;
-- `src/api/client.js`: base URL, bearer token, исключение для `/auth/login`, очистка auth-состояния на `401`;
-- `src/components/Layout.jsx`: тема по умолчанию, восстановление сохранённой темы, переключение на `neon-purple` через меню пользователя.
+## Web Playwright
 
-Следующий практичный шаг:
-
-- покрыть `AuthContext` и формы логина;
-- добавить тесты для списка оборудования и формы создания бронирования;
-- затем добавить e2e smoke-тесты для входа, списка оборудования и создания бронирования.
-
-## Web dependency audit
-
-Команда для проверки зависимостей:
+Mock smoke:
 
 ```powershell
 cd invenbase-client\web
-npm audit
+npx playwright install chromium
+npm run test:e2e:smoke
 ```
 
-После безопасного `npm audit fix` без `--force` и замены SheetJS:
+Real backend/PostgreSQL и Docker Compose сценарии описаны в [REAL_SMOKE_TESTING.md](REAL_SMOKE_TESTING.md).
 
-- `xlsx` удалён из зависимостей;
-- экспорт `.xlsx` сохранён через локальный writer `src/utils/xlsxExport.js`;
-- `npm audit` должен возвращать `found 0 vulnerabilities`.
+## Dependency и build checks
 
-Практичный следующий шаг: добавить browser smoke-тест на скачивание отчётов, чтобы проверить кнопку экспорта в реальном UI.
+```powershell
+cd invenbase-client\web
+npm audit --audit-level=high
+npm run build
+
+cd ..\..\invenbase-server
+cargo fmt --check
+cargo build --release --locked
+```
+
+Отдельных ESLint/Prettier scripts в web нет.
+
+## Android
+
+```powershell
+cd invenbase-android
+.\gradlew.bat assembleDebug
+```
+
+Зависимости JUnit/Espresso подключены, но тестовых Java/Kotlin исходников в репозитории нет. CI Android не собирает.
+
+## Что реально делает CI
+
+Workflow `.github/workflows/docker-smoke.yml` запускается для push в `main`/`master` и pull request.
+
+Quality job:
+
+- `npm ci`;
+- `npm audit --audit-level=high`;
+- `npm run test:run` и `npm run build`;
+- `cargo fmt --check` и `cargo test --locked --lib`;
+- запрет `console.log` в web source и `show_files_listing` в backend source.
+
+Compose smoke job:
+
+- устанавливает Chromium;
+- собирает полный Compose stack;
+- ждёт `/health` через nginx;
+- выполняет login → создание equipment → создание booking;
+- на failure загружает Playwright artifacts.
+
+CI не выполняет полный backend DB test suite, Android build, lint или secret scan.

@@ -1,80 +1,52 @@
-# Быстрый старт
+# Быстрый запуск backend
 
-## Шаг 1: Настройка базы данных
+## 1. PostgreSQL
 
-Создайте базу данных PostgreSQL:
+Создайте пустую базу `kvantoriym` и убедитесь, что пользователь из connection string имеет к ней доступ. Таблицы вручную создавать не нужно: SQLx migrations применятся при старте.
 
-```bash
-psql -U postgres
-CREATE DATABASE kvantoriym;
-\q
+## 2. Конфигурация
+
+```powershell
+cd D:\InvenBase\invenbase-server
+Copy-Item .env.example .env
+notepad .env
 ```
 
-## Шаг 2: Настройка переменных окружения
-
-Создайте файл `.env` в корне проекта `kvantoriym-server`:
-
+Минимальная dev-конфигурация:
 
 ```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/kvantoriym
-HOST=127.0.0.1
-PORT=8080
-JWT_SECRET=replace-with-a-long-random-secret-minimum-32-chars
-JWT_EXPIRATION=86400
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/kvantoriym
+JWT_SECRET=replace-with-a-unique-secret-at-least-32-characters
 CREATE_DEFAULT_ADMIN=true
 DEFAULT_ADMIN_USERNAME=admin
-DEFAULT_ADMIN_PASSWORD=replace-with-a-strong-initial-password
+DEFAULT_ADMIN_PASSWORD=replace-with-at-least-12-characters
 ```
 
-Замените `postgres:postgres` на ваши данные для подключения к PostgreSQL.
+Спецсимволы в логине или пароле `DATABASE_URL` должны быть percent-encoded.
 
-**Доступ с других устройств в сети (телефон, другой ПК):** чтобы веб-клиент с других устройств мог обращаться к API, запустите сервер, слушая все интерфейсы. В `.env` укажите:
-```env
-HOST=0.0.0.0
-```
-Тогда API будет доступен по адресу `http://ВАШ_IP:8080` (например, `http://192.168.0.106:8080`).
+## 3. Запуск
 
-## Шаг 3: Установка зависимостей и запуск
-
-```bash
-cd kvantoriym-server
-cargo build
+```powershell
 cargo run
 ```
 
-При старте сервер автоматически применяет `sqlx` migrations из каталога `migrations/`.
+Ожидаемые адреса:
 
-Для проверки старых данных перед строгой валидацией constraints:
-```bash
-psql "$DATABASE_URL" -f sql/audit_constraints.sql
-```
+- API: `http://127.0.0.1:8080/api`
+- healthcheck: `http://127.0.0.1:8080/health`
+- legacy HTML: `http://127.0.0.1:8080/` и `/admin`
 
-## Шаг 4: Доступ к системе
+React web запускается отдельно из `invenbase-client/web` на порту `3000`.
 
-1. Откройте браузер и перейдите на `http://localhost:8080`
-2. Войдите с учетными данными, которые указали в `DEFAULT_ADMIN_USERNAME` и `DEFAULT_ADMIN_PASSWORD`.
-3. После первого входа отключите seed администратора: установите `CREATE_DEFAULT_ADMIN=false`.
+## Типичные ошибки
 
-## Возможные проблемы
+- `JWT_SECRET is required` — файл `.env` отсутствует или секрет короче 32 символов.
+- `invalid password` при соединении — пароль PostgreSQL в `DATABASE_URL` неверен. При локализованном Windows PostgreSQL SQLx может показать это как `non-UTF-8 string for its error message`.
+- Login возвращает `401`, хотя admin найден — bootstrap не меняет пароль существующего admin. Используйте прежний пароль или сбросьте `password_hash` штатно в БД.
+- FCM-переменные не нужны для обычного запуска. Удалите пустые `FCM_*=` строки, чтобы текущая конфигурация не считала их заданными.
 
-### Ошибка подключения к базе данных
+После создания первого администратора установите:
 
-Убедитесь, что:
-- PostgreSQL запущен
-- База данных `kvantoriym` создана
-- Данные в `.env` правильные
-
-### Порт занят
-
-Измените порт в `.env`:
 ```env
-PORT=8081
+CREATE_DEFAULT_ADMIN=false
 ```
-
-### Ошибки компиляции
-
-Убедитесь, что у вас установлена последняя версия Rust:
-```bash
-rustup update
-```
-

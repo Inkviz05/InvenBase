@@ -1,108 +1,68 @@
-# Docker Deployment
+# Docker Compose deployment
 
-This compose profile runs the production-shaped local stack:
+Основной `docker-compose.yml` поднимает:
 
-- PostgreSQL 16
-- Rust backend API
-- React web build served by nginx
-- nginx reverse proxy for `/api/*` and `/health`
+- `postgres:16-alpine` с named volume `postgres_data`;
+- multi-stage release image Rust backend;
+- production React build, который отдаёт nginx.
 
-## Quick Start
+Публичен только web/nginx на `WEB_PORT` (default `80`). nginx проксирует `/api` и `/health` в backend. Backend и PostgreSQL host-порты не публикуются.
 
-Create a local env file:
+## Запуск
 
 ```powershell
 Copy-Item .env.docker.example .env
-```
-
-Edit `.env` and set strong values for:
-
-- `POSTGRES_PASSWORD`
-- `JWT_SECRET`
-- `DEFAULT_ADMIN_PASSWORD`
-
-Database pool tuning is available through `DATABASE_MAX_CONNECTIONS` and `DATABASE_ACQUIRE_TIMEOUT_SECONDS`. The defaults are `10` connections and a `5` second acquisition timeout.
-
-Start the stack:
-
-```powershell
+notepad .env
 docker compose up --build
 ```
 
-Open:
+Обязательно задайте собственные значения:
 
-```text
-http://localhost
-```
+- `POSTGRES_PASSWORD`;
+- `JWT_SECRET` (минимум 32 символа);
+- `DEFAULT_ADMIN_PASSWORD` при `CREATE_DEFAULT_ADMIN=true` (минимум 12 символов).
 
-The backend API is available through the reverse proxy:
+Открыть:
 
-```text
-http://localhost/api
-```
+- UI: `http://localhost` или `http://localhost:<WEB_PORT>`;
+- API: `/api` на том же origin;
+- health: `/health` на том же origin.
 
-Health check:
+## Первый admin
 
-```text
-http://localhost/health
-```
-
-## First Admin
-
-For the first local launch you can keep:
+При первом запуске:
 
 ```env
 CREATE_DEFAULT_ADMIN=true
 ```
 
-After the first admin is created, set it back to:
+После создания пользователя установите `false`. Bootstrap не обновляет пароль уже существующего username.
 
-```env
-CREATE_DEFAULT_ADMIN=false
-```
-
-The backend will not overwrite an existing admin with the same username, but disabling bootstrap after initial setup is safer.
-
-## Data
-
-PostgreSQL data is stored in the named Docker volume:
-
-```text
-postgres_data
-```
-
-To stop containers without deleting data:
+## Управление
 
 ```powershell
+docker compose ps
+docker compose logs -f backend
 docker compose down
 ```
 
-To delete containers and database volume:
+Удаление БД вместе с volume — необратимая для этого volume операция:
 
 ```powershell
 docker compose down -v
 ```
 
-## Services
+## Конфигурация
 
-The public entrypoint is the `web` service on `WEB_PORT` from `.env`.
+Пул backend настраивается через `DATABASE_MAX_CONNECTIONS` и `DATABASE_ACQUIRE_TIMEOUT_SECONDS`; defaults — `10` и `5` секунд.
 
-Internal services:
+Web image собирается с `VITE_API_URL=/api`. nginx имеет SPA fallback на `index.html`, прокси API и healthcheck; directory listing backend отключён.
 
-- `backend:8080`
-- `postgres:5432`
+## Push в Docker
 
-The web image is built with:
+Compose передаёт FCM env, но не монтирует service account JSON. Для FCM HTTP v1 deployment должен отдельно смонтировать файл внутрь backend container и указать container path в `FCM_SERVICE_ACCOUNT_PATH`. Не добавляйте JSON в image или git.
 
-```env
-VITE_API_URL=/api
-```
-
-This keeps browser API calls on the same origin as the web app and lets nginx proxy them to the backend container.
-
-## Smoke Tests
-
-To build the production-shaped images and run the browser flow through nginx:
+## Smoke test
 
 ```powershell
 cd invenbase-client\web
@@ -112,12 +72,14 @@ cd ..\..
 .\scripts\test-docker-compose-smoke.ps1
 ```
 
-The script uses an isolated Compose project and disposable PostgreSQL volume. It verifies `/health`, then runs the login, equipment creation and booking flow through the public nginx port. Containers and the volume are removed after the test unless `-KeepDocker` is specified.
+Подробности: [REAL_SMOKE_TESTING.md](REAL_SMOKE_TESTING.md).
 
-The separate development-oriented real smoke test remains available:
+## Чего эта конфигурация не предоставляет
 
-```powershell
-.\scripts\test-web-real-smoke.ps1
-```
+- TLS/HTTPS и автоматические сертификаты.
+- Readiness check с запросом к БД; используется статический `/health`.
+- Backup/restore automation.
+- Отдельный migrate/rollback job.
+- Resource limits и внешнюю observability.
 
-It uses `docker-compose.smoke.yml`, a disposable PostgreSQL database on port `55432`, `cargo run` and the Vite development server. The Docker Compose smoke test above is the deployment verification used by CI.
+Перед публичным production-развёртыванием эти пункты необходимо решить в инфраструктуре.

@@ -1,197 +1,66 @@
 # План доработок InvenBase
 
-## Целевая архитектура
+Актуализировано по исходному коду 23 октября 2026 года. Это план, а не описание уже существующих возможностей.
 
-Оставить проект как модульный монолит:
+## Что уже сделано
 
-- `invenbase-server` - единый Rust/Actix REST API.
-- `invenbase-client/web` - основной React/Vite web-клиент.
-- `invenbase-android` - основное native Android-приложение на Java.
+- Удалён старый Android WebView-клиент; активны React web и native Android Java.
+- Секреты вынесены в env, `JWT_SECRET` и bootstrap-пароль валидируются.
+- Добавлены SQLx migrations, ограничения и внешние ключи PostgreSQL.
+- Основная логика жизненного цикла бронирования вынесена в services и покрыта unit/DB integration tests.
+- Добавлены Dockerfiles, Compose, nginx reverse proxy, healthchecks и browser smoke полного стека.
+- Добавлен GitHub Actions workflow: web audit/tests/build, `cargo fmt`, backend library tests и Compose smoke.
+- Убраны production `console.log`, directory listing отключён, параметры пула БД вынесены в env.
+- Web использует локальный XLSX writer вместо зависимости `xlsx`.
 
-Не переходить на микросервисную архитектуру на текущем этапе. Проекту важнее укрепить внутреннюю структуру, безопасность, тесты и процесс сборки. Микросервисы дадут лишнюю сложность: отдельные деплои, сетевые ошибки, распределенные транзакции, мониторинг и согласование контрактов.
+## Следующие задачи
 
-## Решение по Android WebView
+### 1. Backend API и безопасность
 
-`invenbase-client/android` удален из активной разработки.
+1. Добавить HTTP integration tests через `actix_web::test` для login, ролей, users, equipment и support.
+2. Унифицировать JSON-ошибки полями `code`, `message`, `details`; сейчас публичной спецификации нет.
+3. Добавить OpenAPI и проверку контрактов для React и Android.
+4. Добавить `/ready`, который реально выполняет запрос к PostgreSQL; `/health` сейчас возвращает статический `200`.
+5. Убрать подробное диагностическое логирование FCM-конфигурации и нормализовать пустые FCM env как `None`.
 
-Причины:
+### 2. База данных и эксплуатация
 
-- Дублирует web-клиент и native Android.
-- Увеличивает стоимость поддержки: отдельная сборка, WebView-специфичные хаки, отдельная настройка API URL.
-- Для мобильных сценариев проекта важны QR-сканер, push-уведомления, камера и локальное состояние. Native Android подходит лучше.
+1. Не использовать основную БД для integration tests: создавать отдельную БД и задавать `TEST_DATABASE_URL`.
+2. Добавить явную production-процедуру backup, migrate и restore. Сейчас migrations выполняются при запуске backend.
+3. Проверить исторические данные перед валидацией оставшихся `NOT VALID` constraints.
+4. Добавить CI job с чистой PostgreSQL для полного `cargo test --locked`.
 
-Выполнено:
+### 3. Архитектура backend
 
-1. Удалены:
-   - `invenbase-client/android`
-   - `invenbase-client/build-android.bat`
-   - `invenbase-client/build-android.sh`
-2. Обновлена документация: актуальные клиенты - React web и native Android Java.
-3. Web-клиент очищен от WebView-специфичной конфигурации.
+1. Продолжить перенос SQL и бизнес-правил из handlers в service/repository слой.
+2. Добавить транзакции для оставшихся операций, изменяющих несколько сущностей.
+3. Перейти от `log` к структурированному `tracing`, добавить request/correlation ID.
+4. Добавить метрики ошибок БД, push и времени ответа API.
 
-## Приоритет 1. Безопасность и конфигурация
+### 4. Web
 
-1. Убрать секреты из репозитория:
-   - `invenbase-server/firebase-service-account.json`
-   - реальные `.env`
-   - приватные Firebase/service account файлы
-2. Добавить `.env.example` для сервера и web-клиента.
-3. Заменить дефолтные значения:
-   - дефолтные учетные данные администратора
-   - слабые значения `JWT_SECRET`
-4. Запретить запуск production-сервера со слабым `JWT_SECRET`.
-5. Настроить CORS через env-переменную вместо `allow_any_origin()`.
-6. Проверить, что `google-services.json` не содержит приватных серверных ключей. Если проект публичный, хранить его осознанно или генерировать через CI.
+1. Добавить route-level role guards; сейчас маршруты защищены фактом входа, а окончательная авторизация выполняется backend и частично UI.
+2. Расширить Vitest-покрытие reports, support, equipment detail/edit и действий с бронированием.
+3. Расширить Playwright flow на approve/reject/cancel/return и экспорт отчётов.
+4. Разбить крупные страницы и добавить lazy loading; отдельного lint script сейчас нет.
 
-## Приоритет 2. База данных и миграции
+### 5. Native Android
 
-1. Перенести создание схемы из `invenbase-server/src/database.rs` в `sqlx` migrations.
-2. Разделить:
-   - миграции схемы
-   - начальные seed-данные
-   - создание первого администратора
-3. Добавить команду в документацию:
-   - `sqlx migrate run`
-4. Убрать автоматические `ALTER TABLE` при старте приложения.
-5. Добавить индексы и ограничения на уровне БД:
-   - `available_quantity >= 0`
-   - `quantity > 0`
-   - допустимые значения `role`, `status`, `permission_type`
+1. Убрать токены и пользовательские данные из обычных `SharedPreferences` в защищённое хранилище.
+2. Вынести API URL в build types/flavors вместо одной константы и пользовательской настройки.
+3. Ввести repository/ViewModel слой и сократить API/UI-логику в Activity/Fragment.
+4. Добавить unit и instrumentation tests; сейчас Gradle содержит зависимости JUnit/Espresso, но тестовых исходников в проекте нет.
+5. Проверить release signing, включить и протестировать R8/ProGuard.
 
-Выполнено: схема перенесена в `invenbase-server/migrations`, сервер применяет миграции через встроенный `sqlx` migrator при старте. Добавлен SQL-аудит `invenbase-server/sql/audit_constraints.sql` для проверки старых данных. Следующий шаг - после очистки данных перевести `CHECK` constraints из `NOT VALID` в validated.
+### 6. Delivery
 
-## Приоритет 3. Бронирования и бизнес-логика
+1. Добавить Android build в CI.
+2. Добавить secret scanning и проверку случайно staged `.env`/service-account файлов.
+3. Определить production TLS и reverse proxy перед публичным развёртыванием; текущий Compose — production-shaped локальный стек без TLS.
 
-1. Исправить одиночное создание бронирования:
-   - использовать транзакцию
-   - блокировать строку оборудования через `FOR UPDATE`
-   - проверять остаток и уменьшать количество атомарно
-2. Вынести бизнес-логику бронирований из handlers в отдельный service layer.
-3. Унифицировать одиночное и bulk-бронирование, чтобы они использовали один общий алгоритм.
-4. Формализовать жизненный цикл бронирования:
-   - `pending`
-   - `approved`
-   - `rejected`
-   - `cancelled`
-   - `expired`
-   - `returned`
-5. Проверить возврат `available_quantity` при отмене, отклонении, истечении и удалении бронирования.
+## Не планируется без отдельного решения
 
-Выполнено частично: добавлен явный `POST /api/bookings/{id}/cancel`; web и native Android переведены на него. `DELETE /api/bookings/{id}` оставлен как legacy-совместимость.
-
-## Приоритет 4. Внутренняя структура сервера
-
-Разделить server-код по доменам:
-
-```text
-src/
-  domains/
-    auth/
-    users/
-    equipment/
-    bookings/
-    notifications/
-    reports/
-    support/
-  infrastructure/
-    db/
-    config/
-    push/
-    mail/
-  http/
-    routes.rs
-    middleware.rs
-```
-
-Цель не в большом рефакторинге ради красоты, а в том, чтобы handlers занимались HTTP, а бизнес-логика жила отдельно и тестировалась без Actix.
-
-## Приоритет 5. Тесты
-
-Минимальный набор:
-
-1. Backend integration tests:
-   - login
-   - создание пользователя
-   - роли и доступы
-   - создание/аппрув/отклонение бронирования
-   - проверка остатков оборудования
-   - support requests
-
-Выполнено частично: добавлены PostgreSQL integration tests для цикла бронирования `pending -> approved -> awaiting_return -> returned`, неверного возврата, `reject`, `cancel`, нехватки остатков, недоступного оборудования и возврата `available_quantity`.
-2. Backend unit tests:
-   - проверка ролей
-   - state machine бронирований
-   - расчет доступного количества
-
-Выполнено частично: добавлены unit-тесты для валидации создания бронирования и статусов, удерживающих оборудование.
-3. Web smoke tests:
-   - login
-   - список оборудования
-   - создание бронирования
-4. Android smoke checklist:
-   - login
-   - QR scanner
-   - push token registration
-   - создание бронирования
-
-## Приоритет 6. Web-клиент
-
-1. Убрать debug `console.log` из production-кода.
-2. Добавить единый слой обработки ошибок API.
-3. Добавить role-based guards на уровне маршрутов и UI.
-4. Разбить крупные страницы:
-   - `Reports.jsx`
-   - `EquipmentDetail.jsx`
-   - `BookingList.jsx`
-5. Вынести повторяющиеся таблицы, фильтры, статусы и формы в компоненты.
-6. Рассмотреть переход на TypeScript, если проект будет развиваться дальше.
-
-## Приоритет 7. Native Android Java
-
-1. Сделать `invenbase-android` единственным Android-клиентом.
-2. Убрать hardcoded/dev URL из production-сборок.
-3. Разделить Activity-код:
-   - UI
-   - API/repository
-   - state/view model
-4. Постепенно внедрить MVVM на Java:
-   - `ViewModel`
-   - `LiveData`
-   - repositories
-5. Проверить хранение JWT:
-   - минимум `SharedPreferences` с аккуратной очисткой
-   - лучше `EncryptedSharedPreferences`, если доступно
-6. Оставаться на Java можно. Переход на Kotlin имеет смысл только постепенно и после стабилизации архитектуры.
-
-## Приоритет 8. Документация и репозиторий
-
-1. Исправить кодировку README и русскоязычных документов.
-2. Обновить README под новую структуру:
-   - server
-   - React web
-   - native Android
-3. Добавить `.gitignore` на уровне корня.
-4. Убрать build-артефакты из репозитория:
-   - Android `build/`
-   - web `dist/`
-   - временные APK
-5. Добавить раздел "Production checklist".
-
-## Рекомендуемый порядок работ
-
-1. Зафиксировать решение: WebView Android больше не поддерживается.
-2. Убрать секреты и обновить `.gitignore`.
-3. Исправить гонку в одиночном бронировании.
-4. Добавить миграции БД.
-5. Добавить backend-тесты для бронирований и ролей.
-6. Почистить README и инструкции запуска.
-7. Разбить крупные backend handlers на service layer.
-8. Разбить крупные web/native экраны.
-9. Настроить CI: backend build/test, web build, Android build.
-
-## Что не делать сейчас
-
-- Не переходить на микросервисы.
-- Не переписывать весь Android на Flutter/React Native без отдельной причины.
-- Не переписывать сервер на другой язык.
-- Не делать большой рефакторинг UI до исправления безопасности, БД и бронирований.
+- Переход на микросервисы.
+- Переписывание backend на другом языке.
+- Полная замена native Android на Flutter/React Native.
+- Большой UI-редизайн до фиксации API-контрактов и тестового покрытия.

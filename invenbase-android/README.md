@@ -1,50 +1,64 @@
 # InvenBase Android
 
-Native Android client for InvenBase. This is the active mobile client; the old WebView Android client under `invenbase-client/android` has been removed from the active architecture.
+Активный native Android-клиент на Java.
 
-## Stack
+## Технологии и параметры сборки
 
-- Java
-- Android Gradle Plugin
-- Gradle Wrapper
-- Retrofit + Gson
-- AndroidX + Material Components
-- ZXing QR scanner
-- Firebase Cloud Messaging
+- Android Gradle Plugin 8.1.0, Gradle Wrapper 8.7.
+- `compileSdk 34`, `targetSdk 34`, `minSdk 24`.
+- Java source/target compatibility 8; для запуска Gradle рекомендуется JDK 17 или 21.
+- Retrofit/Gson/OkHttp, Material/AndroidX, ZXing, Glide и Firebase Messaging.
+- Package/application ID: `com.invenbase.app`.
 
-## Requirements
-
-- Android SDK with `compileSdk 34`
-- JDK 17 or JDK 21
-- Avoid running this project with JDK 25: Gradle/Android tooling can fail during script compilation.
-
-On this workstation the successful build command used JetBrains Runtime 21:
+## Сборка
 
 ```powershell
-$env:JAVA_HOME='C:\Program Files\JetBrains\PyCharm 2025.2.3\jbr'
-$env:Path="$env:JAVA_HOME\bin;$env:Path"
 .\gradlew.bat assembleDebug
 ```
+
+APK: `app/build/outputs/apk/debug/app-debug.apk`.
+
+Release variant существует, но signing config в проекте не задан, а `minifyEnabled=false`. Готовой production release-процедуры документация не заявляет.
 
 ## API URL
 
-Configure the backend URL in `app/src/main/java/com/invenbase/app/utils/Config.java`.
+Константа находится в `app/src/main/java/com/invenbase/app/Config.java`:
 
-- Android emulator: `http://10.0.2.2:8080/api`
-- Physical device: `http://YOUR_LAN_IP:8080/api`
-
-The Rust backend must allow the web/mobile origin in `CORS_ALLOWED_ORIGINS` when requests come from a browser context. Native Android Retrofit requests are not restricted by browser CORS.
-
-## Build
-
-```powershell
-.\gradlew.bat assembleDebug
+```java
+public static final String DEFAULT_API_URL = "https://invenbase.inkviz05.online";
 ```
 
-Debug APK output:
+`ApiClient` читает переопределение из `SharedPreferences` по ключу `api_url`. Retrofit-методы содержат абсолютные пути `/api/...`, поэтому base URL указывается без `/api`.
 
-```text
-app/build/outputs/apk/debug/app-debug.apk
-```
+В manifest задано `android:usesCleartextTraffic="false"`. Поэтому обычный `http://10.0.2.2:8080` или LAN HTTP URL не заработает без изменения network security для debug-сборки. Для текущей конфигурации нужен HTTPS endpoint.
 
-Build outputs are intentionally ignored by git.
+## Реализованные экраны
+
+- Login и основной экран с fragments dashboard, equipment, bookings, scanner и admin.
+- Equipment detail/create/edit и перемещения.
+- Корзина и одиночное/пакетное бронирование.
+- Categories, users, squads, reports и logs.
+- Notifications, support и squad detail.
+
+Доступность функций дополнительно ограничивается backend-ролями `admin`, `responsible`, `user`.
+
+## Авторизация и локальные данные
+
+JWT, сериализованный пользователь и API URL сохраняются в обычных `SharedPreferences`. `EncryptedSharedPreferences` в проекте не используется — это известное ограничение безопасности.
+
+## Push
+
+Приложение:
+
+- подключает Firebase Messaging;
+- подписывается на topic `all` при старте;
+- обрабатывает `onNewToken` и `onMessageReceived`;
+- после авторизации регистрирует token через `POST /api/push/register-token`.
+
+Для сборки Firebase нужен `app/google-services.json`; он не должен попадать в git. Подробности: [FIREBASE_SETUP.md](FIREBASE_SETUP.md) и [PUSH_NOTIFICATIONS_SERVER.md](PUSH_NOTIFICATIONS_SERVER.md).
+
+## Тесты и ограничения
+
+Gradle содержит зависимости JUnit и Espresso, но каталогов с test/androidTest исходниками в репозитории сейчас нет. Android build также не включён в GitHub Actions.
+
+Архитектура в основном Activity/Fragment + прямые Retrofit-вызовы; полноценного repository/ViewModel слоя нет.

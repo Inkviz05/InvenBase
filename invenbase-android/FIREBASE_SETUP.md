@@ -1,40 +1,44 @@
-# Настройка Firebase Cloud Messaging для Push-уведомлений
+# Firebase Cloud Messaging для Android
 
-## Шаги настройки:
+## Что уже реализовано
 
-1. **Создайте проект в Firebase Console:**
-   - Перейдите на https://console.firebase.google.com/
-   - Создайте новый проект или выберите существующий
-   - Добавьте Android приложение с package name: `com.invenbase.app`
+- В корневом `build.gradle` подключён Google Services plugin.
+- В `app/build.gradle` подключены Firebase BOM, Messaging и Analytics.
+- `InvenBaseApplication` подписывается на topic `all`.
+- `MyFirebaseMessagingService` принимает сообщения и обновление токена.
+- `PushManager` регистрирует token на backend после авторизации.
 
-2. **Скачайте google-services.json:**
-   - В Firebase Console перейдите в Project Settings → Your apps
-   - Скачайте файл `google-services.json`
-   - Поместите его в папку `app/` (на том же уровне, что и `build.gradle`)
+## Настройка Android
 
-3. **Проверьте зависимости:**
-   - Убедитесь, что в `build.gradle` (project level) добавлен плагин:
-     ```gradle
-     id 'com.google.gms.google-services' version '4.4.0' apply false
-     ```
-   - В `app/build.gradle` добавлен:
-     ```gradle
-     id 'com.google.gms.google-services'
-     ```
-   - И зависимости Firebase уже добавлены
+1. Создайте или выберите Firebase project.
+2. Добавьте Android app с package name `com.invenbase.app`.
+3. Скачайте `google-services.json`.
+4. Поместите файл в `invenbase-android/app/google-services.json`.
+5. Решите политику хранения явно: текущий корневой `.gitignore` не исключает `google-services.json`. Service account JSON и приватные ключи коммитить нельзя.
+6. Выполните Gradle sync и соберите debug APK.
 
-4. **Синхронизируйте проект:**
-   - В Android Studio: File → Sync Project with Gradle Files
+Регистрация токена требует авторизованного пользователя, потому что `POST /api/push/register-token` защищён Bearer JWT.
 
-5. **Проверьте работу:**
-   - При первом запуске приложение автоматически подпишется на топик "all"
-   - Токен FCM будет логироваться в Logcat с тегом "FCM"
+## Backend для отправки
 
-## Отправка уведомлений:
+Рекомендуемый и реализованный вариант — FCM HTTP v1:
 
-Уведомления можно отправлять через:
-- Firebase Console → Cloud Messaging
-- Backend API (используя FCM Server Key)
-- Топик "all" для массовых уведомлений
+```env
+FCM_PROJECT_ID=your-firebase-project-id
+FCM_SERVICE_ACCOUNT_PATH=C:\secure\firebase-service-account.json
+```
 
-Приложение автоматически откроет экран уведомлений при клике на push-уведомление.
+Service account JSON храните вне git и вне Docker image. Backend читает файл, создаёт OAuth JWT, получает access token и вызывает `https://fcm.googleapis.com/v1/projects/{project}/messages:send`.
+
+`FCM_SERVER_KEY` присутствует в коде только как legacy fallback. Legacy endpoint `fcm/send` отключён Google, поэтому на него нельзя рассчитывать как на рабочую production-конфигурацию.
+
+Если FCM вообще не настроен, текущий backend не сохраняет token устройства и возвращает ошибку регистрации.
+
+## Проверка
+
+1. Авторизуйтесь в Android-приложении.
+2. Убедитесь по backend-логу, что `POST /api/push/register-token` успешен.
+3. Создайте событие, для которого backend вызывает push: изменение статуса бронирования или сообщение/изменение заявки поддержки.
+4. Проверьте доставку на устройстве и запись in-app уведомления.
+
+Отправка из Firebase Console в topic `all` проверяет только Firebase/Android, но не backend-регистрацию token и не серверную HTTP v1 реализацию.

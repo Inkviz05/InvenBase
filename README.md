@@ -1,117 +1,120 @@
 # InvenBase
 
-Система учета, бронирования и контроля оборудования для технопарка "Кванториум".
+InvenBase — система учёта, перемещения и бронирования оборудования для технопарка «Кванториум».
 
-## Структура проекта
+## Состав репозитория
 
 ```text
-invenbase-server/       Rust / Actix Web REST API, PostgreSQL
-invenbase-client/web/   React / Vite web-клиент
-invenbase-android/      Native Android-приложение на Java
+invenbase-server/       Rust 2021, Actix Web, SQLx, PostgreSQL
+invenbase-client/web/   React 18, Vite, React Router
+invenbase-android/      Native Android-клиент на Java
+scripts/                PowerShell-сценарии тестирования
+.github/workflows/      CI для quality checks и Docker smoke
 ```
 
-Android WebView-клиент из `invenbase-client/android` выведен из активной разработки. Основные клиентские приложения теперь: React web и native Android Java.
+Старого WebView-клиента в актуальной архитектуре нет. Поддерживаются React web и native Android.
 
-## Быстрый старт
+## Быстрый локальный запуск
 
-### 1. Сервер
+### Backend
 
-Требования:
+Нужны Rust/Cargo и PostgreSQL. Создайте базу `kvantoriym`, затем:
 
-- Rust 1.70+
-- PostgreSQL 14+
-
-```bash
+```powershell
 cd invenbase-server
-cp .env.example .env
+Copy-Item .env.example .env
+# отредактируйте DATABASE_URL, JWT_SECRET и параметры первого администратора
 cargo run
 ```
 
-Перед запуском отредактируйте `invenbase-server/.env`:
+`JWT_SECRET` обязателен и должен содержать не менее 32 символов. Если `CREATE_DEFAULT_ADMIN=true`, обязателен `DEFAULT_ADMIN_PASSWORD` длиной не менее 12 символов. Администратор создаётся только при отсутствии пользователя с таким именем; существующий пароль не перезаписывается.
 
-```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/kvantoriym
-HOST=127.0.0.1
-PORT=8080
-JWT_SECRET=change-me-use-a-long-random-secret-minimum-32-chars
-JWT_EXPIRATION=86400
-CREATE_DEFAULT_ADMIN=true
-DEFAULT_ADMIN_USERNAME=admin
-DEFAULT_ADMIN_PASSWORD=replace-with-a-strong-initial-password
-CORS_ALLOWED_ORIGINS=http://localhost:3000
-```
+Backend применяет SQLx migrations при старте. API доступен на `http://127.0.0.1:8080/api`, healthcheck — на `http://127.0.0.1:8080/health`.
 
-API будет доступен по адресу `http://localhost:8080/api`.
+### Web
 
-### 2. Web-клиент
+Нужны Node.js и npm:
 
-Требования:
-
-- Node.js 18+
-- npm 9+
-
-```bash
-cd invenbase-client/web
-cp .env.example .env
-npm install
+```powershell
+cd invenbase-client\web
+Copy-Item .env.example .env
+npm ci
 npm run dev
 ```
 
-По умолчанию Vite запускается на `http://localhost:3000` и проксирует `/api` на backend.
+Vite запускается на `http://localhost:3000`. В dev-режиме `/api` проксируется на backend; порт backend задаётся через `VITE_API_PORT`.
 
-### 3. Native Android
+### Docker Compose
 
-Требования:
+Нужен запущенный Docker Desktop с доступной командой `docker`:
 
-- Android Studio
-- JDK 17+
-- Android SDK API 24+
-
-```bash
-cd invenbase-android
-./gradlew assembleDebug
+```powershell
+Copy-Item .env.docker.example .env
+# задайте POSTGRES_PASSWORD, JWT_SECRET и DEFAULT_ADMIN_PASSWORD
+docker compose up --build
 ```
 
-Для эмулятора backend должен быть доступен с устройства. В native Android используется собственная конфигурация API URL в `invenbase-android/app/src/main/java/com/invenbase/app/Config.java`.
+Единая точка входа — `http://localhost` или порт из `WEB_PORT`. PostgreSQL и backend наружу не публикуются. Подробнее: [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md).
 
-## Основная функциональность
+### Native Android
 
-- Авторизация пользователей.
-- Роли `admin`, `responsible`, `user`.
-- Учет оборудования и категорий.
-- Группы оборудования и отряды/зоны ответственности.
-- Создание и обработка бронирований.
-- QR-коды и QR-сканирование.
-- Уведомления и push-уведомления.
-- Журнал действий и отчеты.
-- Заявки в техническую поддержку.
+Проект требует Android SDK 34 и JDK 17 или 21:
 
-## Безопасность
+```powershell
+cd invenbase-android
+.\gradlew.bat assembleDebug
+```
 
-Перед production-запуском обязательно:
+APK: `invenbase-android/app/build/outputs/apk/debug/app-debug.apk`. Текущий URL API по умолчанию задан в `invenbase-android/app/src/main/java/com/invenbase/app/Config.java` и может быть переопределён сохранённой настройкой приложения.
 
-1. Не использовать дефолтные учетные данные администратора: задавать первого администратора через `CREATE_DEFAULT_ADMIN` и `DEFAULT_ADMIN_PASSWORD`, затем отключать seed.
-2. Использовать уникальный `JWT_SECRET` длиной минимум 32 символа.
-3. Ограничить `CORS_ALLOWED_ORIGINS` реальными доменами клиентов.
-4. Не хранить `.env`, Firebase service account и приватные ключи в git.
-5. Перевыпустить FCM/Firebase ключи, если они уже попадали в репозиторий.
-6. Использовать HTTPS.
+## Реализованная функциональность
+
+- JWT-аутентификация и роли `admin`, `responsible`, `user`.
+- Пользователи, категории, оборудование, перемещения, группы и отряды.
+- Одиночные и пакетные бронирования; approve, reject, cancel, return и автоматическое истечение.
+- QR-коды и сканирование.
+- In-app уведомления, регистрация FCM-токенов и отправка push через FCM HTTP v1; legacy FCM оставлен как fallback в коде.
+- Журнал действий, отчёты и экспорт XLSX в web.
+- Заявки поддержки и сообщения в них.
+
+## Проверки
+
+```powershell
+.\scripts\test-backend.ps1
+
+cd invenbase-client\web
+npm run test:run
+npm run build
+
+cd ..\..
+.\scripts\test-docker-compose-smoke.ps1
+```
+
+Полная тестовая матрица описана в [TESTING.md](TESTING.md), реальные browser smoke-сценарии — в [REAL_SMOKE_TESTING.md](REAL_SMOKE_TESTING.md).
+
+## Важные ограничения
+
+- `/health` проверяет только HTTP-процесс; отдельного `/ready` с запросом к БД нет.
+- OpenAPI/Swagger в репозитории нет.
+- CI не собирает Android и не запускает DB integration tests backend; в CI выполняются Rust library tests, web tests/build/audit и Docker browser smoke.
+- Release Android собирается без минификации (`minifyEnabled false`), API URL не разделён по build flavors.
+- Миграции запускаются самим backend; отдельной production-команды migrate/rollback нет.
 
 ## Документация
 
-- [План доработок](PLAN_DORABOTOK.md)
-- [Сервер](invenbase-server/README.md)
-- [Быстрый старт сервера](invenbase-server/QUICKSTART.md)
-- [Web-клиент](invenbase-client/README.md)
-- [Native Android](invenbase-android/README.md)
-- [Сборка Native Android](invenbase-android/BUILD_INSTRUCTIONS.md)
-- [Firebase для Native Android](invenbase-android/FIREBASE_SETUP.md)
-- [Push-уведомления](invenbase-android/PUSH_NOTIFICATIONS_SERVER.md)
+- [Backend](invenbase-server/README.md) и [его быстрый старт](invenbase-server/QUICKSTART.md)
+- [Web-клиент](invenbase-client/web/README.md)
+- [Docker deployment](DOCKER_DEPLOYMENT.md)
+- [Тестирование](TESTING.md)
+- [Native Android](invenbase-android/README.md), [сборка](invenbase-android/BUILD_INSTRUCTIONS.md), [Firebase](invenbase-android/FIREBASE_SETUP.md), [push backend](invenbase-android/PUSH_NOTIFICATIONS_SERVER.md)
+- [Текущий план работ](PLAN_DORABOTOK.md)
+- [Актуальный технический бэклог](PROJECT_WEAKNESSES_BACKLOG.md)
 
-## Ближайшие технические задачи
+## Production checklist
 
-1. Запустить SQL-аудит старых данных и затем перевести `CHECK` constraints из `NOT VALID` в validated.
-2. Расширить интеграционные тесты на роли, пользователей и support requests.
-3. Разделить backend handlers и бизнес-логику на service layer.
-4. Убрать debug-логи из web-клиента.
-5. Постепенно привести native Android к MVVM-структуре.
+- Использовать уникальные `POSTGRES_PASSWORD`, `JWT_SECRET` и пароль первого администратора.
+- После создания администратора установить `CREATE_DEFAULT_ADMIN=false`.
+- Ограничить `CORS_ALLOWED_ORIGINS` реальными web-origin.
+- Не коммитить `.env`, `google-services.json` и Firebase service account.
+- Использовать HTTPS перед публичным доступом; Compose-конфигурация сама TLS не настраивает.
+- Настроить резервное копирование PostgreSQL и проверить восстановление до обновления production.

@@ -1,187 +1,105 @@
-# Сервер системы учёта и бронирования оборудования "Кванториум"
+# InvenBase backend
 
-Rust REST API сервер для системы учёта и бронирования оборудования технопарка "Кванториум".
+REST API на Rust 2021, Actix Web и PostgreSQL. Доступ к БД реализован через SQLx; migrations встроены в бинарник и применяются при старте.
 
-## Технологии
+## Запуск
 
-- **Actix Web** - веб-фреймворк
-- **SQLx** - асинхронный доступ к базе данных PostgreSQL
-- **Serde** - сериализация/десериализация JSON
-- **JWT** - аутентификация
-- **bcrypt** - хэширование паролей
-- **QR Code** - генерация QR-кодов
+Нужны Rust/Cargo и доступный PostgreSQL:
 
-## Требования
-
-- Rust 1.70+
-- PostgreSQL 14+
-- Cargo
-
-## Установка
-
-1. Клонируйте репозиторий
-2. Установите PostgreSQL и создайте базу данных:
-   ```sql
-   CREATE DATABASE kvantoriym;
-   ```
-
-3. Создайте файл `.env` на основе `.env.example`:
-   ```bash
-   cp .env.example .env
-   ```
-
-4. Настройте `.env` файл с вашими данными:
-   ```
-   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/kvantoriym
-   HOST=127.0.0.1
-   PORT=8080
-   JWT_SECRET=replace-with-a-long-random-secret-minimum-32-chars
-   JWT_EXPIRATION=86400
-   CREATE_DEFAULT_ADMIN=true
-   DEFAULT_ADMIN_USERNAME=admin
-   DEFAULT_ADMIN_PASSWORD=replace-with-a-strong-initial-password
-   ```
-
-5. Установите зависимости и запустите сервер:
-   ```bash
-   cargo build
-   cargo run
-   ```
-
-   Схема БД применяется автоматически через встроенные `sqlx` migrations из каталога `migrations/`.
-
-   Перед переводом `CHECK` constraints из `NOT VALID` в validated проверьте старые данные:
-   ```bash
-   psql "$DATABASE_URL" -f sql/audit_constraints.sql
-   ```
-
-## Использование
-
-### Первоначальная настройка
-
-Первый администратор создаётся только если в `.env` включено `CREATE_DEFAULT_ADMIN=true`.
-Используйте сильный `DEFAULT_ADMIN_PASSWORD`, войдите под этим пользователем и затем отключите seed администратора.
-
-### Веб-интерфейс
-
-После запуска сервера откройте в браузере:
-- `http://localhost:8080` - страница входа
-- `http://localhost:8080/admin` - административная панель
-
-### API Endpoints
-
-Все API endpoints доступны по пути `/api`:
-
-#### Аутентификация
-- `POST /api/auth/login` - вход в систему
-
-#### Пользователи
-- `GET /api/users` - список пользователей (требует auth)
-- `POST /api/users` - создать пользователя (требует admin)
-- `GET /api/users/me` - текущий пользователь
-- `GET /api/users/{id}` - получить пользователя
-- `PUT /api/users/{id}` - обновить пользователя
-- `DELETE /api/users/{id}` - удалить пользователя
-
-#### Оборудование
-- `GET /api/equipment` - список оборудования
-- `POST /api/equipment` - добавить оборудование
-- `GET /api/equipment/{id}` - получить оборудование
-- `PUT /api/equipment/{id}` - обновить оборудование
-- `DELETE /api/equipment/{id}` - удалить оборудование
-- `GET /api/equipment/qr/{qr_code}` - найти по QR-коду
-
-#### Категории
-- `GET /api/categories` - список категорий
-- `POST /api/categories` - создать категорию
-- `GET /api/categories/{id}` - получить категорию
-- `PUT /api/categories/{id}` - обновить категорию
-- `DELETE /api/categories/{id}` - удалить категорию
-
-#### Бронирования
-- `GET /api/bookings` - список бронирований
-- `POST /api/bookings` - создать бронирование
-- `GET /api/bookings/{id}` - получить бронирование
-- `PUT /api/bookings/{id}` - обновить бронирование
-- `POST /api/bookings/{id}/cancel` - отменить бронирование
-- `DELETE /api/bookings/{id}` - legacy-совместимость для отмены бронирования
-
-#### Разрешения
-- `GET /api/permissions` - список разрешений
-- `POST /api/permissions` - создать разрешение
-- `POST /api/permissions/{id}/revoke` - отозвать разрешение
-
-#### Уведомления
-- `GET /api/notifications` - список уведомлений
-- `GET /api/notifications/count` - количество непрочитанных
-- `POST /api/notifications/{id}/read` - отметить как прочитанное
-- `POST /api/notifications/read-all` - отметить все как прочитанные
-
-#### Отчёты
-- `GET /api/reports/equipment` - отчёт по оборудованию
-- `GET /api/reports/bookings` - отчёт по бронированиям
-
-#### Логи
-- `GET /api/logs` - журнал действий
-
-#### QR-коды
-- `GET /api/qr/{id}` - сгенерировать QR-код (PNG изображение)
-- `GET /api/qr/{id}/data` - получить данные QR-кода
-
-## Роли пользователей
-
-- **admin** - полный доступ ко всем функциям
-- **responsible** - доступ к управлению оборудованием и бронированиями
-- **user** - создание бронирований и просмотр своего оборудования
-
-## Структура базы данных
-
-Сервер автоматически создаёт необходимые таблицы при первом запуске:
-- `users` - пользователи
-- `equipment` - оборудование
-- `equipment_categories` - категории оборудования
-- `equipment_groups` - группы оборудования
-- `equipment_group_items` - связь оборудования с группами
-- `bookings` - бронирования
-- `permissions` - разрешения
-- `activity_logs` - журнал действий
-- `notifications` - уведомления
-
-## Разработка
-
-### Запуск в режиме разработки
-
-```bash
+```powershell
+Copy-Item .env.example .env
+# создайте базу из DATABASE_URL и отредактируйте .env
 cargo run
 ```
 
-### Тестирование
+Проверка процесса:
 
-```bash
-cargo test
+```text
+GET http://127.0.0.1:8080/health
 ```
 
-Integration-тесты бронирований используют PostgreSQL из `TEST_DATABASE_URL`.
-Без этой переменной DB-тесты пропускают подключение:
+`/health` не проверяет БД. Отдельного readiness endpoint в коде нет.
 
-```bash
-TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/kvantoriym_test cargo test
+## Конфигурация
+
+| Переменная | Обязательность и значение |
+| --- | --- |
+| `DATABASE_URL` | Не обязательна кодом; default `postgresql://postgres:postgres@localhost:5432/kvantoriym` |
+| `DATABASE_MAX_CONNECTIONS` | Default `10`, целое число больше нуля |
+| `DATABASE_ACQUIRE_TIMEOUT_SECONDS` | Default `5`, целое число больше нуля |
+| `HOST` | Default `127.0.0.1` |
+| `PORT` | Default `8080` |
+| `JWT_SECRET` | Обязательна, минимум 32 символа |
+| `JWT_EXPIRATION` | Default `86400` секунд |
+| `CORS_ALLOWED_ORIGINS` | Список через запятую; default localhost/127.0.0.1:3000 |
+| `CREATE_DEFAULT_ADMIN` | Default `false` |
+| `DEFAULT_ADMIN_PASSWORD` | Обязательна при bootstrap, минимум 12 символов |
+| `DEFAULT_ADMIN_USERNAME` | Default `admin` |
+| `DEFAULT_ADMIN_EMAIL` | Default `admin@kvantoriym.local` |
+| `DEFAULT_ADMIN_FULL_NAME` | Default `Administrator` |
+| `FCM_PROJECT_ID` | Опциональный project ID для FCM HTTP v1 |
+| `FCM_SERVICE_ACCOUNT_PATH` | Опциональный путь к service account JSON для HTTP v1 |
+| `FCM_SERVER_KEY` | Опциональный legacy fallback; legacy FCM отключён Google |
+| `RUST_LOG` | Фильтр логов; backend по умолчанию использует `info` |
+
+Пустые строки FCM сейчас не нормализуются в `None`; лучше удалять незаданные FCM-переменные из `.env`, а не оставлять `KEY=`.
+
+### Первый администратор
+
+При `CREATE_DEFAULT_ADMIN=true` пользователь создаётся только в том случае, если username ещё отсутствует. Изменение `DEFAULT_ADMIN_PASSWORD` не сбрасывает пароль существующего пользователя. После первого успешного запуска установите `CREATE_DEFAULT_ADMIN=false`.
+
+## HTTP API
+
+Все перечисленные маршруты, кроме login, требуют Bearer JWT. Роли реально проверяются middleware и handlers.
+
+- `POST /api/auth/login`
+- Users: `GET /api/users/me`; admin-only `GET|POST /api/users`; authenticated `GET|PUT /api/users/{id}`; admin-only `DELETE /api/users/{id}`.
+- Equipment: `GET|POST /api/equipment`, `GET|PUT|DELETE /api/equipment/{id}`, `GET /api/equipment/qr/{qr_code}`, `GET /api/equipment/{id}/movements`, `POST /api/equipment/{id}/move`. Изменения требуют `admin` или `responsible`.
+- Categories: `GET|POST /api/categories`, `GET|PUT|DELETE /api/categories/{id}`; изменения требуют `admin` или `responsible`.
+- Groups: `GET|POST /api/groups`, `GET|PUT|DELETE /api/groups/{id}`; изменения требуют `admin` или `responsible`.
+- Squads: `GET|POST /api/squads`, `GET|PUT|DELETE /api/squads/{id}`, `GET /api/squads/{id}/equipment`; изменения требуют `admin` или `responsible`.
+- Bookings: `GET|POST /api/bookings`, `POST /api/bookings/bulk`, `GET|PUT|DELETE /api/bookings/{id}`, `POST /api/bookings/{id}/approve|reject|cancel|return`. Approve/reject/return требуют `admin` или `responsible`; `DELETE` оставлен как legacy cancel.
+- Permissions: `GET|POST /api/permissions`, `POST /api/permissions/{id}/revoke`.
+- Notifications: `GET|POST /api/notifications`, `GET /api/notifications/count`, `GET /api/notifications/unread-count`, `POST /api/notifications/{id}/read`, `POST /api/notifications/read-all`.
+- Reports: `GET /api/reports/equipment`, `/bookings`, `/bookings/detailed`, `/audit`; требуют `admin` или `responsible`.
+- Logs: `GET /api/logs`; требует `admin` или `responsible`.
+- QR: `GET /api/qr/{id}` требует `admin` или `responsible`; `GET /api/qr/{id}/data` требует авторизацию.
+- Push: `POST /api/push/register-token`.
+- Support: `GET|POST /api/support/requests`, admin-only `PUT|DELETE /api/support/requests/{id}`, authenticated `POST /api/support/requests/{id}/messages`.
+
+Отдельной OpenAPI/Swagger-спецификации нет.
+
+## Встроенные страницы
+
+Backend отдаёт legacy HTML из `static/` по `/` и `/admin`. Это не React web-клиент. В Docker Compose React build отдаётся nginx, а `/api` и `/health` проксируются к backend.
+
+## Фоновые задачи и push
+
+При старте запускается проверка истёкших бронирований. События бронирований и поддержки создают in-app уведомления и могут отправлять push.
+
+Предпочтительная FCM-конфигурация — `FCM_PROJECT_ID` + `FCM_SERVICE_ACCOUNT_PATH`; код самостоятельно получает OAuth token и вызывает FCM HTTP v1. `FCM_SERVER_KEY` поддерживается только как legacy fallback.
+
+## Тесты
+
+Быстрые library tests без БД:
+
+```powershell
+cargo test --locked --lib
 ```
 
-### Сборка для production
+Полный набор, включая `tests/booking_lifecycle.rs` и `tests/database_schema.rs`, требует `TEST_DATABASE_URL`:
 
-```bash
-cargo build --release
+```powershell
+$env:TEST_DATABASE_URL = "postgresql://postgres:password@localhost:5432/kvantoriym_test"
+cargo test --locked
 ```
 
-## Безопасность
+Из корня репозитория доступен `scripts/test-backend.ps1`. Он использует `TEST_DATABASE_URL`, а при её отсутствии — `DATABASE_URL` из `.env`; это может затронуть основную локальную базу тестовыми записями.
 
-- Пароли хранятся в хэшированном виде (bcrypt)
-- JWT токены для аутентификации
-- Разграничение доступа по ролям
-- HTTPS рекомендуется для production (настройте через reverse proxy)
+## Известные ограничения
 
-## Лицензия
-
-Проект выполняется в рамках дипломной работы.
-
+- Migrations запускаются приложением, отдельного migrate/rollback CLI нет.
+- `/ready` отсутствует.
+- HTTP integration tests маршрутов и middleware отсутствуют.
+- Часть SQL и бизнес-логики всё ещё находится в handlers.
+- `sqlx-postgres 0.7.4` выдаёт future-incompatibility warning на актуальном Rust, но текущую сборку не блокирует.
