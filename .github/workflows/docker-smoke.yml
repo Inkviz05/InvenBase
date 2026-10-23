@@ -26,6 +26,10 @@ jobs:
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v6
 
+      - name: Make Gradle wrapper executable
+        working-directory: invenbase-android
+        run: chmod +x gradlew
+
       - name: Build Android debug APK
         working-directory: invenbase-android
         run: ./gradlew :app:assembleDebug --no-daemon --console=plain
