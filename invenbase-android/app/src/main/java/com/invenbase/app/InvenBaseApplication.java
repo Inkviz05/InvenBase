@@ -8,6 +8,7 @@ import android.os.Build;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.invenbase.app.utils.PushManager;
+import com.invenbase.app.notifications.NotificationSyncScheduler;
 
 import ru.rustore.sdk.pushclient.RuStorePushClient;
 
@@ -17,6 +18,7 @@ public class InvenBaseApplication extends Application {
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
+        NotificationSyncScheduler.schedulePeriodic(this);
         FirebaseApp.initializeApp(this);
 
         if (!BuildConfig.RUSTORE_PROJECT_ID.isEmpty()) {

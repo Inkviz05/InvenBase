@@ -56,6 +56,8 @@ JWT, сериализованный пользователь и API URL сохр
 - обрабатывает обновление FCM/RuStore tokens и входящие сообщения;
 - после авторизации регистрирует оба доступных token через `POST /api/push/register-token` с соответствующим provider;
 - перед локальным logout вызывает `POST /api/push/unregister-device` для FCM и RuStore, поэтому отключается только текущее устройство, а остальные устройства учётной записи остаются активными.
+- планирует WorkManager-сверку непрочитанных уведомлений каждые 15 минут при наличии сети и немедленно после login/`onDeletedMessages`;
+- хранит до 500 обработанных `notification_id`, чтобы не показывать повторно уже полученный push.
 
 Для сборки Firebase нужен `app/google-services.json`; он не должен попадать в git. RuStore project ID задаётся через Gradle property или одноимённую переменную окружения `RUSTORE_PROJECT_ID`. Подробности: [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md), [FIREBASE_SETUP.md](FIREBASE_SETUP.md) и [PUSH_NOTIFICATIONS_SERVER.md](PUSH_NOTIFICATIONS_SERVER.md).
 

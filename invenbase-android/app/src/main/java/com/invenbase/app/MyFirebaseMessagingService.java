@@ -14,6 +14,8 @@ import androidx.core.content.ContextCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.invenbase.app.notifications.NotificationSyncScheduler;
+import com.invenbase.app.notifications.NotificationSyncStore;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -73,9 +75,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // Если есть body или data, показываем уведомление
         if (body != null && !body.isEmpty()) {
             sendNotification(title, body, data);
+            NotificationSyncStore.markHandled(this, data.get("notification_id"));
         } else if (!data.isEmpty()) {
             // Даже если нет body, но есть data - показываем уведомление
             sendNotification(title, "Новое уведомление", data);
+            NotificationSyncStore.markHandled(this, data.get("notification_id"));
         }
     }
 
@@ -91,6 +95,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } else {
             android.util.Log.e("FCM", "Token is null or empty!");
         }
+    }
+
+    @Override
+    public void onDeletedMessages() {
+        NotificationSyncScheduler.enqueueImmediate(this);
     }
 
     // Метод createNotificationChannel: выполняет основную бизнес- или UI-логику данного участка кода.

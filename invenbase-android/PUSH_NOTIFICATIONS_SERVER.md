@@ -7,6 +7,7 @@
 3. Backend сохраняет устройство независимо от наличия credentials транспорта; повторная регистрация обновляет token, `active` и `last_seen_at`.
 4. In-app notification и outbox-задание создаются одной транзакцией; worker доставляет событие на все активные FCM/RuStore устройства.
 5. Payload содержит `notification_id`, а полное уведомление доступно через `/api/notifications`.
+6. WorkManager каждые 15 минут сверяет непрочитанные уведомления и показывает те, чьи `notification_id` не были обработаны push-сервисами. После `onDeletedMessages` FCM/RuStore запускается немедленная сверка.
 
 ## Предпочтительная конфигурация: HTTP v1
 
@@ -52,4 +53,5 @@ Backend отправляет токены provider `rustore` через `https:/
 - RuStore требует отдельный проект для каждой комбинации package name и подписи; реальная доставка должна быть проверена debug/release сборками, зарегистрированными в RuStore Console.
 - Huawei transport и клиентский Huawei Push Kit отсутствуют.
 - Отдельных network contract tests FCM/OAuth и RuStore API пока нет.
+- WorkManager использует минимальный системный интервал 15 минут и не является каналом мгновенной доставки.
 - Service account rotation и secret mounting должны настраиваться вне приложения.

@@ -5,6 +5,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.invenbase.app.utils.PushManager;
+import com.invenbase.app.notifications.NotificationSyncScheduler;
+import com.invenbase.app.notifications.NotificationSyncStore;
 
 import java.util.List;
 
@@ -25,11 +27,16 @@ public class MyRuStoreMessagingService extends RuStoreMessagingService {
         // и последующей синхронизации полного уведомления по notification_id.
         Log.d("RuStorePush", "Message received, notification_id="
                 + message.getData().get("notification_id"));
+        NotificationSyncStore.markHandled(
+                getApplicationContext(),
+                message.getData().get("notification_id")
+        );
     }
 
     @Override
     public void onDeletedMessages() {
         Log.w("RuStorePush", "Messages were deleted before delivery; notification sync required");
+        NotificationSyncScheduler.enqueueImmediate(getApplicationContext());
     }
 
     @Override

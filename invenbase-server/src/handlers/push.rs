@@ -852,8 +852,8 @@ async fn send_push_v1(
     db_pool: &sqlx::PgPool,
     project_id: &str,
     service_account_path: &str,
-    title: &str,
-    body: &str,
+    _title: &str,
+    _body: &str,
     data: &serde_json::Map<String, serde_json::Value>,
     devices: &[(String,)],
     user_id: Uuid,
@@ -908,28 +908,10 @@ async fn send_push_v1(
         let payload = json!({
             "message": {
                 "token": token,
-                "notification": {
-                    "title": title,
-                    "body": body
-                },
                 "data": fcm_data,
                 "android": {
                     "priority": "high",
-                    "notification": {
-                        "channel_id": "invenbase_notifications",
-                        "sound": "default",
-                        "default_sound": true,
-                        "default_vibrate_timings": true,
-                        "default_light_settings": true
-                    }
-                },
-                "apns": {
-                    "payload": {
-                        "aps": {
-                            "sound": "default",
-                            "badge": 1
-                        }
-                    }
+                    "ttl": "86400s"
                 }
             }
         });

@@ -50,7 +50,7 @@
 5. [Выполнено для FCM и RuStore] Событие рассылается на все активные устройства пользователя соответствующих providers; FCM `UNREGISTERED` и RuStore `NOT_FOUND` деактивируют токен. Аналогичное поведение для Huawei потребуется при добавлении transport.
 6. [Выполнено] Добавлена PostgreSQL transactional outbox: in-app запись и outbox создаются одной транзакцией, payload включает `notification_id`, worker выполняет retries с exponential backoff и сохраняет статус/последнюю ошибку. Полное содержимое доступно из авторизованного notifications API.
 7. Добавить SSE для мгновенного обновления открытых web/Android-клиентов. WebSocket использовать только если появится реальный двусторонний сценарий, например live-чат поддержки.
-8. Добавить Android WorkManager как страховочную периодическую синхронизацию непрочитанных уведомлений и восстановление пропущенных push. Не считать его каналом мгновенной доставки.
+8. [Выполнено] Android WorkManager каждые 15 минут синхронизирует непрочитанные уведомления при наличии сети; immediate sync запускается после login и `onDeletedMessages` FCM/RuStore. Локальный реестр `notification_id` предотвращает повторный показ уже обработанных push.
 9. Не использовать foreground service для постоянного соединения без отдельной продуктовой необходимости: он расходует батарею и требует постоянного системного уведомления.
 10. [Частично выполнено] Миграции, multi-device/deactivation lifecycle, атомарное создание notification/outbox и outbox claim/retry/complete покрыты PostgreSQL integration tests, backoff и нормализация FCM env — unit tests. Ещё нужны HTTP-тесты register/unregister и contract tests новых transports.
 
@@ -68,7 +68,7 @@
 3. Ввести repository/ViewModel слой и сократить API/UI-логику в Activity/Fragment.
 4. Добавить unit и instrumentation tests; сейчас Gradle содержит зависимости JUnit/Espresso, но тестовых исходников в проекте нет.
 5. Проверить release signing, включить и протестировать R8/ProGuard.
-6. [Частично выполнено] Android RuStore Push SDK 7.5.0 подключён: init через build-конфигурацию, получение/обновление token, регистрация provider/device и деактивация при logout. Остаются проверка на реальном RuStore-устройстве, Huawei Push token, SSE и WorkManager-синхронизация.
+6. [Частично выполнено] Android RuStore Push SDK 7.5.0 подключён: init через build-конфигурацию, получение/обновление token, регистрация provider/device и деактивация при logout. WorkManager-сверка пропущенных уведомлений реализована. Остаются проверка на реальном RuStore-устройстве, Huawei Push token и SSE.
 
 ### 7. Delivery
 

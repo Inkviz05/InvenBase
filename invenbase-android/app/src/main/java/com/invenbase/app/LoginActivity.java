@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import ru.rustore.sdk.pushclient.RuStorePushClient;
+import com.invenbase.app.notifications.NotificationSyncScheduler;
 import com.invenbase.app.api.ApiClient;
 import com.invenbase.app.api.ApiService;
 import com.invenbase.app.models.LoginRequest;
@@ -91,6 +92,7 @@ public class LoginActivity extends BaseActivity {
                     LoginResponse loginResponse = response.body();
                     authManager.saveToken(loginResponse.getToken());
                     authManager.saveUser(loginResponse.getUser());
+                    NotificationSyncScheduler.enqueueImmediate(LoginActivity.this);
 
                     // Отправляем FCM-токен на сервер, если он уже есть
                     android.util.Log.d("FCM", "Login successful, checking for stored token...");

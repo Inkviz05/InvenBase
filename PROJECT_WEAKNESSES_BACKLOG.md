@@ -31,7 +31,7 @@
 4. Расширить web unit/e2e тесты на reports, support и полный lifecycle бронирования.
 5. Разбить крупные React-страницы и внедрить lazy loading.
 6. Ввести repository/ViewModel слой в Android и покрыть критичные сценарии тестами.
-7. Добавить SSE для открытых web/Android-клиентов и WorkManager для фоновой сверки непрочитанных уведомлений. Foreground service не использовать без отдельной необходимости.
+7. Добавить SSE для открытых web/Android-клиентов. WorkManager-фоновая сверка непрочитанных уведомлений уже реализована; foreground service не использовать без отдельной необходимости.
 
 ## Низкий приоритет
 
@@ -48,6 +48,6 @@
 - Автоматической ротации JWT/refresh token нет: API выдаёт один JWT с временем жизни из `JWT_EXPIRATION`.
 - Отдельного logout endpoint на backend нет; клиенты удаляют локальный токен.
 - `user_devices` моделирует provider/device lifecycle и несколько устройств; сервер и Android реализуют FCM/RuStore, но RuStore ещё не проверен на зарегистрированной сборке реального устройства, а Huawei transport отсутствует.
-- Для открытых клиентов нет SSE/WebSocket, для Android нет WorkManager-сверки уведомлений. Серверная очередь повторной push-доставки уже атомарно связана с созданием in-app уведомления.
+- Для открытых клиентов нет SSE/WebSocket. Android WorkManager сверяет непрочитанные уведомления и восстанавливает пропущенные push; серверная очередь повторной доставки атомарно связана с in-app уведомлением.
 
 Приоритетный порядок: readiness и production DB-процедура → HTTP/API tests и контракт → multi-device notifications/outbox/transports → CI с PostgreSQL → Android security/build → SSE/WorkManager → архитектурные рефакторинги.
