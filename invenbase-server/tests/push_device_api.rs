@@ -369,6 +369,10 @@ async fn login_and_notification_flow_targets_all_account_devices() -> Result<()>
     .await?;
     assert_eq!(queued_recipients, 2);
 
+    sqlx::query("DELETE FROM activity_logs WHERE user_id = ANY($1)")
+        .bind(vec![user.id, admin.id])
+        .execute(&pool)
+        .await?;
     sqlx::query("DELETE FROM users WHERE id = ANY($1)")
         .bind(vec![user.id, admin.id])
         .execute(&pool)
