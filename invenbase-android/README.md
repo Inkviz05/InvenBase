@@ -54,6 +54,7 @@ JWT, сериализованный пользователь и API URL сохр
 - подписывается на topic `all` при старте;
 - обрабатывает `onNewToken` и `onMessageReceived`;
 - после авторизации регистрирует token через `POST /api/push/register-token`.
+- перед локальным logout вызывает `POST /api/push/unregister-device`, поэтому отключается только текущее устройство, а остальные устройства учётной записи остаются активными.
 
 Для сборки Firebase нужен `app/google-services.json`; он не должен попадать в git. Подробности: [FIREBASE_SETUP.md](FIREBASE_SETUP.md) и [PUSH_NOTIFICATIONS_SERVER.md](PUSH_NOTIFICATIONS_SERVER.md).
 

@@ -19,6 +19,9 @@
 5. Защитить Android auth storage, разделить API URL по build type и настроить release signing/minification.
 6. Добавить Android build/tests в CI.
 7. Добавить role guards на маршрутах web, не полагаясь только на скрытие пунктов меню и backend `403`.
+8. Продолжить provider-independent архитектуру после завершённого multi-device/FcmTransport этапа: выделить `NotificationEvent`, добавить `RuStoreTransport` и `HuaweiTransport`.
+9. Добавить HTTP integration tests для реализованных register/update/unregister устройства и проверить смену пользователя на одном физическом устройстве.
+10. Добавить transactional outbox, retries/backoff и журнал доставки, чтобы ошибка внешнего push-провайдера не теряла событие.
 
 ## Средний приоритет
 
@@ -28,12 +31,13 @@
 4. Расширить web unit/e2e тесты на reports, support и полный lifecycle бронирования.
 5. Разбить крупные React-страницы и внедрить lazy loading.
 6. Ввести repository/ViewModel слой в Android и покрыть критичные сценарии тестами.
+7. Добавить SSE для открытых web/Android-клиентов и WorkManager для фоновой сверки непрочитанных уведомлений. Foreground service не использовать без отдельной необходимости.
 
 ## Низкий приоритет
 
 1. Систематизировать повторяющиеся web-компоненты: статусы, фильтры, таблицы и booking actions.
 2. Рассмотреть TypeScript после стабилизации API-контрактов.
-3. Рассмотреть абстракцию push transport только при реальной необходимости второго провайдера; RuStore/HMS в текущем коде отсутствуют.
+3. После проверки реальных устройств определить порядок transports и условия отключения FCM fallback. RuStore/Huawei в текущем коде отсутствуют и должны внедряться через общий `PushTransport`, а не напрямую из бизнес-обработчиков.
 
 ## Подтверждённые ограничения текущей реализации
 
@@ -43,5 +47,7 @@
 - Android release build имеет `minifyEnabled false`.
 - Автоматической ротации JWT/refresh token нет: API выдаёт один JWT с временем жизни из `JWT_EXPIRATION`.
 - Отдельного logout endpoint на backend нет; клиенты удаляют локальный токен.
+- `user_devices` уже моделирует provider/device lifecycle и несколько устройств, но реализован только `FcmTransport`; RuStore и Huawei transports отсутствуют.
+- Для открытых клиентов нет SSE/WebSocket, для Android нет WorkManager-сверки уведомлений и серверной очереди повторной доставки.
 
-Приоритетный порядок: readiness и production DB-процедура → HTTP/API tests и контракт → CI с PostgreSQL → Android security/build → архитектурные рефакторинги.
+Приоритетный порядок: readiness и production DB-процедура → HTTP/API tests и контракт → multi-device notifications/outbox/transports → CI с PostgreSQL → Android security/build → SSE/WorkManager → архитектурные рефакторинги.

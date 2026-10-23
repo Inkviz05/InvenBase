@@ -66,6 +66,7 @@ async fn migrations_create_core_tables() -> Result<()> {
         "activity_logs",
         "support_requests",
         "support_request_messages",
+        "user_devices",
     ] {
         assert!(
             relation_exists(&db.pool, table).await?,
@@ -88,7 +89,9 @@ async fn migrations_create_critical_indexes() -> Result<()> {
         "idx_bookings_status",
         "idx_notifications_user",
         "idx_support_requests_status",
-        "user_devices_user_token_idx",
+        "user_devices_user_provider_device_idx",
+        "user_devices_provider_token_idx",
+        "idx_user_devices_active_user",
     ] {
         assert!(
             relation_exists(&db.pool, index).await?,
@@ -116,6 +119,7 @@ async fn migrations_create_domain_constraints() -> Result<()> {
         "bookings_permission_type_check",
         "bookings_target_check",
         "support_requests_status_check",
+        "user_devices_provider_check",
     ] {
         assert!(
             constraint_exists(&db.pool, constraint).await?,
@@ -123,6 +127,64 @@ async fn migrations_create_domain_constraints() -> Result<()> {
         );
     }
 
+    Ok(())
+}
+
+#[tokio::test]
+async fn user_devices_support_multiple_devices_and_deactivation() -> Result<()> {
+    let Some(db) = connect_test_db().await? else {
+        return Ok(());
+    };
+
+    let user_id = Uuid::new_v4();
+    sqlx::query(
+        "INSERT INTO users (id, username, password_hash, role)
+         VALUES ($1, $2, 'hash', 'user')",
+    )
+    .bind(user_id)
+    .bind(format!("devices_{}", user_id.simple()))
+    .execute(&db.pool)
+    .await?;
+
+    for (device_id, token) in [("phone", "token-phone"), ("tablet", "token-tablet")] {
+        sqlx::query(
+            "INSERT INTO user_devices
+                (user_id, device_id, provider, push_token, platform)
+             VALUES ($1, $2, 'fcm', $3, 'android')",
+        )
+        .bind(user_id)
+        .bind(format!("{device_id}-{user_id}"))
+        .bind(format!("{token}-{user_id}"))
+        .execute(&db.pool)
+        .await?;
+    }
+
+    let active_devices: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM user_devices WHERE user_id = $1 AND active = TRUE",
+    )
+    .bind(user_id)
+    .fetch_one(&db.pool)
+    .await?;
+    assert_eq!(active_devices, 2);
+
+    sqlx::query(
+        "UPDATE user_devices SET active = FALSE
+         WHERE user_id = $1 AND device_id = $2",
+    )
+    .bind(user_id)
+    .bind(format!("phone-{user_id}"))
+    .execute(&db.pool)
+    .await?;
+
+    let active_devices: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM user_devices WHERE user_id = $1 AND active = TRUE",
+    )
+    .bind(user_id)
+    .fetch_one(&db.pool)
+    .await?;
+    assert_eq!(active_devices, 1);
+
+    cleanup_user(&db.pool, user_id).await?;
     Ok(())
 }
 

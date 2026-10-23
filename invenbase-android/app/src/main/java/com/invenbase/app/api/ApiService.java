@@ -16,6 +16,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
@@ -178,6 +179,12 @@ public interface ApiService {
     @POST("/api/push/register-token")
     // Метод registerPushToken: выполняет основную бизнес- или UI-логику данного участка кода.
     Call<Void> registerPushToken(@Body Map<String, String> data);
+
+    @POST("/api/push/unregister-device")
+    Call<Void> unregisterPushDevice(
+        @Header("Authorization") String authorization,
+        @Body Map<String, String> data
+    );
     
     // QR Code
     @GET("/api/qr/{id}")

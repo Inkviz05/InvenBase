@@ -2,19 +2,30 @@ package com.invenbase.app.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.invenbase.app.Config;
 import com.invenbase.app.models.User;
+import com.invenbase.app.api.ApiClient;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AuthManager {
     private static AuthManager instance;
     private SharedPreferences prefs;
     private Gson gson;
+    private Context appContext;
 
     // Конструктор AuthManager: инициализирует объект и его зависимости.
     private AuthManager(Context context) {
-        prefs = context.getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE);
+        appContext = context.getApplicationContext();
+        prefs = appContext.getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE);
         gson = new Gson();
     }
 
@@ -58,6 +69,30 @@ public class AuthManager {
 
     // Метод logout: выполняет основную бизнес- или UI-логику данного участка кода.
     public void logout() {
+        String token = getToken();
+        if (token != null) {
+            String deviceId = DeviceIdentity.get(appContext);
+            Map<String, String> body = new HashMap<>();
+            body.put("device_id", deviceId);
+            body.put("provider", "fcm");
+            ApiClient.getInstance(appContext)
+                .getApiService()
+                .unregisterPushDevice("Bearer " + token, body)
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (!response.isSuccessful()) {
+                            Log.w("Auth", "Push device unregister returned " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable throwable) {
+                        Log.w("Auth", "Push device unregister failed", throwable);
+                    }
+                });
+        }
+
         prefs.edit()
             .remove(Config.PREF_TOKEN)
             .remove(Config.PREF_USER)

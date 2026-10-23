@@ -14,6 +14,74 @@ use crate::errors::AppError;
 pub struct RegisterPushTokenRequest {
     pub token: String,
     pub platform: Option<String>,
+    pub device_id: Option<String>,
+    pub provider: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UnregisterPushDeviceRequest {
+    pub device_id: String,
+    pub provider: Option<String>,
+}
+
+trait PushTransport {
+    fn provider(&self) -> &'static str;
+
+    async fn send(
+        &self,
+        title: &str,
+        body: &str,
+        data: &serde_json::Map<String, serde_json::Value>,
+        devices: &[(String,)],
+    ) -> Result<usize, Box<dyn std::error::Error + Send + Sync>>;
+}
+
+struct FcmTransport<'a> {
+    state: &'a AppState,
+    user_id: Uuid,
+}
+
+impl PushTransport for FcmTransport<'_> {
+    fn provider(&self) -> &'static str {
+        "fcm"
+    }
+
+    async fn send(
+        &self,
+        title: &str,
+        body: &str,
+        data: &serde_json::Map<String, serde_json::Value>,
+        devices: &[(String,)],
+    ) -> Result<usize, Box<dyn std::error::Error + Send + Sync>> {
+        if let (Some(project_id), Some(service_account_path)) = (
+            self.state.config.fcm_project_id.as_deref(),
+            self.state.config.fcm_service_account_path.as_deref(),
+        ) {
+            let sent = send_push_v1(
+                &self.state.db.pool,
+                project_id,
+                service_account_path,
+                title,
+                body,
+                data,
+                devices,
+                self.user_id,
+            )
+            .await?;
+            if sent > 0 || self.state.config.fcm_server_key.is_none() {
+                return Ok(sent);
+            }
+        }
+
+        if let Some(server_key) = self.state.config.fcm_server_key.as_deref() {
+            return Ok(
+                send_push_legacy(server_key, title, body, data, devices, self.user_id).await,
+            );
+        }
+
+        log::warn!("FCM transport is not configured; delivery skipped");
+        Ok(0)
+    }
 }
 
 /// Регистрация FCM токена устройства для текущего пользователя.
@@ -27,52 +95,108 @@ pub async fn register_push_token(
     let user_id = Uuid::parse_str(&claims.sub)
         .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
 
-    // Сохраняем токен, если настроен хотя бы один способ отправки: Legacy (FCM_SERVER_KEY) или HTTP v1 (FCM_PROJECT_ID + FCM_SERVICE_ACCOUNT_PATH)
-    let fcm_configured = state.config.fcm_server_key.is_some()
-        || (state.config.fcm_project_id.is_some()
-            && state.config.fcm_service_account_path.is_some());
-    if !fcm_configured {
-        log::warn!("FCM not configured: token not saved. Set FCM_SERVER_KEY or FCM_PROJECT_ID+FCM_SERVICE_ACCOUNT_PATH.");
-        return Ok(HttpResponse::NoContent().finish());
+    let token = body.token.trim();
+    if token.is_empty() {
+        return Err(AppError::BadRequest(
+            "Push token must not be empty".to_string(),
+        ));
     }
 
     let platform = body.platform.as_deref().unwrap_or("android").to_string();
+    let provider = body.provider.as_deref().unwrap_or("fcm").to_lowercase();
+    if !matches!(provider.as_str(), "fcm" | "rustore" | "huawei") {
+        return Err(AppError::BadRequest(
+            "Unsupported push provider".to_string(),
+        ));
+    }
+    let device_id = body
+        .device_id
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(ToOwned::to_owned)
+        .unwrap_or_else(|| format!("legacy:{token}"));
 
-    // Таблица user_devices должна существовать в БД:
-    //
-    // CREATE TABLE IF NOT EXISTS user_devices (
-    //   id UUID PRIMARY KEY,
-    //   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    //   fcm_token TEXT NOT NULL,
-    //   platform TEXT,
-    //   created_at TIMESTAMPTZ DEFAULT NOW(),
-    //   updated_at TIMESTAMPTZ DEFAULT NOW()
-    // );
-    // CREATE UNIQUE INDEX IF NOT EXISTS user_devices_user_token_idx
-    //   ON user_devices(user_id, fcm_token);
+    let mut transaction = state.db.pool.begin().await?;
 
-    sqlx::query::<sqlx::Postgres>(
+    sqlx::query(
+        "DELETE FROM user_devices
+         WHERE provider = $1 AND push_token = $2
+           AND (user_id <> $3 OR device_id <> $4)",
+    )
+    .bind(&provider)
+    .bind(token)
+    .bind(user_id)
+    .bind(&device_id)
+    .execute(&mut *transaction)
+    .await?;
+
+    sqlx::query(
         r#"
-        INSERT INTO user_devices (id, user_id, fcm_token, platform)
-        VALUES ($1, $2, $3, $4)
-        ON CONFLICT (user_id, fcm_token)
+        INSERT INTO user_devices
+            (id, user_id, device_id, provider, push_token, platform, active, last_seen_at)
+        VALUES ($1, $2, $3, $4, $5, $6, TRUE, NOW())
+        ON CONFLICT (user_id, provider, device_id)
         DO UPDATE SET
+            push_token = EXCLUDED.push_token,
             platform = EXCLUDED.platform,
+            active = TRUE,
+            last_seen_at = NOW(),
             updated_at = NOW()
         "#,
     )
     .bind(Uuid::new_v4())
     .bind(user_id)
-    .bind(&body.token)
+    .bind(&device_id)
+    .bind(&provider)
+    .bind(token)
     .bind(&platform)
+    .execute(&mut *transaction)
+    .await?;
+
+    transaction.commit().await?;
+
+    log::info!(
+        "Push device registered for user {} (provider: {}, platform: {})",
+        user_id,
+        provider,
+        platform
+    );
+    Ok(HttpResponse::NoContent().finish())
+}
+
+/// Деактивирует только текущее физическое устройство пользователя.
+pub async fn unregister_push_device(
+    state: web::Data<AppState>,
+    claims: Claims,
+    body: web::Json<UnregisterPushDeviceRequest>,
+) -> Result<HttpResponse, AppError> {
+    let user_id = Uuid::parse_str(&claims.sub)
+        .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
+    let device_id = body.device_id.trim();
+    if device_id.is_empty() {
+        return Err(AppError::BadRequest(
+            "Device ID must not be empty".to_string(),
+        ));
+    }
+    let provider = body.provider.as_deref().unwrap_or("fcm").to_lowercase();
+    if !matches!(provider.as_str(), "fcm" | "rustore" | "huawei") {
+        return Err(AppError::BadRequest(
+            "Unsupported push provider".to_string(),
+        ));
+    }
+
+    sqlx::query(
+        "UPDATE user_devices
+         SET active = FALSE, updated_at = NOW()
+         WHERE user_id = $1 AND provider = $2 AND device_id = $3",
+    )
+    .bind(user_id)
+    .bind(&provider)
+    .bind(device_id)
     .execute(&state.db.pool)
     .await?;
 
-    log::info!(
-        "Push token registered for user {} (platform: {})",
-        user_id,
-        platform
-    );
     Ok(HttpResponse::NoContent().finish())
 }
 
@@ -87,10 +211,13 @@ pub async fn send_push_to_user(
     mut data: serde_json::Map<String, serde_json::Value>,
 ) {
     // Загружаем все устройства пользователя
+    let transport = FcmTransport { state, user_id };
     let devices: Vec<(String,)> = match sqlx::query_as::<sqlx::Postgres, (String,)>(
-        "SELECT fcm_token FROM user_devices WHERE user_id = $1",
+        "SELECT push_token FROM user_devices
+         WHERE user_id = $1 AND provider = $2 AND active = TRUE",
     )
     .bind(user_id)
+    .bind(transport.provider())
     .fetch_all(&state.db.pool)
     .await
     {
@@ -126,6 +253,24 @@ pub async fn send_push_to_user(
         "body".to_string(),
         serde_json::Value::String(body.to_string()),
     );
+
+    match transport.send(title, body, &data, &devices).await {
+        Ok(sent_count) => {
+            log::info!(
+                "Push transport completed for user {} ({} devices sent)",
+                user_id,
+                sent_count
+            );
+            return;
+        }
+        Err(error) => {
+            log::error!(
+                "FCM transport failed for user {}: {:?}; using compatibility fallback",
+                user_id,
+                error
+            );
+        }
+    }
 
     // Пытаемся использовать HTTP v1 API, если настроен (приоритет)
     if let (Some(project_id), Some(service_account_path)) = (
@@ -276,10 +421,13 @@ pub async fn send_push_to_user_excluding_tokens(
     mut data: serde_json::Map<String, serde_json::Value>,
     exclude_tokens: &[String],
 ) {
+    let transport = FcmTransport { state, user_id };
     let devices: Vec<(String,)> = match sqlx::query_as::<sqlx::Postgres, (String,)>(
-        "SELECT fcm_token FROM user_devices WHERE user_id = $1",
+        "SELECT push_token FROM user_devices
+         WHERE user_id = $1 AND provider = $2 AND active = TRUE",
     )
     .bind(user_id)
+    .bind(transport.provider())
     .fetch_all(&state.db.pool)
     .await
     {
@@ -320,6 +468,24 @@ pub async fn send_push_to_user_excluding_tokens(
         "body".to_string(),
         serde_json::Value::String(body.to_string()),
     );
+
+    match transport.send(title, body, &data, &devices).await {
+        Ok(sent_count) => {
+            log::info!(
+                "Push transport completed for user {} ({} devices sent)",
+                user_id,
+                sent_count
+            );
+            return;
+        }
+        Err(error) => {
+            log::error!(
+                "FCM transport failed for user {}: {:?}; using compatibility fallback",
+                user_id,
+                error
+            );
+        }
+    }
 
     if let (Some(project_id), Some(service_account_path)) = (
         state.config.fcm_project_id.clone(),
@@ -385,6 +551,59 @@ pub async fn send_push_to_user_excluding_tokens(
     }
 }
 
+async fn send_push_legacy(
+    server_key: &str,
+    title: &str,
+    body: &str,
+    data: &serde_json::Map<String, serde_json::Value>,
+    devices: &[(String,)],
+    user_id: Uuid,
+) -> usize {
+    let client = reqwest::Client::new();
+    let fcm_data: HashMap<String, String> = data
+        .iter()
+        .map(|(key, value)| {
+            let value = match value {
+                serde_json::Value::String(value) => value.clone(),
+                _ => serde_json::to_string(value).unwrap_or_else(|_| value.to_string()),
+            };
+            (key.clone(), value)
+        })
+        .collect();
+    let mut sent_count = 0;
+
+    for (token,) in devices {
+        let payload = json!({
+            "to": token,
+            "notification": { "title": title, "body": body, "sound": "default" },
+            "data": fcm_data,
+            "priority": "high",
+            "time_to_live": 86400
+        });
+        match client
+            .post("https://fcm.googleapis.com/fcm/send")
+            .header("Authorization", format!("key={server_key}"))
+            .json(&payload)
+            .send()
+            .await
+        {
+            Ok(response) if response.status().is_success() => sent_count += 1,
+            Ok(response) => log::error!(
+                "Legacy FCM delivery failed for user {} with status {}",
+                user_id,
+                response.status()
+            ),
+            Err(error) => log::error!(
+                "Legacy FCM request failed for user {}: {:?}",
+                user_id,
+                error
+            ),
+        }
+    }
+
+    sent_count
+}
+
 /// Отправка push-уведомления через FCM HTTP v1 API
 /// Возвращает количество успешно отправленных уведомлений
 async fn send_push_v1(
@@ -396,7 +615,7 @@ async fn send_push_v1(
     data: &serde_json::Map<String, serde_json::Value>,
     devices: &[(String,)],
     user_id: Uuid,
-) -> Result<usize, Box<dyn std::error::Error>> {
+) -> Result<usize, Box<dyn std::error::Error + Send + Sync>> {
     // Нормализуем путь (для Windows обрабатываем обратные слэши)
     let normalized_path = service_account_path.replace('\\', "/");
     log::debug!("Reading Service Account from: {}", normalized_path);
@@ -544,7 +763,9 @@ async fn send_push_v1(
         );
         for token in &invalid_tokens {
             if let Err(e) = sqlx::query::<sqlx::Postgres>(
-                "DELETE FROM user_devices WHERE user_id = $1 AND fcm_token = $2",
+                "UPDATE user_devices
+                 SET active = FALSE, updated_at = NOW()
+                 WHERE user_id = $1 AND provider = 'fcm' AND push_token = $2",
             )
             .bind(user_id)
             .bind(token)
@@ -563,7 +784,7 @@ async fn send_push_v1(
 async fn get_oauth_token(
     client_email: &str,
     private_key_pem: &str,
-) -> Result<String, Box<dyn std::error::Error>> {
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
     use chrono::Utc;
 
     // Создаём JWT claims

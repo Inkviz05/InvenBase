@@ -35,16 +35,27 @@ impl Config {
         }
 
         // Читаем переменные окружения
-        let fcm_project_id = env::var("FCM_PROJECT_ID").ok();
-        let fcm_service_account_path_raw = env::var("FCM_SERVICE_ACCOUNT_PATH").ok();
-        let fcm_server_key = env::var("FCM_SERVER_KEY").ok();
+        let fcm_project_id = non_empty_value(env::var("FCM_PROJECT_ID").ok());
+        let fcm_service_account_path_raw =
+            non_empty_value(env::var("FCM_SERVICE_ACCOUNT_PATH").ok());
+        let fcm_server_key = non_empty_value(env::var("FCM_SERVER_KEY").ok());
 
-        // Логируем загруженные значения для отладки (до нормализации)
         log::info!("FCM configuration loaded:");
-        log::info!("  FCM_PROJECT_ID: {:?}", fcm_project_id);
         log::info!(
-            "  FCM_SERVICE_ACCOUNT_PATH (raw): {:?}",
-            &fcm_service_account_path_raw
+            "  HTTP v1 project: {}",
+            if fcm_project_id.is_some() {
+                "SET"
+            } else {
+                "NOT SET"
+            }
+        );
+        log::info!(
+            "  Service account path: {}",
+            if fcm_service_account_path_raw.is_some() {
+                "SET"
+            } else {
+                "NOT SET"
+            }
         );
         log::info!(
             "  FCM_SERVER_KEY: {}",
@@ -65,11 +76,7 @@ impl Config {
                         .join(path.trim_start_matches("./"))
                         .to_string_lossy()
                         .to_string();
-                    log::info!(
-                        "  FCM_SERVICE_ACCOUNT_PATH normalized: {} -> {}",
-                        path,
-                        normalized
-                    );
+                    log::debug!("FCM service account path normalized");
                     normalized
                 } else {
                     path
@@ -80,29 +87,12 @@ impl Config {
             }
         });
 
-        // Дополнительная диагностика: проверяем все переменные окружения, начинающиеся с FCM_
-        if std::env::var("RUST_LOG").is_ok() {
-            for (key, value) in std::env::vars() {
-                if key.starts_with("FCM_") {
-                    log::debug!(
-                        "  Env var {} = {:?}",
-                        key,
-                        if key.contains("KEY") {
-                            "***HIDDEN***"
-                        } else {
-                            &value
-                        }
-                    );
-                }
-            }
-        }
-
         // Проверяем существование файла Service Account, если путь указан
         if let Some(ref path) = fcm_service_account_path {
             if std::path::Path::new(path).exists() {
-                log::info!("  Service Account file exists: {}", path);
+                log::info!("  Service Account file exists");
             } else {
-                log::warn!("  Service Account file NOT FOUND: {}", path);
+                log::warn!("  Service Account file NOT FOUND");
             }
         }
 
@@ -179,5 +169,36 @@ impl Config {
             fcm_service_account_path,
             default_admin,
         })
+    }
+}
+
+fn non_empty_value(value: Option<String>) -> Option<String> {
+    value.and_then(|value| {
+        let trimmed = value.trim();
+        if trimmed.is_empty() {
+            None
+        } else {
+            Some(trimmed.to_string())
+        }
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::non_empty_value;
+
+    #[test]
+    fn empty_optional_configuration_is_treated_as_missing() {
+        assert_eq!(non_empty_value(None), None);
+        assert_eq!(non_empty_value(Some(String::new())), None);
+        assert_eq!(non_empty_value(Some("   ".to_string())), None);
+    }
+
+    #[test]
+    fn optional_configuration_is_trimmed() {
+        assert_eq!(
+            non_empty_value(Some("  configured-value  ".to_string())),
+            Some("configured-value".to_string())
+        );
     }
 }

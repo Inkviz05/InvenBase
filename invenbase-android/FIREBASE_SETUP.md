@@ -32,7 +32,7 @@ Service account JSON храните вне git и вне Docker image. Backend �
 
 `FCM_SERVER_KEY` присутствует в коде только как legacy fallback. Legacy endpoint `fcm/send` отключён Google, поэтому на него нельзя рассчитывать как на рабочую production-конфигурацию.
 
-Если FCM вообще не настроен, текущий backend не сохраняет token устройства и возвращает ошибку регистрации.
+Backend сохраняет устройство и token независимо от наличия FCM credentials. Если transport не настроен, регистрация останется в БД, но внешняя доставка будет пропущена до настройки FCM.
 
 ## Проверка
 

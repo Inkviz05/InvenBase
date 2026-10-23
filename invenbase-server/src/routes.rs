@@ -238,6 +238,9 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
                 .route("/register-token", web::post().to(|state: web::Data<AppState>, auth: Authenticated, body: web::Json<_>| async move {
                     push::register_push_token(state, auth.claims(), body).await
                 }))
+                .route("/unregister-device", web::post().to(|state: web::Data<AppState>, auth: Authenticated, body: web::Json<_>| async move {
+                    push::unregister_push_device(state, auth.claims(), body).await
+                }))
         )
         // Техподдержка
         .service(

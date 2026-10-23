@@ -12,6 +12,7 @@
 - Добавлен GitHub Actions workflow: web audit/tests/build, `cargo fmt`, backend library tests и Compose smoke.
 - Убраны production `console.log`, directory listing отключён, параметры пула БД вынесены в env.
 - Web использует локальный XLSX writer вместо зависимости `xlsx`.
+- Завершён первый этап multi-device push: provider-aware `user_devices`, стабильный `device_id`, active/last-seen lifecycle, register/unregister, деактивация невалидных FCM-токенов и рабочий `FcmTransport`.
 
 ## Следующие задачи
 
@@ -37,22 +38,38 @@
 3. Перейти от `log` к структурированному `tracing`, добавить request/correlation ID.
 4. Добавить метрики ошибок БД, push и времени ответа API.
 
-### 4. Web
+### 4. Уведомления и доставка на устройства
+
+Целевая архитектура не должна зависеть от Java/Kotlin/Flutter или конкретного push-провайдера.
+
+1. Ввести единое серверное событие `NotificationEvent` и сохранять каждое уведомление в PostgreSQL как источник истины.
+2. [Выполнено] Расширить модель устройств: `user_id`, стабильный `device_id`, `provider`, `push_token`, `platform`, `active`, `last_seen_at`. Одна учётная запись поддерживает несколько устройств и провайдеров на уровне схемы.
+3. [Выполнено] Добавить API регистрации, обновления и удаления устройства. Android logout деактивирует только текущее FCM-устройство.
+4. [Частично выполнено] Введён интерфейс `PushTransport` и `FcmTransport`. Реализации `RuStoreTransport` и `HuaweiTransport` ещё отсутствуют; FCM остаётся рабочим транспортом.
+5. [Выполнено для FCM] Рассылать событие на все активные FCM-устройства пользователя и деактивировать невалидные tokens. Аналогичное поведение для RuStore/Huawei потребуется при добавлении transports.
+6. Добавить transactional outbox/очередь, retries с backoff и журнал результатов доставки. Push payload должен содержать минимум данных и `notification_id`; полное содержимое клиент получает из авторизованного API.
+7. Добавить SSE для мгновенного обновления открытых web/Android-клиентов. WebSocket использовать только если появится реальный двусторонний сценарий, например live-чат поддержки.
+8. Добавить Android WorkManager как страховочную периодическую синхронизацию непрочитанных уведомлений и восстановление пропущенных push. Не считать его каналом мгновенной доставки.
+9. Не использовать foreground service для постоянного соединения без отдельной продуктовой необходимости: он расходует батарею и требует постоянного системного уведомления.
+10. [Частично выполнено] Миграция и multi-device/deactivation lifecycle покрыты PostgreSQL integration test, нормализация FCM env — unit tests. Ещё нужны HTTP-тесты register/unregister, retries и contract tests новых transports.
+
+### 5. Web
 
 1. Добавить route-level role guards; сейчас маршруты защищены фактом входа, а окончательная авторизация выполняется backend и частично UI.
 2. Расширить Vitest-покрытие reports, support, equipment detail/edit и действий с бронированием.
 3. Расширить Playwright flow на approve/reject/cancel/return и экспорт отчётов.
 4. Разбить крупные страницы и добавить lazy loading; отдельного lint script сейчас нет.
 
-### 5. Native Android
+### 6. Native Android
 
 1. Убрать токены и пользовательские данные из обычных `SharedPreferences` в защищённое хранилище.
 2. Вынести API URL в build types/flavors вместо одной константы и пользовательской настройки.
 3. Ввести repository/ViewModel слой и сократить API/UI-логику в Activity/Fragment.
 4. Добавить unit и instrumentation tests; сейчас Gradle содержит зависимости JUnit/Espresso, но тестовых исходников в проекте нет.
 5. Проверить release signing, включить и протестировать R8/ProGuard.
+6. Подключить получение RuStore Push и Huawei Push tokens, регистрацию provider/device на backend, SSE в активном приложении и WorkManager-синхронизацию в фоне.
 
-### 6. Delivery
+### 7. Delivery
 
 1. Добавить Android build в CI.
 2. Добавить secret scanning и проверку случайно staged `.env`/service-account файлов.

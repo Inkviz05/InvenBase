@@ -3,8 +3,8 @@
 ## Поток данных
 
 1. Android получает FCM token.
-2. После login `PushManager` отправляет `{ "token": "..." }` на `POST /api/push/register-token` с Bearer JWT.
-3. Backend сохраняет token в `user_devices` с platform `android` только если настроен FCM.
+2. После login `PushManager` отправляет token, стабильный `device_id`, provider `fcm` и platform `android` на `POST /api/push/register-token` с Bearer JWT.
+3. Backend сохраняет устройство независимо от наличия credentials транспорта; повторная регистрация обновляет token, `active` и `last_seen_at`.
 4. События бронирований, background expiration checker и support handlers вызывают отправку пользователю.
 5. In-app notifications хранятся отдельно в PostgreSQL и доступны через `/api/notifications`.
 
@@ -31,6 +31,7 @@ Backend вручную:
 ## Реальные маршруты
 
 - `POST /api/push/register-token` — регистрация token текущего пользователя.
+- `POST /api/push/unregister-device` — деактивация конкретного provider/device при logout.
 - `GET /api/notifications` — in-app уведомления.
 - `GET /api/notifications/count` и `/unread-count` — число непрочитанных.
 - `POST /api/notifications/{id}/read` и `/read-all` — отметка прочитанного.

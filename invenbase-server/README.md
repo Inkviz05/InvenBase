@@ -64,7 +64,7 @@ GET http://127.0.0.1:8080/health
 - Reports: `GET /api/reports/equipment`, `/bookings`, `/bookings/detailed`, `/audit`; требуют `admin` или `responsible`.
 - Logs: `GET /api/logs`; требует `admin` или `responsible`.
 - QR: `GET /api/qr/{id}` требует `admin` или `responsible`; `GET /api/qr/{id}/data` требует авторизацию.
-- Push: `POST /api/push/register-token`.
+- Push: `POST /api/push/register-token` регистрирует или обновляет конкретное устройство; `POST /api/push/unregister-device` деактивирует устройство при logout.
 - Support: `GET|POST /api/support/requests`, admin-only `PUT|DELETE /api/support/requests/{id}`, authenticated `POST /api/support/requests/{id}/messages`.
 
 Отдельной OpenAPI/Swagger-спецификации нет.
@@ -77,7 +77,7 @@ Backend отдаёт legacy HTML из `static/` по `/` и `/admin`. Это н�
 
 При старте запускается проверка истёкших бронирований. События бронирований и поддержки создают in-app уведомления и могут отправлять push.
 
-Предпочтительная FCM-конфигурация — `FCM_PROJECT_ID` + `FCM_SERVICE_ACCOUNT_PATH`; код самостоятельно получает OAuth token и вызывает FCM HTTP v1. `FCM_SERVER_KEY` поддерживается только как legacy fallback.
+Предпочтительная FCM-конфигурация — `FCM_PROJECT_ID` + `FCM_SERVICE_ACCOUNT_PATH`; код самостоятельно получает OAuth token и вызывает FCM HTTP v1. `FCM_SERVER_KEY` поддерживается только как legacy fallback. Реестр `user_devices` поддерживает несколько устройств, `device_id`, provider, active state и last-seen; существующие записи мигрируют как FCM.
 
 ## Тесты
 

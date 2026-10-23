@@ -28,6 +28,7 @@ public class PushManager {
     private final SharedPreferences prefs;
     private final ApiService apiService;
     private final AuthManager authManager;
+    private final String deviceId;
 
     // Конструктор PushManager: инициализирует объект и его зависимости.
     private PushManager(Context context) {
@@ -35,6 +36,7 @@ public class PushManager {
         this.prefs = appContext.getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE);
         this.apiService = ApiClient.getInstance(appContext).getApiService();
         this.authManager = AuthManager.getInstance(appContext);
+        this.deviceId = DeviceIdentity.get(appContext);
     }
 
     // Метод getInstance: возвращает нужное значение для текущего контекста.
@@ -53,7 +55,6 @@ public class PushManager {
         if (token == null || token.isEmpty()) {
             return;
         }
-        Log.d("FCM", "PushManager.registerToken: " + token);
         prefs.edit().putString(PREF_FCM_TOKEN, token).apply();
 
         if (!authManager.isAuthenticated()) {
@@ -80,6 +81,8 @@ public class PushManager {
         Map<String, String> body = new HashMap<>();
         body.put("token", token);
         body.put("platform", "android");
+        body.put("provider", "fcm");
+        body.put("device_id", deviceId);
 
         Log.d("FCM", "Sending push token to server: " + token.substring(0, Math.min(20, token.length())) + "...");
         Log.d("FCM", "API endpoint: POST /api/push/register-token");
