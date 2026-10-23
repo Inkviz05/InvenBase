@@ -53,6 +53,7 @@
 8. [Выполнено] Android WorkManager каждые 15 минут синхронизирует непрочитанные уведомления при наличии сети; immediate sync запускается после login и `onDeletedMessages` FCM/RuStore. Локальный реестр `notification_id` предотвращает повторный показ уже обработанных push.
 9. Не использовать foreground service для постоянного соединения без отдельной продуктовой необходимости: он расходует батарею и требует постоянного системного уведомления.
 10. [Частично выполнено] Миграции, multi-device/deactivation lifecycle, атомарное создание notification/outbox и outbox claim/retry/complete покрыты PostgreSQL integration tests, backoff и нормализация FCM env — unit tests. Ещё нужны HTTP-тесты register/unregister и contract tests новых transports.
+11. [Отложено] Провести end-to-end проверку уведомлений на реальных Android-устройствах: доставка на несколько устройств одной учётной записи, восстановление после потери сети и `onDeletedMessages`, а также прекращение доставки после logout. Вернуться к проверке, когда будет готово реальное устройство и пользователь решит продолжить ручное тестирование.
 
 ### 5. Web
 
