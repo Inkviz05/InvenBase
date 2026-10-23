@@ -373,6 +373,10 @@ async fn login_and_notification_flow_targets_all_account_devices() -> Result<()>
         .bind(vec![user.id, admin.id])
         .execute(&pool)
         .await?;
+    sqlx::query("DELETE FROM notifications WHERE user_id = $1")
+        .bind(user.id)
+        .execute(&pool)
+        .await?;
     sqlx::query("DELETE FROM users WHERE id = ANY($1)")
         .bind(vec![user.id, admin.id])
         .execute(&pool)
