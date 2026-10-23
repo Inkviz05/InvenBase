@@ -1,5 +1,4 @@
 use crate::app_state::AppState;
-use crate::handlers::push::send_push_to_user;
 use crate::services::bookings as booking_service;
 use crate::services::notification_outbox;
 use chrono::Utc;
@@ -156,17 +155,6 @@ async fn check_expired_bookings(state: &AppState) -> Result<(), Box<dyn std::err
             )
         };
 
-        let _ = sqlx::query::<sqlx::Postgres>(
-            "INSERT INTO notifications (id, user_id, title, message, notification_type)
-             VALUES (gen_random_uuid(), $1, $2, $3, $4)",
-        )
-        .bind(user_id)
-        .bind(&title)
-        .bind(&notification_message)
-        .bind(notification_type)
-        .execute(&state.db.pool)
-        .await;
-
         if status == booking_service::STATUS_APPROVED {
             let mut data = serde_json::Map::new();
             data.insert(
@@ -204,12 +192,27 @@ async fn check_expired_bookings(state: &AppState) -> Result<(), Box<dyn std::err
                 serde_json::Value::String(new_status.to_string()),
             );
 
-            let state_clone = state.clone();
-            let title_push = title.clone();
-            let body_push = notification_message.clone();
-            tokio::spawn(async move {
-                send_push_to_user(&state_clone, user_id, &title_push, &body_push, data).await;
-            });
+            notification_outbox::create_notification_with_push(
+                &state.db.pool,
+                user_id,
+                &title,
+                &notification_message,
+                notification_type,
+                data,
+                &[],
+            )
+            .await?;
+        } else {
+            sqlx::query::<sqlx::Postgres>(
+                "INSERT INTO notifications (id, user_id, title, message, notification_type)
+                 VALUES (gen_random_uuid(), $1, $2, $3, $4)",
+            )
+            .bind(user_id)
+            .bind(&title)
+            .bind(&notification_message)
+            .bind(notification_type)
+            .execute(&state.db.pool)
+            .await?;
         }
 
         log::info!("Expired booking {} moved to {}", booking_id, new_status);

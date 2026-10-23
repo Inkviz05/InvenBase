@@ -3,6 +3,54 @@ use serde_json::{Map, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
 
+/// Атомарно создаёт in-app уведомление и задание внешней доставки.
+pub async fn create_notification_with_push(
+    pool: &PgPool,
+    user_id: Uuid,
+    title: &str,
+    body: &str,
+    notification_type: &str,
+    mut data: Map<String, Value>,
+    exclude_tokens: &[String],
+) -> Result<Uuid, sqlx::Error> {
+    let notification_id = Uuid::new_v4();
+    data.insert(
+        "notification_id".to_string(),
+        Value::String(notification_id.to_string()),
+    );
+    let outbox_id = Uuid::new_v4();
+    let mut transaction = pool.begin().await?;
+
+    sqlx::query(
+        "INSERT INTO notifications (id, user_id, title, message, notification_type)
+         VALUES ($1, $2, $3, $4, $5)",
+    )
+    .bind(notification_id)
+    .bind(user_id)
+    .bind(title)
+    .bind(body)
+    .bind(notification_type)
+    .execute(&mut *transaction)
+    .await?;
+
+    sqlx::query(
+        "INSERT INTO notification_outbox
+            (id, user_id, title, body, data, exclude_tokens)
+         VALUES ($1, $2, $3, $4, $5, $6)",
+    )
+    .bind(outbox_id)
+    .bind(user_id)
+    .bind(title)
+    .bind(body)
+    .bind(Value::Object(data))
+    .bind(serde_json::to_value(exclude_tokens).unwrap_or_else(|_| Value::Array(Vec::new())))
+    .execute(&mut *transaction)
+    .await?;
+
+    transaction.commit().await?;
+    Ok(notification_id)
+}
+
 pub struct OutboxMessage {
     pub id: Uuid,
     pub user_id: Uuid,

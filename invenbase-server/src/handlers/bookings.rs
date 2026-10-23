@@ -4,7 +4,6 @@ use uuid::Uuid;
 use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::handlers::push::send_push_to_user;
 use crate::models::{
     Booking, BookingWithDetails, CreateBookingRequest, CreateBulkBookingsRequest,
     UpdateBookingRequest,
@@ -25,26 +24,6 @@ pub async fn create_booking(
     let notification_message =
         format!("Пользователь {} создал новое бронирование", claims.username);
 
-    // Создаём уведомление в БД для каждого администратора и ответственного
-    booking_events::notify_reviewers_about_booking_request(
-        &state.db.pool,
-        "Новое бронирование",
-        &notification_message,
-    )
-    .await;
-
-    // Отправляем push-уведомление администраторам и ответственным
-    let admin_user_ids: Vec<(Uuid,)> = sqlx::query_as::<sqlx::Postgres, (Uuid,)>(
-        "SELECT id FROM users WHERE role IN ('admin', 'responsible')",
-    )
-    .fetch_all(&state.db.pool)
-    .await
-    .unwrap_or_default();
-    log::info!(
-        "Booking created: sending push to {} admin/responsible user(s) about new booking from {}",
-        admin_user_ids.len(),
-        claims.username
-    );
     let mut data = serde_json::Map::new();
     data.insert(
         "type".to_string(),
@@ -54,16 +33,18 @@ pub async fn create_booking(
         "booking_id".to_string(),
         serde_json::Value::String(booking_id.to_string()),
     );
-    for (admin_id,) in admin_user_ids {
-        send_push_to_user(
-            state.get_ref(),
-            admin_id,
-            "Новое бронирование",
-            &notification_message,
-            data.clone(),
-        )
-        .await;
-    }
+    let reviewer_count = booking_events::notify_reviewers_about_booking_request(
+        &state.db.pool,
+        "Новое бронирование",
+        &notification_message,
+        data,
+    )
+    .await?;
+    log::info!(
+        "Booking created: queued notifications for {} reviewer(s) about new booking from {}",
+        reviewer_count,
+        claims.username
+    );
 
     // Логирование
     booking_events::record_activity(
@@ -94,20 +75,6 @@ pub async fn create_bulk_bookings(
         claims.username, count
     );
 
-    booking_events::notify_reviewers_about_booking_request(
-        &state.db.pool,
-        "Новые бронирования",
-        &notification_message,
-    )
-    .await;
-
-    let admin_user_ids: Vec<(Uuid,)> = sqlx::query_as::<sqlx::Postgres, (Uuid,)>(
-        "SELECT id FROM users WHERE role IN ('admin', 'responsible')",
-    )
-    .fetch_all(&state.db.pool)
-    .await
-    .unwrap_or_default();
-
     let mut data = serde_json::Map::new();
     data.insert(
         "type".to_string(),
@@ -117,16 +84,13 @@ pub async fn create_bulk_bookings(
         "count".to_string(),
         serde_json::Value::Number(serde_json::Number::from(count)),
     );
-    for (admin_id,) in admin_user_ids {
-        send_push_to_user(
-            state.get_ref(),
-            admin_id,
-            "Новые бронирования",
-            &notification_message,
-            data.clone(),
-        )
-        .await;
-    }
+    booking_events::notify_reviewers_about_booking_request(
+        &state.db.pool,
+        "Новые бронирования",
+        &notification_message,
+        data,
+    )
+    .await?;
 
     log::info!(
         "Bulk booking: {} bookings created by {}, one notification sent",
@@ -329,17 +293,6 @@ pub async fn approve_booking(
             equipment_name_str, booking.quantity, start_date_str, end_date_str
         );
 
-        // Создаём уведомление для пользователя
-        booking_events::notify_user(
-            &state.db.pool,
-            booking.user_id,
-            "Бронирование одобрено",
-            &notification_message,
-            "booking_approved",
-        )
-        .await;
-
-        // Отправляем push-уведомление пользователю
         let mut data = serde_json::Map::new();
         data.insert(
             "type".to_string(),
@@ -374,14 +327,15 @@ pub async fn approve_booking(
             serde_json::Value::String("approved".to_string()),
         );
 
-        // fire-and-forget, не блокируем ответ
-        let state_clone = state.get_ref().clone();
-        let user_id_for_push = booking.user_id;
-        let title = "Бронирование одобрено".to_string();
-        let body = notification_message.clone();
-        tokio::spawn(async move {
-            send_push_to_user(&state_clone, user_id_for_push, &title, &body, data).await;
-        });
+        booking_events::notify_user(
+            &state.db.pool,
+            booking.user_id,
+            "Бронирование одобрено",
+            &notification_message,
+            "booking_approved",
+            data,
+        )
+        .await?;
     }
 
     // Логирование
@@ -434,17 +388,6 @@ pub async fn reject_booking(
             equipment_name_str, booking.quantity, start_date_str, end_date_str
         );
 
-        // Создаём уведомление для пользователя
-        booking_events::notify_user(
-            &state.db.pool,
-            booking.user_id,
-            "Бронирование отклонено",
-            &notification_message,
-            "booking_rejected",
-        )
-        .await;
-
-        // Отправляем push-уведомление пользователю
         let mut data = serde_json::Map::new();
         data.insert(
             "type".to_string(),
@@ -479,13 +422,15 @@ pub async fn reject_booking(
             serde_json::Value::String("rejected".to_string()),
         );
 
-        let state_clone = state.get_ref().clone();
-        let user_id_for_push = booking.user_id;
-        let title = "Бронирование отклонено".to_string();
-        let body = notification_message.clone();
-        tokio::spawn(async move {
-            send_push_to_user(&state_clone, user_id_for_push, &title, &body, data).await;
-        });
+        booking_events::notify_user(
+            &state.db.pool,
+            booking.user_id,
+            "Бронирование отклонено",
+            &notification_message,
+            "booking_rejected",
+            data,
+        )
+        .await?;
     }
 
     // Логирование
@@ -522,14 +467,28 @@ pub async fn confirm_booking_return(
     )
     .await;
 
+    let mut data = serde_json::Map::new();
+    data.insert(
+        "type".to_string(),
+        serde_json::Value::String("notification".to_string()),
+    );
+    data.insert(
+        "booking_id".to_string(),
+        serde_json::Value::String(booking_id.to_string()),
+    );
+    data.insert(
+        "status".to_string(),
+        serde_json::Value::String("returned".to_string()),
+    );
     booking_events::notify_user(
         &state.db.pool,
         booking.user_id,
         "Возврат оборудования подтвержден",
         "Оборудование возвращено и снова доступно для бронирования.",
         "booking_returned",
+        data,
     )
-    .await;
+    .await?;
 
     Ok(HttpResponse::Ok().json(booking))
 }

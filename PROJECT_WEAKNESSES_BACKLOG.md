@@ -21,7 +21,7 @@
 7. Добавить role guards на маршрутах web, не полагаясь только на скрытие пунктов меню и backend `403`.
 8. Продолжить provider-independent архитектуру после завершённого multi-device/FcmTransport этапа: выделить `NotificationEvent`, добавить `RuStoreTransport` и `HuaweiTransport`.
 9. Добавить HTTP integration tests для реализованных register/update/unregister устройства и проверить смену пользователя на одном физическом устройстве.
-10. [Частично закрыто] Durable outbox, retries/backoff и журнал доставки добавлены. Осталось атомарно создавать in-app уведомление и outbox в одной бизнес-транзакции и передавать `notification_id`.
+10. [Закрыто] Transactional outbox, retries/backoff и журнал доставки добавлены; in-app уведомление и outbox создаются одной транзакцией, payload содержит `notification_id`.
 
 ## Средний приоритет
 
@@ -48,6 +48,6 @@
 - Автоматической ротации JWT/refresh token нет: API выдаёт один JWT с временем жизни из `JWT_EXPIRATION`.
 - Отдельного logout endpoint на backend нет; клиенты удаляют локальный токен.
 - `user_devices` уже моделирует provider/device lifecycle и несколько устройств, но реализован только `FcmTransport`; RuStore и Huawei transports отсутствуют.
-- Для открытых клиентов нет SSE/WebSocket, для Android нет WorkManager-сверки уведомлений. Серверная очередь повторной push-доставки уже добавлена, но пока не атомарна с созданием in-app уведомления.
+- Для открытых клиентов нет SSE/WebSocket, для Android нет WorkManager-сверки уведомлений. Серверная очередь повторной push-доставки уже атомарно связана с созданием in-app уведомления.
 
 Приоритетный порядок: readiness и production DB-процедура → HTTP/API tests и контракт → multi-device notifications/outbox/transports → CI с PostgreSQL → Android security/build → SSE/WorkManager → архитектурные рефакторинги.

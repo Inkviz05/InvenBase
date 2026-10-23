@@ -3,11 +3,11 @@ use actix_web::{web, HttpResponse};
 use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
-use crate::handlers::push::send_push_to_user;
 use crate::models::{
     AddSupportMessageRequest, CreateSupportRequestRequest, SupportRequest, SupportRequestMessage,
     SupportRequestWithMessages, SupportRequestWithUser, UpdateSupportRequestRequest,
 };
+use crate::services::notification_outbox;
 
 pub async fn create_support_request(
     state: web::Data<AppState>,
@@ -73,23 +73,11 @@ pub async fn create_support_request(
             subject.to_string()
         }
     );
-    let _ = sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO notifications (user_id, title, message, notification_type)
-         SELECT id, $1, $2, 'support_new'
-         FROM users WHERE role = 'admin' AND id != $3",
-    )
-    .bind(&notif_title)
-    .bind(&notif_message)
-    .bind(user_id)
-    .execute(&state.db.pool)
-    .await;
-
     let admin_ids: Vec<(uuid::Uuid,)> =
         sqlx::query_as("SELECT id FROM users WHERE role = 'admin' AND id != $1")
             .bind(user_id)
             .fetch_all(&state.db.pool)
-            .await
-            .unwrap_or_default();
+            .await?;
     let mut data = serde_json::Map::new();
     data.insert(
         "type".to_string(),
@@ -100,14 +88,16 @@ pub async fn create_support_request(
         serde_json::Value::String(id.to_string()),
     );
     for (admin_id,) in admin_ids {
-        send_push_to_user(
-            state.get_ref(),
+        notification_outbox::create_notification_with_push(
+            &state.db.pool,
             admin_id,
             notif_title,
             &notif_message,
+            "support_new",
             data.clone(),
+            &[],
         )
-        .await;
+        .await?;
     }
 
     Ok(HttpResponse::Created().json(row))
@@ -306,16 +296,6 @@ pub async fn update_support_request(
             "По вашей заявке «{}» дан ответ. Перейдите в раздел «Поддержка».",
             subject_preview
         );
-        let _ = sqlx::query::<sqlx::Postgres>(
-            "INSERT INTO notifications (user_id, title, message, notification_type)
-             VALUES ($1, $2, $3, 'support_reply')",
-        )
-        .bind(updated.user_id)
-        .bind(&notif_title)
-        .bind(&notif_message)
-        .execute(&state.db.pool)
-        .await;
-
         let mut data = serde_json::Map::new();
         data.insert(
             "type".to_string(),
@@ -325,14 +305,16 @@ pub async fn update_support_request(
             "support_request_id".to_string(),
             serde_json::Value::String(request_id.to_string()),
         );
-        send_push_to_user(
-            state.get_ref(),
+        notification_outbox::create_notification_with_push(
+            &state.db.pool,
             updated.user_id,
             &notif_title,
             &notif_message,
+            "support_reply",
             data,
+            &[],
         )
-        .await;
+        .await?;
     }
 
     Ok(HttpResponse::Ok().json(updated))

@@ -153,17 +153,24 @@ async fn notification_outbox_claims_retries_and_completes_messages() -> Result<(
     .execute(&db.pool)
     .await?;
 
-    let mut data = serde_json::Map::new();
-    data.insert("notification_id".into(), serde_json::json!(Uuid::new_v4()));
-    let id = notification_outbox::enqueue(
+    let notification_id = notification_outbox::create_notification_with_push(
         &db.pool,
         user_id,
         "title",
         "body",
-        data,
+        "test",
+        serde_json::Map::new(),
         &["excluded-token".to_string()],
     )
     .await?;
+    let (id, linked_id): (Uuid, String) = sqlx::query_as(
+        "SELECT id, data->>'notification_id'
+         FROM notification_outbox WHERE user_id = $1",
+    )
+    .bind(user_id)
+    .fetch_one(&db.pool)
+    .await?;
+    assert_eq!(linked_id, notification_id.to_string());
 
     let claimed = notification_outbox::claim_next(&db.pool)
         .await?
@@ -199,6 +206,11 @@ async fn notification_outbox_claims_retries_and_completes_messages() -> Result<(
     .fetch_one(&db.pool)
     .await?;
     assert_eq!(state, ("delivered".to_string(), 2, None));
+
+    sqlx::query("DELETE FROM notifications WHERE user_id = $1")
+        .bind(user_id)
+        .execute(&db.pool)
+        .await?;
 
     cleanup_user(&db.pool, user_id).await?;
     Ok(())

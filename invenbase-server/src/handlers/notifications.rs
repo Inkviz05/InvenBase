@@ -5,6 +5,7 @@ use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
 use crate::models::{CreateNotificationRequest, Notification};
+use crate::services::notification_outbox;
 
 pub async fn get_notifications(
     state: web::Data<AppState>,
@@ -85,18 +86,20 @@ pub async fn create_notification(
 ) -> Result<HttpResponse, AppError> {
     AuthService::require_any_role(&claims, &["admin", "responsible"])?;
 
-    let notification_id = uuid::Uuid::new_v4();
-
-    sqlx::query::<sqlx::Postgres>(
-        "INSERT INTO notifications (id, user_id, title, message, notification_type)
-         VALUES ($1, $2, $3, $4, $5)",
+    let mut data = serde_json::Map::new();
+    data.insert(
+        "type".to_string(),
+        serde_json::Value::String(req.notification_type.clone()),
+    );
+    let notification_id = notification_outbox::create_notification_with_push(
+        &state.db.pool,
+        req.user_id,
+        &req.title,
+        &req.message,
+        &req.notification_type,
+        data,
+        &[],
     )
-    .bind(notification_id)
-    .bind(req.user_id)
-    .bind(&req.title)
-    .bind(&req.message)
-    .bind(&req.notification_type)
-    .execute(&state.db.pool)
     .await?;
 
     let notification: Notification = sqlx::query_as::<sqlx::Postgres, _>(
