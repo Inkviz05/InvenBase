@@ -17,7 +17,7 @@
 3. Убрать или официально пометить legacy FCM fallback; рабочий предпочтительный путь — HTTP v1 с service account.
 4. Добавить secret scanning и запрет staged секретов.
 5. Защитить Android auth storage, разделить API URL по build type и настроить release signing/minification.
-6. Добавить Android build/tests в CI.
+6. [Частично выполнено] Android debug build добавлен в CI; unit/instrumentation tests появятся после добавления тестовых исходников.
 7. Добавить role guards на маршрутах web, не полагаясь только на скрытие пунктов меню и backend `403`.
 8. Продолжить provider-independent архитектуру: FCM, RuStore и Huawei реализованы на сервере и Android; остаются проверка transports на реальном устройстве и единое `NotificationEvent`.
 9. [Закрыто] Добавлен HTTP integration test register/update/unregister устройства, нескольких устройств одной учётной записи и смены пользователя на одном физическом устройстве.

@@ -9,7 +9,7 @@
 - Добавлены SQLx migrations, ограничения и внешние ключи PostgreSQL.
 - Основная логика жизненного цикла бронирования вынесена в services и покрыта unit/DB integration tests.
 - Добавлены Dockerfiles, Compose, nginx reverse proxy, healthchecks и browser smoke полного стека.
-- Добавлен GitHub Actions workflow: web audit/tests/build, `cargo fmt`, backend library tests и Compose smoke.
+- Добавлен GitHub Actions workflow: Android debug build, web audit/tests/build, `cargo fmt`, backend library tests и Compose smoke.
 - Убраны production `console.log`, directory listing отключён, параметры пула БД вынесены в env.
 - Web использует локальный XLSX writer вместо зависимости `xlsx`.
 - Завершён первый этап multi-device push: provider-aware `user_devices`, стабильный `device_id`, active/last-seen lifecycle, register/unregister, деактивация невалидных FCM-токенов и рабочий `FcmTransport`.
@@ -73,7 +73,7 @@
 
 ### 7. Delivery
 
-1. Добавить Android build в CI.
+1. [Выполнено] Добавить Android debug build в CI на JDK 21 с Gradle cache и публикацией APK-артефакта.
 2. Добавить secret scanning и проверку случайно staged `.env`/service-account файлов.
 3. Определить production TLS и reverse proxy перед публичным развёртыванием; текущий Compose — production-shaped локальный стек без TLS.
 

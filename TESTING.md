@@ -89,7 +89,7 @@ cd invenbase-android
 .\gradlew.bat assembleDebug
 ```
 
-Зависимости JUnit/Espresso подключены, но тестовых Java/Kotlin исходников в репозитории нет. CI Android не собирает.
+Зависимости JUnit/Espresso подключены, но тестовых Java/Kotlin исходников в репозитории нет. CI собирает debug APK на JDK 21 и публикует его как artifact.
 
 ## Что реально делает CI
 
@@ -101,6 +101,7 @@ Quality job:
 - `npm audit --audit-level=high`;
 - `npm run test:run` и `npm run build`;
 - `cargo fmt --check` и `cargo test --locked --lib`;
+- Android `:app:assembleDebug` на JDK 21 с публикацией debug APK;
 - запрет `console.log` в web source и `show_files_listing` в backend source.
 
 Compose smoke job:
@@ -111,4 +112,4 @@ Compose smoke job:
 - выполняет login → создание equipment → создание booking;
 - на failure загружает Playwright artifacts.
 
-CI не выполняет полный backend DB test suite, Android build, lint или secret scan.
+CI не выполняет полный backend DB test suite, Android unit/instrumentation tests, lint или secret scan.
