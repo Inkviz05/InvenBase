@@ -20,7 +20,7 @@
 6. Добавить Android build/tests в CI.
 7. Добавить role guards на маршрутах web, не полагаясь только на скрытие пунктов меню и backend `403`.
 8. Продолжить provider-independent архитектуру: FCM и RuStore реализованы на сервере и Android; остаются проверка RuStore на реальном устройстве, `NotificationEvent` и `HuaweiTransport`.
-9. Добавить HTTP integration tests для реализованных register/update/unregister устройства и проверить смену пользователя на одном физическом устройстве.
+9. [Закрыто] Добавлен HTTP integration test register/update/unregister устройства, нескольких устройств одной учётной записи и смены пользователя на одном физическом устройстве.
 10. [Закрыто] Transactional outbox, retries/backoff и журнал доставки добавлены; in-app уведомление и outbox создаются одной транзакцией, payload содержит `notification_id`.
 11. [Отложено] End-to-end проверка уведомлений на реальных Android-устройствах: multi-device доставка, восстановление WorkManager после потери сети и `onDeletedMessages`, деактивация устройства после logout. Выполнить позже по решению пользователя.
 
