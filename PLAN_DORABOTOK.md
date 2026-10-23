@@ -46,8 +46,8 @@
 1. Ввести единое серверное событие `NotificationEvent` и сохранять каждое уведомление в PostgreSQL как источник истины.
 2. [Выполнено] Расширить модель устройств: `user_id`, стабильный `device_id`, `provider`, `push_token`, `platform`, `active`, `last_seen_at`. Одна учётная запись поддерживает несколько устройств и провайдеров на уровне схемы.
 3. [Выполнено] Добавить API регистрации, обновления и удаления устройства. Android logout деактивирует только текущее FCM-устройство.
-4. [Частично выполнено] Введён интерфейс `PushTransport` и `FcmTransport`. Реализации `RuStoreTransport` и `HuaweiTransport` ещё отсутствуют; FCM остаётся рабочим транспортом.
-5. [Выполнено для FCM] Рассылать событие на все активные FCM-устройства пользователя и деактивировать невалидные tokens. Аналогичное поведение для RuStore/Huawei потребуется при добавлении transports.
+4. [Частично выполнено] Введены интерфейс `PushTransport`, `FcmTransport` и серверный `RuStoreTransport`. `HuaweiTransport` ещё отсутствует.
+5. [Выполнено для FCM и RuStore] Событие рассылается на все активные устройства пользователя соответствующих providers; FCM `UNREGISTERED` и RuStore `NOT_FOUND` деактивируют токен. Аналогичное поведение для Huawei потребуется при добавлении transport.
 6. [Выполнено] Добавлена PostgreSQL transactional outbox: in-app запись и outbox создаются одной транзакцией, payload включает `notification_id`, worker выполняет retries с exponential backoff и сохраняет статус/последнюю ошибку. Полное содержимое доступно из авторизованного notifications API.
 7. Добавить SSE для мгновенного обновления открытых web/Android-клиентов. WebSocket использовать только если появится реальный двусторонний сценарий, например live-чат поддержки.
 8. Добавить Android WorkManager как страховочную периодическую синхронизацию непрочитанных уведомлений и восстановление пропущенных push. Не считать его каналом мгновенной доставки.
@@ -68,7 +68,7 @@
 3. Ввести repository/ViewModel слой и сократить API/UI-логику в Activity/Fragment.
 4. Добавить unit и instrumentation tests; сейчас Gradle содержит зависимости JUnit/Espresso, но тестовых исходников в проекте нет.
 5. Проверить release signing, включить и протестировать R8/ProGuard.
-6. Подключить получение RuStore Push и Huawei Push tokens, регистрацию provider/device на backend, SSE в активном приложении и WorkManager-синхронизацию в фоне.
+6. Подключить Android RuStore Push SDK и получение его token (backend registration уже принимает provider `rustore`), затем Huawei Push token, SSE в активном приложении и WorkManager-синхронизацию в фоне.
 
 ### 7. Delivery
 

@@ -24,6 +24,10 @@ pub struct Config {
     pub fcm_project_id: Option<String>,
     /// Путь к Service Account JSON файлу для FCM HTTP v1 API
     pub fcm_service_account_path: Option<String>,
+    /// Project ID сервиса RuStore Push.
+    pub rustore_project_id: Option<String>,
+    /// Сервисный токен RuStore Push из консоли разработчика.
+    pub rustore_service_token: Option<String>,
     pub default_admin: Option<DefaultAdminConfig>,
 }
 
@@ -39,6 +43,8 @@ impl Config {
         let fcm_service_account_path_raw =
             non_empty_value(env::var("FCM_SERVICE_ACCOUNT_PATH").ok());
         let fcm_server_key = non_empty_value(env::var("FCM_SERVER_KEY").ok());
+        let rustore_project_id = non_empty_value(env::var("RUSTORE_PROJECT_ID").ok());
+        let rustore_service_token = non_empty_value(env::var("RUSTORE_SERVICE_TOKEN").ok());
 
         log::info!("FCM configuration loaded:");
         log::info!(
@@ -167,6 +173,8 @@ impl Config {
             fcm_server_key,
             fcm_project_id,
             fcm_service_account_path,
+            rustore_project_id,
+            rustore_service_token,
             default_admin,
         })
     }

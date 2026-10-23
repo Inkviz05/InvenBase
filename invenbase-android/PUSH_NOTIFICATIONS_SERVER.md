@@ -5,8 +5,8 @@
 1. Android получает FCM token.
 2. После login `PushManager` отправляет token, стабильный `device_id`, provider `fcm` и platform `android` на `POST /api/push/register-token` с Bearer JWT.
 3. Backend сохраняет устройство независимо от наличия credentials транспорта; повторная регистрация обновляет token, `active` и `last_seen_at`.
-4. События бронирований, background expiration checker и support handlers вызывают отправку пользователю.
-5. In-app notifications хранятся отдельно в PostgreSQL и доступны через `/api/notifications`.
+4. In-app notification и outbox-задание создаются одной транзакцией; worker доставляет событие на все активные FCM/RuStore устройства.
+5. Payload содержит `notification_id`, а полное уведомление доступно через `/api/notifications`.
 
 ## Предпочтительная конфигурация: HTTP v1
 
@@ -28,6 +28,15 @@ Backend вручную:
 
 Переменная `FCM_SERVER_KEY` и вызов `https://fcm.googleapis.com/fcm/send` ещё присутствуют в коде. Этот API отключён Google с июля 2024 года. Используйте HTTP v1; legacy ветку следует считать совместимостью со старым кодом, а не рекомендованной настройкой.
 
+## RuStore transport
+
+```env
+RUSTORE_PROJECT_ID=your-rustore-project-id
+RUSTORE_SERVICE_TOKEN=your-service-token
+```
+
+Backend отправляет токены provider `rustore` через `https://vkpns.rustore.ru/v1/projects/{project_id}/messages:send`. Ответ `NOT_FOUND` деактивирует токен. Android-клиент пока не подключает RuStore Push SDK и не получает RuStore token — это следующий этап.
+
 ## Реальные маршруты
 
 - `POST /api/push/register-token` — регистрация token текущего пользователя.
@@ -40,7 +49,7 @@ Backend вручную:
 
 ## Ограничения
 
-- В таблице и API provider зафиксирован как FCM; RuStore/HMS providers не реализованы.
-- Пустые `FCM_*=` текущий config может интерпретировать как заданные значения; незаданные переменные лучше удалить.
-- Отдельных automated tests FCM/OAuth потока нет.
+- Android-клиент пока регистрирует только FCM token; серверный RuStore transport уже реализован.
+- Huawei transport и клиентский Huawei Push Kit отсутствуют.
+- Отдельных network contract tests FCM/OAuth и RuStore API пока нет.
 - Service account rotation и secret mounting должны настраиваться вне приложения.

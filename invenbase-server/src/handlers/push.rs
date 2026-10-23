@@ -42,6 +42,49 @@ struct FcmTransport<'a> {
     user_id: Uuid,
 }
 
+struct RuStoreTransport<'a> {
+    state: &'a AppState,
+    user_id: Uuid,
+}
+
+impl PushTransport for RuStoreTransport<'_> {
+    fn provider(&self) -> &'static str {
+        "rustore"
+    }
+
+    async fn send(
+        &self,
+        title: &str,
+        body: &str,
+        data: &serde_json::Map<String, serde_json::Value>,
+        devices: &[(String,)],
+    ) -> Result<usize, Box<dyn std::error::Error + Send + Sync>> {
+        let project_id = self
+            .state
+            .config
+            .rustore_project_id
+            .as_deref()
+            .ok_or("RuStore project ID is not configured")?;
+        let service_token = self
+            .state
+            .config
+            .rustore_service_token
+            .as_deref()
+            .ok_or("RuStore service token is not configured")?;
+        send_push_rustore(
+            &self.state.db.pool,
+            project_id,
+            service_token,
+            title,
+            body,
+            data,
+            devices,
+            self.user_id,
+        )
+        .await
+    }
+}
+
 impl PushTransport for FcmTransport<'_> {
     fn provider(&self) -> &'static str {
         "fcm"
@@ -237,24 +280,19 @@ pub async fn deliver_outbox_push(
     state: &AppState,
     message: &notification_outbox::OutboxMessage,
 ) -> Result<(), String> {
-    let transport = FcmTransport {
-        state,
-        user_id: message.user_id,
-    };
-    let devices: Vec<(String,)> = sqlx::query_as::<sqlx::Postgres, (String,)>(
-        "SELECT push_token FROM user_devices
-         WHERE user_id = $1 AND provider = $2 AND active = TRUE",
+    let devices: Vec<(String, String)> = sqlx::query_as::<sqlx::Postgres, (String, String)>(
+        "SELECT provider, push_token FROM user_devices
+         WHERE user_id = $1 AND active = TRUE",
     )
     .bind(message.user_id)
-    .bind(transport.provider())
     .fetch_all(&state.db.pool)
     .await
     .map_err(|error| format!("failed to load devices: {error}"))?;
 
     let excluded: HashSet<&str> = message.exclude_tokens.iter().map(String::as_str).collect();
-    let devices: Vec<(String,)> = devices
+    let devices: Vec<(String, String)> = devices
         .into_iter()
-        .filter(|(token,)| !excluded.contains(token.as_str()))
+        .filter(|(_, token)| !excluded.contains(token.as_str()))
         .collect();
     if devices.is_empty() {
         return Ok(());
@@ -263,19 +301,47 @@ pub async fn deliver_outbox_push(
     let mut data = message.data.clone();
     data.insert("title".to_string(), json!(message.title));
     data.insert("body".to_string(), json!(message.body));
-    let sent = transport
-        .send(&message.title, &message.body, &data, &devices)
-        .await
-        .map_err(|error| error.to_string())?;
+    for provider in ["fcm", "rustore", "huawei"] {
+        let provider_devices: Vec<(String,)> = devices
+            .iter()
+            .filter(|(device_provider, _)| device_provider == provider)
+            .map(|(_, token)| (token.clone(),))
+            .collect();
+        if provider_devices.is_empty() {
+            continue;
+        }
 
-    if sent == devices.len() {
-        Ok(())
-    } else {
-        Err(format!(
-            "push transport delivered {sent} of {} devices",
-            devices.len()
-        ))
+        let sent = match provider {
+            "fcm" => {
+                FcmTransport {
+                    state,
+                    user_id: message.user_id,
+                }
+                .send(&message.title, &message.body, &data, &provider_devices)
+                .await
+            }
+            "rustore" => {
+                RuStoreTransport {
+                    state,
+                    user_id: message.user_id,
+                }
+                .send(&message.title, &message.body, &data, &provider_devices)
+                .await
+            }
+            "huawei" => return Err("Huawei push transport is not implemented".to_string()),
+            _ => unreachable!(),
+        }
+        .map_err(|error| format!("{provider} transport failed: {error}"))?;
+
+        if sent != provider_devices.len() {
+            return Err(format!(
+                "{provider} transport delivered {sent} of {} devices",
+                provider_devices.len()
+            ));
+        }
     }
+
+    Ok(())
 }
 
 /// Старый синхронный путь доставки оставлен только как совместимый fallback-код.
@@ -684,6 +750,102 @@ async fn send_push_legacy(
     sent_count
 }
 
+/// Отправка через официальный RuStore Push API.
+async fn send_push_rustore(
+    db_pool: &sqlx::PgPool,
+    project_id: &str,
+    service_token: &str,
+    title: &str,
+    body: &str,
+    data: &serde_json::Map<String, serde_json::Value>,
+    devices: &[(String,)],
+    user_id: Uuid,
+) -> Result<usize, Box<dyn std::error::Error + Send + Sync>> {
+    let client = reqwest::Client::new();
+    let url = format!("https://vkpns.rustore.ru/v1/projects/{project_id}/messages:send");
+    let string_data = stringify_push_data(data);
+    let mut sent_count = 0;
+    let mut invalid_tokens = Vec::new();
+
+    for (token,) in devices {
+        let payload = json!({
+            "message": {
+                "token": token,
+                "data": string_data,
+                "notification": { "title": title, "body": body },
+                "android": {
+                    "ttl": "86400s",
+                    "notification": {
+                        "title": title,
+                        "body": body,
+                        "channel_id": "invenbase_notifications"
+                    }
+                }
+            }
+        });
+        let response = client
+            .post(&url)
+            .bearer_auth(service_token)
+            .json(&payload)
+            .send()
+            .await?;
+
+        if response.status().is_success() {
+            sent_count += 1;
+            continue;
+        }
+
+        let status = response.status();
+        let error_body = response.text().await.unwrap_or_default();
+        let provider_status = serde_json::from_str::<serde_json::Value>(&error_body)
+            .ok()
+            .and_then(|value| {
+                value
+                    .get("error")
+                    .and_then(|error| error.get("status"))
+                    .and_then(|status| status.as_str())
+                    .map(ToOwned::to_owned)
+            });
+        if provider_status.as_deref() == Some("NOT_FOUND") {
+            invalid_tokens.push(token.clone());
+        }
+        log::error!(
+            "RuStore push failed for user {}: status={}, provider_status={:?}",
+            user_id,
+            status,
+            provider_status
+        );
+    }
+
+    for token in invalid_tokens {
+        sqlx::query(
+            "UPDATE user_devices
+             SET active = FALSE, updated_at = NOW()
+             WHERE user_id = $1 AND provider = 'rustore' AND push_token = $2",
+        )
+        .bind(user_id)
+        .bind(token)
+        .execute(db_pool)
+        .await?;
+    }
+
+    Ok(sent_count)
+}
+
+fn stringify_push_data(
+    data: &serde_json::Map<String, serde_json::Value>,
+) -> HashMap<String, String> {
+    data.iter()
+        .map(|(key, value)| {
+            let string_value = match value {
+                serde_json::Value::String(value) => value.clone(),
+                _ => serde_json::to_string(value).unwrap_or_else(|_| value.to_string()),
+            };
+            (key.clone(), string_value)
+        })
+        .collect()
+}
+
 /// Отправка push-уведомления через FCM HTTP v1 API
 /// Возвращает количество успешно отправленных уведомлений
 async fn send_push_v1(
@@ -925,4 +1087,25 @@ async fn get_oauth_token(
         .ok_or("Missing access_token in OAuth response")?;
 
     Ok(access_token.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::stringify_push_data;
+
+    #[test]
+    fn push_data_is_converted_to_provider_string_values() {
+        let mut data = serde_json::Map::new();
+        data.insert("text".to_string(), serde_json::json!("value"));
+        data.insert("count".to_string(), serde_json::json!(3));
+        data.insert("nested".to_string(), serde_json::json!({"ok": true}));
+
+        let result = stringify_push_data(&data);
+        assert_eq!(result.get("text").map(String::as_str), Some("value"));
+        assert_eq!(result.get("count").map(String::as_str), Some("3"));
+        assert_eq!(
+            result.get("nested").map(String::as_str),
+            Some("{\"ok\":true}")
+        );
+    }
 }
