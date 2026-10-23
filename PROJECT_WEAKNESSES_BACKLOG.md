@@ -19,7 +19,7 @@
 5. Защитить Android auth storage, разделить API URL по build type и настроить release signing/minification.
 6. Добавить Android build/tests в CI.
 7. Добавить role guards на маршрутах web, не полагаясь только на скрытие пунктов меню и backend `403`.
-8. Продолжить provider-independent архитектуру: FCM и RuStore реализованы на сервере и Android; остаются проверка RuStore на реальном устройстве, `NotificationEvent` и `HuaweiTransport`.
+8. Продолжить provider-independent архитектуру: FCM и RuStore реализованы на сервере и Android, Huawei — на сервере; остаются Android-интеграция Huawei, проверка transports на реальном устройстве и единое `NotificationEvent`.
 9. [Закрыто] Добавлен HTTP integration test register/update/unregister устройства, нескольких устройств одной учётной записи и смены пользователя на одном физическом устройстве.
 10. [Закрыто] Transactional outbox, retries/backoff и журнал доставки добавлены; in-app уведомление и outbox создаются одной транзакцией, payload содержит `notification_id`.
 11. [Отложено] End-to-end проверка уведомлений на реальных Android-устройствах: multi-device доставка, восстановление WorkManager после потери сети и `onDeletedMessages`, деактивация устройства после logout. Выполнить позже по решению пользователя.
@@ -38,7 +38,7 @@
 
 1. Систематизировать повторяющиеся web-компоненты: статусы, фильтры, таблицы и booking actions.
 2. Рассмотреть TypeScript после стабилизации API-контрактов.
-3. Проверить RuStore transport на реальном устройстве и определить условия отключения FCM fallback. Huawei должен внедряться через общий `PushTransport`, а не напрямую из бизнес-обработчиков.
+3. Проверить RuStore и Huawei transports на реальном устройстве и определить условия отключения FCM fallback. Серверный Huawei transport уже внедрён через общий `PushTransport`; Android-интеграция отсутствует.
 
 ## Подтверждённые ограничения текущей реализации
 
@@ -48,7 +48,7 @@
 - Android release build имеет `minifyEnabled false`.
 - Автоматической ротации JWT/refresh token нет: API выдаёт один JWT с временем жизни из `JWT_EXPIRATION`.
 - Отдельного logout endpoint на backend нет; клиенты удаляют локальный токен.
-- `user_devices` моделирует provider/device lifecycle и несколько устройств; сервер и Android реализуют FCM/RuStore, но RuStore ещё не проверен на зарегистрированной сборке реального устройства, а Huawei transport отсутствует.
+- `user_devices` моделирует provider/device lifecycle и несколько устройств; сервер реализует FCM/RuStore/Huawei, Android — FCM/RuStore. RuStore ещё не проверен на зарегистрированной сборке реального устройства, Huawei Android token lifecycle отсутствует.
 - Для открытых клиентов нет SSE/WebSocket. Android WorkManager сверяет непрочитанные уведомления и восстанавливает пропущенные push; серверная очередь повторной доставки атомарно связана с in-app уведомлением.
 
 Приоритетный порядок: readiness и production DB-процедура → HTTP/API tests и контракт → multi-device notifications/outbox/transports → CI с PostgreSQL → Android security/build → SSE/WorkManager → архитектурные рефакторинги.

@@ -28,6 +28,10 @@ pub struct Config {
     pub rustore_project_id: Option<String>,
     /// Сервисный токен RuStore Push из консоли разработчика.
     pub rustore_service_token: Option<String>,
+    /// OAuth 2.0 client ID приложения из AppGallery Connect.
+    pub huawei_client_id: Option<String>,
+    /// OAuth 2.0 client secret приложения из AppGallery Connect.
+    pub huawei_client_secret: Option<String>,
     pub default_admin: Option<DefaultAdminConfig>,
 }
 
@@ -45,6 +49,8 @@ impl Config {
         let fcm_server_key = non_empty_value(env::var("FCM_SERVER_KEY").ok());
         let rustore_project_id = non_empty_value(env::var("RUSTORE_PROJECT_ID").ok());
         let rustore_service_token = non_empty_value(env::var("RUSTORE_SERVICE_TOKEN").ok());
+        let huawei_client_id = non_empty_value(env::var("HUAWEI_CLIENT_ID").ok());
+        let huawei_client_secret = non_empty_value(env::var("HUAWEI_CLIENT_SECRET").ok());
 
         log::info!("FCM configuration loaded:");
         log::info!(
@@ -175,6 +181,8 @@ impl Config {
             fcm_service_account_path,
             rustore_project_id,
             rustore_service_token,
+            huawei_client_id,
+            huawei_client_secret,
             default_admin,
         })
     }

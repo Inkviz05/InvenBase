@@ -47,6 +47,49 @@ struct RuStoreTransport<'a> {
     user_id: Uuid,
 }
 
+struct HuaweiTransport<'a> {
+    state: &'a AppState,
+    user_id: Uuid,
+}
+
+impl PushTransport for HuaweiTransport<'_> {
+    fn provider(&self) -> &'static str {
+        "huawei"
+    }
+
+    async fn send(
+        &self,
+        title: &str,
+        body: &str,
+        data: &serde_json::Map<String, serde_json::Value>,
+        devices: &[(String,)],
+    ) -> Result<usize, Box<dyn std::error::Error + Send + Sync>> {
+        let client_id = self
+            .state
+            .config
+            .huawei_client_id
+            .as_deref()
+            .ok_or("Huawei client ID is not configured")?;
+        let client_secret = self
+            .state
+            .config
+            .huawei_client_secret
+            .as_deref()
+            .ok_or("Huawei client secret is not configured")?;
+        send_push_huawei(
+            &self.state.db.pool,
+            client_id,
+            client_secret,
+            title,
+            body,
+            data,
+            devices,
+            self.user_id,
+        )
+        .await
+    }
+}
+
 impl PushTransport for RuStoreTransport<'_> {
     fn provider(&self) -> &'static str {
         "rustore"
@@ -328,7 +371,14 @@ pub async fn deliver_outbox_push(
                 .send(&message.title, &message.body, &data, &provider_devices)
                 .await
             }
-            "huawei" => return Err("Huawei push transport is not implemented".to_string()),
+            "huawei" => {
+                HuaweiTransport {
+                    state,
+                    user_id: message.user_id,
+                }
+                .send(&message.title, &message.body, &data, &provider_devices)
+                .await
+            }
             _ => unreachable!(),
         }
         .map_err(|error| format!("{provider} transport failed: {error}"))?;
@@ -832,6 +882,124 @@ async fn send_push_rustore(
     Ok(sent_count)
 }
 
+#[derive(Deserialize)]
+struct HuaweiOauthResponse {
+    access_token: String,
+}
+
+fn build_huawei_payload(
+    token: &str,
+    title: &str,
+    body: &str,
+    data: &serde_json::Map<String, serde_json::Value>,
+) -> serde_json::Value {
+    let data_json =
+        serde_json::to_string(&stringify_push_data(data)).unwrap_or_else(|_| "{}".into());
+    json!({
+        "validate_only": false,
+        "message": {
+            "data": data_json,
+            "notification": {
+                "title": title,
+                "body": body
+            },
+            "android": {
+                "urgency": "HIGH",
+                "ttl": "86400s",
+                "notification": {
+                    "title": title,
+                    "body": body,
+                    "default_sound": true,
+                    "channel_id": "invenbase_notifications"
+                }
+            },
+            "token": [token]
+        }
+    })
+}
+
+async fn get_huawei_oauth_token(
+    client: &reqwest::Client,
+    client_id: &str,
+    client_secret: &str,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    let response = client
+        .post("https://oauth-login.cloud.huawei.com/oauth2/v3/token")
+        .form(&[
+            ("grant_type", "client_credentials"),
+            ("client_id", client_id),
+            ("client_secret", client_secret),
+        ])
+        .send()
+        .await?;
+    let status = response.status();
+    if !status.is_success() {
+        return Err(format!("Huawei OAuth request failed with status {status}").into());
+    }
+
+    Ok(response.json::<HuaweiOauthResponse>().await?.access_token)
+}
+
+/// Отправка через Huawei Push Kit REST API для Android/HMS Core.
+async fn send_push_huawei(
+    db_pool: &sqlx::PgPool,
+    client_id: &str,
+    client_secret: &str,
+    title: &str,
+    body: &str,
+    data: &serde_json::Map<String, serde_json::Value>,
+    devices: &[(String,)],
+    user_id: Uuid,
+) -> Result<usize, Box<dyn std::error::Error + Send + Sync>> {
+    let client = reqwest::Client::new();
+    let access_token = get_huawei_oauth_token(&client, client_id, client_secret).await?;
+    let url = format!("https://push-api.cloud.huawei.com/v1/{client_id}/messages:send");
+    let mut sent_count = 0;
+    let mut invalid_tokens = Vec::new();
+
+    for (token,) in devices {
+        let response = client
+            .post(&url)
+            .bearer_auth(&access_token)
+            .json(&build_huawei_payload(token, title, body, data))
+            .send()
+            .await?;
+        let status = response.status();
+        let response_body = response.text().await.unwrap_or_default();
+        let provider_code = serde_json::from_str::<serde_json::Value>(&response_body)
+            .ok()
+            .and_then(|value| value.get("code")?.as_str().map(ToOwned::to_owned));
+
+        if status.is_success() && provider_code.as_deref() == Some("80000000") {
+            sent_count += 1;
+            continue;
+        }
+        if provider_code.as_deref() == Some("80300007") {
+            invalid_tokens.push(token.clone());
+        }
+        log::error!(
+            "Huawei push failed for user {}: status={}, provider_code={:?}",
+            user_id,
+            status,
+            provider_code
+        );
+    }
+
+    for token in invalid_tokens {
+        sqlx::query(
+            "UPDATE user_devices
+             SET active = FALSE, updated_at = NOW()
+             WHERE user_id = $1 AND provider = 'huawei' AND push_token = $2",
+        )
+        .bind(user_id)
+        .bind(token)
+        .execute(db_pool)
+        .await?;
+    }
+
+    Ok(sent_count)
+}
+
 fn stringify_push_data(
     data: &serde_json::Map<String, serde_json::Value>,
 ) -> HashMap<String, String> {
@@ -1073,7 +1241,7 @@ async fn get_oauth_token(
 
 #[cfg(test)]
 mod tests {
-    use super::stringify_push_data;
+    use super::{build_huawei_payload, stringify_push_data};
 
     #[test]
     fn push_data_is_converted_to_provider_string_values() {
@@ -1089,5 +1257,22 @@ mod tests {
             result.get("nested").map(String::as_str),
             Some("{\"ok\":true}")
         );
+    }
+
+    #[test]
+    fn huawei_payload_contains_notification_tokens_and_stringified_data() {
+        let mut data = serde_json::Map::new();
+        data.insert("notification_id".to_string(), serde_json::json!(42));
+
+        let payload = build_huawei_payload("device-token", "Title", "Body", &data);
+        assert_eq!(payload["message"]["token"][0], "device-token");
+        assert_eq!(payload["message"]["notification"]["title"], "Title");
+        assert_eq!(
+            payload["message"]["android"]["notification"]["channel_id"],
+            "invenbase_notifications"
+        );
+        let data: serde_json::Value =
+            serde_json::from_str(payload["message"]["data"].as_str().unwrap()).unwrap();
+        assert_eq!(data["notification_id"], "42");
     }
 }

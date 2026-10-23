@@ -40,6 +40,8 @@ fn test_config(database_url: String) -> Config {
         fcm_service_account_path: None,
         rustore_project_id: None,
         rustore_service_token: None,
+        huawei_client_id: None,
+        huawei_client_secret: None,
         default_admin: None,
     }
 }

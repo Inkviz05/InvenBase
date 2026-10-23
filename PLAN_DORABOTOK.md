@@ -46,8 +46,8 @@
 1. Ввести единое серверное событие `NotificationEvent` и сохранять каждое уведомление в PostgreSQL как источник истины.
 2. [Выполнено] Расширить модель устройств: `user_id`, стабильный `device_id`, `provider`, `push_token`, `platform`, `active`, `last_seen_at`. Одна учётная запись поддерживает несколько устройств и провайдеров на уровне схемы.
 3. [Выполнено] Добавить API регистрации, обновления и удаления устройства. Android logout деактивирует только текущее FCM-устройство.
-4. [Частично выполнено] Введены интерфейс `PushTransport`, `FcmTransport` и серверный `RuStoreTransport`. `HuaweiTransport` ещё отсутствует.
-5. [Выполнено для FCM и RuStore] Событие рассылается на все активные устройства пользователя соответствующих providers; FCM `UNREGISTERED` и RuStore `NOT_FOUND` деактивируют токен. Аналогичное поведение для Huawei потребуется при добавлении transport.
+4. [Выполнено на backend] Введены интерфейс `PushTransport`, `FcmTransport`, `RuStoreTransport` и `HuaweiTransport`. Android-клиент ещё не получает и не регистрирует Huawei Push token.
+5. [Выполнено на backend] Событие рассылается на все активные устройства пользователя соответствующих providers; FCM `UNREGISTERED`, RuStore `NOT_FOUND` и Huawei `80300007` деактивируют токен.
 6. [Выполнено] Добавлена PostgreSQL transactional outbox: in-app запись и outbox создаются одной транзакцией, payload включает `notification_id`, worker выполняет retries с exponential backoff и сохраняет статус/последнюю ошибку. Полное содержимое доступно из авторизованного notifications API.
 7. Добавить SSE для мгновенного обновления открытых web/Android-клиентов. WebSocket использовать только если появится реальный двусторонний сценарий, например live-чат поддержки.
 8. [Выполнено] Android WorkManager каждые 15 минут синхронизирует непрочитанные уведомления при наличии сети; immediate sync запускается после login и `onDeletedMessages` FCM/RuStore. Локальный реестр `notification_id` предотвращает повторный показ уже обработанных push.
