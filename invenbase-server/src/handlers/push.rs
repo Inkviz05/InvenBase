@@ -9,6 +9,7 @@ use uuid::Uuid;
 use crate::app_state::AppState;
 use crate::auth::Claims;
 use crate::errors::AppError;
+use crate::services::notification_outbox;
 
 #[derive(Debug, Deserialize)]
 pub struct RegisterPushTokenRequest {
@@ -79,8 +80,7 @@ impl PushTransport for FcmTransport<'_> {
             );
         }
 
-        log::warn!("FCM transport is not configured; delivery skipped");
-        Ok(0)
+        Err("FCM transport is not configured".into())
     }
 }
 
@@ -200,10 +200,89 @@ pub async fn unregister_push_device(
     Ok(HttpResponse::NoContent().finish())
 }
 
-/// Вспомогательная функция для отправки push-уведомления всем устройствам пользователя.
+/// Ставит push-уведомление в надёжную очередь доставки.
+pub async fn send_push_to_user(
+    state: &AppState,
+    user_id: Uuid,
+    title: &str,
+    body: &str,
+    data: serde_json::Map<String, serde_json::Value>,
+) {
+    if let Err(error) =
+        notification_outbox::enqueue(&state.db.pool, user_id, title, body, data, &[]).await
+    {
+        log::error!("Failed to enqueue push for user {}: {:?}", user_id, error);
+    }
+}
+
+/// Ставит push в очередь, исключая указанные токены при фактической доставке.
+pub async fn send_push_to_user_excluding_tokens(
+    state: &AppState,
+    user_id: Uuid,
+    title: &str,
+    body: &str,
+    data: serde_json::Map<String, serde_json::Value>,
+    exclude_tokens: &[String],
+) {
+    if let Err(error) =
+        notification_outbox::enqueue(&state.db.pool, user_id, title, body, data, exclude_tokens)
+            .await
+    {
+        log::error!("Failed to enqueue push for user {}: {:?}", user_id, error);
+    }
+}
+
+/// Выполняет одну попытку доставки сообщения из outbox.
+pub async fn deliver_outbox_push(
+    state: &AppState,
+    message: &notification_outbox::OutboxMessage,
+) -> Result<(), String> {
+    let transport = FcmTransport {
+        state,
+        user_id: message.user_id,
+    };
+    let devices: Vec<(String,)> = sqlx::query_as::<sqlx::Postgres, (String,)>(
+        "SELECT push_token FROM user_devices
+         WHERE user_id = $1 AND provider = $2 AND active = TRUE",
+    )
+    .bind(message.user_id)
+    .bind(transport.provider())
+    .fetch_all(&state.db.pool)
+    .await
+    .map_err(|error| format!("failed to load devices: {error}"))?;
+
+    let excluded: HashSet<&str> = message.exclude_tokens.iter().map(String::as_str).collect();
+    let devices: Vec<(String,)> = devices
+        .into_iter()
+        .filter(|(token,)| !excluded.contains(token.as_str()))
+        .collect();
+    if devices.is_empty() {
+        return Ok(());
+    }
+
+    let mut data = message.data.clone();
+    data.insert("title".to_string(), json!(message.title));
+    data.insert("body".to_string(), json!(message.body));
+    let sent = transport
+        .send(&message.title, &message.body, &data, &devices)
+        .await
+        .map_err(|error| error.to_string())?;
+
+    if sent == devices.len() {
+        Ok(())
+    } else {
+        Err(format!(
+            "push transport delivered {sent} of {} devices",
+            devices.len()
+        ))
+    }
+}
+
+/// Старый синхронный путь доставки оставлен только как совместимый fallback-код.
 ///
 /// Сначала пытается использовать HTTP v1 API (если настроен), затем fallback на Legacy API.
-pub async fn send_push_to_user(
+#[allow(dead_code)]
+async fn send_push_to_user_direct_legacy(
     state: &AppState,
     user_id: Uuid,
     title: &str,
@@ -413,7 +492,8 @@ pub async fn send_push_to_user(
 }
 
 /// Отправка push админам, но не на устройства автора заявки (чтобы автор не получал уведомление о своей заявке).
-pub async fn send_push_to_user_excluding_tokens(
+#[allow(dead_code)]
+async fn send_push_to_user_excluding_tokens_direct_legacy(
     state: &AppState,
     user_id: Uuid,
     title: &str,

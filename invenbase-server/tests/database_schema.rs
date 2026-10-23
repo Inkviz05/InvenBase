@@ -3,6 +3,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use kvantoriym_server::database::Database;
+use kvantoriym_server::services::notification_outbox;
 
 async fn connect_test_db() -> Result<Option<Database>> {
     let Ok(database_url) = std::env::var("TEST_DATABASE_URL") else {
@@ -67,6 +68,7 @@ async fn migrations_create_core_tables() -> Result<()> {
         "support_requests",
         "support_request_messages",
         "user_devices",
+        "notification_outbox",
     ] {
         assert!(
             relation_exists(&db.pool, table).await?,
@@ -92,6 +94,8 @@ async fn migrations_create_critical_indexes() -> Result<()> {
         "user_devices_user_provider_device_idx",
         "user_devices_provider_token_idx",
         "idx_user_devices_active_user",
+        "idx_notification_outbox_pending",
+        "idx_notification_outbox_user",
     ] {
         assert!(
             relation_exists(&db.pool, index).await?,
@@ -120,6 +124,9 @@ async fn migrations_create_domain_constraints() -> Result<()> {
         "bookings_target_check",
         "support_requests_status_check",
         "user_devices_provider_check",
+        "notification_outbox_status_check",
+        "notification_outbox_attempts_check",
+        "notification_outbox_max_attempts_check",
     ] {
         assert!(
             constraint_exists(&db.pool, constraint).await?,
@@ -127,6 +134,73 @@ async fn migrations_create_domain_constraints() -> Result<()> {
         );
     }
 
+    Ok(())
+}
+
+#[tokio::test]
+async fn notification_outbox_claims_retries_and_completes_messages() -> Result<()> {
+    let Some(db) = connect_test_db().await? else {
+        return Ok(());
+    };
+
+    let user_id = Uuid::new_v4();
+    sqlx::query(
+        "INSERT INTO users (id, username, password_hash, role)
+         VALUES ($1, $2, 'hash', 'user')",
+    )
+    .bind(user_id)
+    .bind(format!("outbox_{}", user_id.simple()))
+    .execute(&db.pool)
+    .await?;
+
+    let mut data = serde_json::Map::new();
+    data.insert("notification_id".into(), serde_json::json!(Uuid::new_v4()));
+    let id = notification_outbox::enqueue(
+        &db.pool,
+        user_id,
+        "title",
+        "body",
+        data,
+        &["excluded-token".to_string()],
+    )
+    .await?;
+
+    let claimed = notification_outbox::claim_next(&db.pool)
+        .await?
+        .expect("queued message should be claimed");
+    assert_eq!(claimed.id, id);
+    assert_eq!(claimed.attempts, 1);
+    assert_eq!(claimed.exclude_tokens, vec!["excluded-token"]);
+
+    notification_outbox::mark_delivery_failed(&db.pool, &claimed, "temporary error").await?;
+    let state: (String, i32, Option<String>) = sqlx::query_as(
+        "SELECT status, attempts, last_error FROM notification_outbox WHERE id = $1",
+    )
+    .bind(id)
+    .fetch_one(&db.pool)
+    .await?;
+    assert_eq!(state.0, "pending");
+    assert_eq!(state.1, 1);
+    assert_eq!(state.2.as_deref(), Some("temporary error"));
+
+    sqlx::query("UPDATE notification_outbox SET next_attempt_at = NOW() WHERE id = $1")
+        .bind(id)
+        .execute(&db.pool)
+        .await?;
+    let claimed_again = notification_outbox::claim_next(&db.pool)
+        .await?
+        .expect("retry should be claimable");
+    notification_outbox::mark_delivered(&db.pool, claimed_again.id).await?;
+
+    let state: (String, i32, Option<String>) = sqlx::query_as(
+        "SELECT status, attempts, last_error FROM notification_outbox WHERE id = $1",
+    )
+    .bind(id)
+    .fetch_one(&db.pool)
+    .await?;
+    assert_eq!(state, ("delivered".to_string(), 2, None));
+
+    cleanup_user(&db.pool, user_id).await?;
     Ok(())
 }
 

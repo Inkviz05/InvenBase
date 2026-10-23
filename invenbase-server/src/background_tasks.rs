@@ -1,9 +1,62 @@
 use crate::app_state::AppState;
 use crate::handlers::push::send_push_to_user;
 use crate::services::bookings as booking_service;
+use crate::services::notification_outbox;
 use chrono::Utc;
 use std::sync::Arc;
 use tokio::time::{interval, Duration};
+
+pub async fn start_notification_outbox_worker(state: Arc<AppState>) {
+    let mut ticker = interval(Duration::from_secs(5));
+    log::info!("Started notification outbox worker");
+
+    loop {
+        ticker.tick().await;
+        for _ in 0..20 {
+            let message = match notification_outbox::claim_next(&state.db.pool).await {
+                Ok(Some(message)) => message,
+                Ok(None) => break,
+                Err(error) => {
+                    log::error!("Failed to claim notification outbox message: {:?}", error);
+                    break;
+                }
+            };
+
+            match crate::handlers::push::deliver_outbox_push(&state, &message).await {
+                Ok(()) => {
+                    if let Err(error) =
+                        notification_outbox::mark_delivered(&state.db.pool, message.id).await
+                    {
+                        log::error!(
+                            "Failed to complete outbox message {}: {:?}",
+                            message.id,
+                            error
+                        );
+                    }
+                }
+                Err(error) => {
+                    log::warn!(
+                        "Outbox delivery {} failed on attempt {}/{}: {}",
+                        message.id,
+                        message.attempts,
+                        message.max_attempts,
+                        error
+                    );
+                    if let Err(database_error) =
+                        notification_outbox::mark_delivery_failed(&state.db.pool, &message, &error)
+                            .await
+                    {
+                        log::error!(
+                            "Failed to record outbox error for {}: {:?}",
+                            message.id,
+                            database_error
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
 
 pub async fn start_booking_expiration_checker(state: Arc<AppState>) {
     let mut interval = interval(Duration::from_secs(120));

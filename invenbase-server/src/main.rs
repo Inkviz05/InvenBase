@@ -47,11 +47,16 @@ async fn main() -> std::io::Result<()> {
     log::info!("База данных инициализирована");
 
     let app_state = AppState::new(db.clone(), config.clone());
-    let app_state_for_background = Arc::new(app_state.clone());
+    let shared_app_state = Arc::new(app_state.clone());
 
     // Запускаем фоновую задачу проверки истечения времени бронирований
     tokio::spawn(async move {
-        background_tasks::start_booking_expiration_checker(app_state_for_background).await;
+        background_tasks::start_booking_expiration_checker(shared_app_state.clone()).await;
+    });
+
+    let outbox_app_state = Arc::new(app_state.clone());
+    tokio::spawn(async move {
+        background_tasks::start_notification_outbox_worker(outbox_app_state).await;
     });
 
     log::info!("Сервер запущен на http://{}:{}", config.host, config.port);

@@ -13,6 +13,7 @@
 - Убраны production `console.log`, directory listing отключён, параметры пула БД вынесены в env.
 - Web использует локальный XLSX writer вместо зависимости `xlsx`.
 - Завершён первый этап multi-device push: provider-aware `user_devices`, стабильный `device_id`, active/last-seen lifecycle, register/unregister, деактивация невалидных FCM-токенов и рабочий `FcmTransport`.
+- Добавлена durable outbox-очередь push: атомарный claim конкурентными worker-ами, retries с exponential backoff, восстановление зависших задач и журнал последней ошибки/итогового статуса.
 
 ## Следующие задачи
 
@@ -47,11 +48,11 @@
 3. [Выполнено] Добавить API регистрации, обновления и удаления устройства. Android logout деактивирует только текущее FCM-устройство.
 4. [Частично выполнено] Введён интерфейс `PushTransport` и `FcmTransport`. Реализации `RuStoreTransport` и `HuaweiTransport` ещё отсутствуют; FCM остаётся рабочим транспортом.
 5. [Выполнено для FCM] Рассылать событие на все активные FCM-устройства пользователя и деактивировать невалидные tokens. Аналогичное поведение для RuStore/Huawei потребуется при добавлении transports.
-6. Добавить transactional outbox/очередь, retries с backoff и журнал результатов доставки. Push payload должен содержать минимум данных и `notification_id`; полное содержимое клиент получает из авторизованного API.
+6. [Выполнено для доставки] Добавлена PostgreSQL outbox-очередь, retries с exponential backoff и журнал статуса/последней ошибки. Следующий отдельный шаг — создавать in-app запись и outbox в одной бизнес-транзакции, включать `notification_id` в минимальный payload и получать полное содержимое из авторизованного API.
 7. Добавить SSE для мгновенного обновления открытых web/Android-клиентов. WebSocket использовать только если появится реальный двусторонний сценарий, например live-чат поддержки.
 8. Добавить Android WorkManager как страховочную периодическую синхронизацию непрочитанных уведомлений и восстановление пропущенных push. Не считать его каналом мгновенной доставки.
 9. Не использовать foreground service для постоянного соединения без отдельной продуктовой необходимости: он расходует батарею и требует постоянного системного уведомления.
-10. [Частично выполнено] Миграция и multi-device/deactivation lifecycle покрыты PostgreSQL integration test, нормализация FCM env — unit tests. Ещё нужны HTTP-тесты register/unregister, retries и contract tests новых transports.
+10. [Частично выполнено] Миграции, multi-device/deactivation lifecycle и outbox claim/retry/complete покрыты PostgreSQL integration tests, backoff и нормализация FCM env — unit tests. Ещё нужны HTTP-тесты register/unregister и contract tests новых transports.
 
 ### 5. Web
 
