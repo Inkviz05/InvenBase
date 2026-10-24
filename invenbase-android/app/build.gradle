@@ -11,6 +11,33 @@ def rustoreProjectId = providers.gradleProperty("RUSTORE_PROJECT_ID")
         .orElse(providers.environmentVariable("RUSTORE_PROJECT_ID"))
         .orElse("")
         .get()
+def debugApiUrl = providers.gradleProperty("DEBUG_API_URL")
+        .orElse(providers.environmentVariable("DEBUG_API_URL"))
+        .orElse("http://10.0.2.2:8080")
+        .get()
+def releaseApiUrl = providers.gradleProperty("RELEASE_API_URL")
+        .orElse(providers.environmentVariable("RELEASE_API_URL"))
+        .orElse("https://invenbase.inkviz05.online")
+        .get()
+
+def validateApiUrl = { name, value, requireHttps ->
+    def uri
+    try {
+        uri = new URI(value)
+    } catch (Exception error) {
+        throw new GradleException("${name} must be a valid absolute URL", error)
+    }
+    if (!uri.isAbsolute() || uri.getHost() == null
+            || !(uri.getScheme() in ["http", "https"])) {
+        throw new GradleException("${name} must be an absolute HTTP(S) URL")
+    }
+    if (requireHttps && uri.getScheme() != "https") {
+        throw new GradleException("${name} must use HTTPS")
+    }
+}
+
+validateApiUrl("DEBUG_API_URL", debugApiUrl, false)
+validateApiUrl("RELEASE_API_URL", releaseApiUrl, true)
 
 android {
     namespace 'com.invenbase.app'
@@ -30,7 +57,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField "String", "API_BASE_URL", "\"${debugApiUrl}\""
+            manifestPlaceholders = [usesCleartextTraffic: "true"]
+        }
         release {
+            buildConfigField "String", "API_BASE_URL", "\"${releaseApiUrl}\""
+            manifestPlaceholders = [usesCleartextTraffic: "false"]
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

@@ -18,6 +18,15 @@ $env:RUSTORE_PROJECT_ID="your-rustore-project-id"
 
 Либо задайте `RUSTORE_PROJECT_ID` в пользовательском `~/.gradle/gradle.properties`. При пустом значении RuStore SDK не инициализируется; Huawei и WorkManager-синхронизация настраиваются независимо.
 
+API endpoint также задаётся на этапе сборки:
+
+```powershell
+$env:DEBUG_API_URL="http://10.0.2.2:8080"
+$env:RELEASE_API_URL="https://invenbase.example.com"
+```
+
+Defaults — `http://10.0.2.2:8080` для debug и `https://invenbase.inkviz05.online` для release. `RELEASE_API_URL` обязан использовать HTTPS; пользовательского переключателя endpoint в приложении нет.
+
 ## Debug APK
 
 ```powershell
@@ -47,6 +56,4 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ## Backend
 
-Текущий default base URL — `https://invenbase.inkviz05.online`, задаётся в `app/src/main/java/com/invenbase/app/Config.java`. Retrofit добавляет пути `/api/...` сам.
-
-Manifest запрещает cleartext HTTP. Для локального backend потребуется либо HTTPS, либо отдельная debug network-security конфигурация, которой сейчас в репозитории нет.
+Retrofit добавляет пути `/api/...` сам. Debug разрешает HTTP для emulator/local backend; release запрещает cleartext.

@@ -16,7 +16,7 @@
 2. [Закрыто] Пустые RuStore/Huawei env нормализуются как отсутствующие; из startup/push-логов убраны значения, пути, payload, текст уведомлений и фрагменты device token.
 3. [Закрыто] Firebase/FCM полностью удалён из Android и backend: Google Services plugin, SDK, service, transport, OAuth/service-account код, env и зависимости. Миграция удаляет старые FCM device tokens.
 4. [Закрыто] Реальные `.env`, mobile provider configs, service-account JSON, приватные ключи и keystore исключены из Git; tracked/staged файлы проверяет PowerShell guard, история Git сканируется Gitleaks в CI. Репозиторный pre-commit hook включается через `git config core.hooksPath .githooks`.
-5. [Частично выполнено] Android auth/user/push-token storage защищён AES-GCM и Android Keystore. Остаются API URL по build type и release signing/minification.
+5. [Частично выполнено] Android auth/user/push-token storage защищён AES-GCM и Android Keystore; API URL разделён по debug/release, release требует HTTPS. Остаются release signing и minification.
 6. [Частично выполнено] Android debug build добавлен в CI; unit/instrumentation tests появятся после добавления тестовых исходников.
 7. Добавить role guards на маршрутах web, не полагаясь только на скрытие пунктов меню и backend `403`.
 8. Продолжить provider-independent архитектуру: RuStore и Huawei реализованы на сервере и Android; остаются проверка transports на реальном устройстве и единое `NotificationEvent`.
@@ -45,7 +45,7 @@
 
 - Backend также содержит встроенные страницы `/` и `/admin` из `invenbase-server/static`; production Compose отдаёт React через nginx, поэтому эти страницы не являются основным web UI.
 - PostgreSQL не опубликован наружу основным Compose-файлом.
-- Android `usesCleartextTraffic=false`; локальный HTTP backend не заработает без debug network-security настройки или HTTPS.
+- Android debug разрешает cleartext и использует emulator endpoint `10.0.2.2`; release запрещает cleartext и требует HTTPS URL.
 - Android release build имеет `minifyEnabled false`.
 - Автоматической ротации JWT/refresh token нет: API выдаёт один JWT с временем жизни из `JWT_EXPIRATION`.
 - Отдельного logout endpoint на backend нет; клиенты удаляют локальный токен.

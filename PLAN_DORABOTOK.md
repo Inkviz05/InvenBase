@@ -65,7 +65,7 @@
 ### 6. Native Android
 
 1. [Выполнено] JWT, сериализованный пользователь и push-токены шифруются AES-GCM с ключом Android Keystore; plaintext-значения мигрируются и удаляются, зашифрованный файл исключён из backup.
-2. Вынести API URL в build types/flavors вместо одной константы и пользовательской настройки.
+2. [Выполнено] API URL вынесен в `BuildConfig` по build type: локальный emulator URL для debug, HTTPS production URL для release, оба переопределяются Gradle property/env. Пользовательское сохранение endpoint удалено.
 3. Ввести repository/ViewModel слой и сократить API/UI-логику в Activity/Fragment.
 4. Добавить unit и instrumentation tests; сейчас Gradle содержит зависимости JUnit/Espresso, но тестовых исходников в проекте нет.
 5. Проверить release signing, включить и протестировать R8/ProGuard.
@@ -73,7 +73,7 @@
 
 ### 7. Delivery
 
-1. [Выполнено] Добавить Android debug build в CI на JDK 21 с Gradle cache и публикацией APK-артефакта.
+1. [Выполнено] Добавить Android debug и unsigned release builds в CI на JDK 21 с Gradle cache и публикацией debug APK-артефакта.
 2. [Выполнено] Добавить secret scanning и проверку случайно staged `.env`/service-account/provider config/private key файлов: локальный pre-commit hook и CI guard проверяют имена и содержимое, Gitleaks сканирует историю Git.
 3. Определить production TLS и reverse proxy перед публичным развёртыванием; текущий Compose — production-shaped локальный стек без TLS.
 

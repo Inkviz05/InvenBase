@@ -1,10 +1,10 @@
 package com.invenbase.app.api;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import com.invenbase.app.BuildConfig;
 import com.invenbase.app.Config;
+import com.invenbase.app.utils.SecurePreferences;
 
 import java.util.concurrent.TimeUnit;
 
@@ -17,11 +17,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
     private static ApiClient instance;
 
-    private final Context context;
+    private final SecurePreferences securePreferences;
     private ApiService apiService;
 
     private ApiClient(Context context) {
-        this.context = context.getApplicationContext();
+        this.securePreferences = new SecurePreferences(context.getApplicationContext());
+        context.getApplicationContext()
+                .getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .remove("api_url")
+                .apply();
         createApiService();
     }
 
@@ -45,8 +50,7 @@ public class ApiClient {
 
         httpClient.addInterceptor(loggingInterceptor);
         httpClient.addInterceptor(chain -> {
-            SharedPreferences prefs = context.getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE);
-            String token = prefs.getString(Config.PREF_TOKEN, null);
+            String token = securePreferences.getString(Config.PREF_TOKEN);
 
             if (token == null || chain.request().url().encodedPath().contains("/auth/login")) {
                 return chain.proceed(chain.request());
@@ -66,7 +70,7 @@ public class ApiClient {
         });
 
         Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl(normalizeBaseUrl(getConfiguredApiUrl()))
+            .baseUrl(normalizeBaseUrl(BuildConfig.API_BASE_URL))
             .client(httpClient.build())
             .addConverterFactory(GsonConverterFactory.create())
             .build();
@@ -78,30 +82,12 @@ public class ApiClient {
         return apiService;
     }
 
-    public void updateApiUrl(String newUrl) {
-        SharedPreferences prefs = context.getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(Config.PREF_API_URL, newUrl).apply();
-        createApiService();
-    }
-
-    private String getConfiguredApiUrl() {
-        SharedPreferences prefs = context.getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE);
-        String apiUrl = prefs.getString(Config.PREF_API_URL, Config.DEFAULT_API_URL);
-        if (apiUrl == null || apiUrl.trim().isEmpty()) {
-            return Config.DEFAULT_API_URL;
-        }
-        return apiUrl.trim();
-    }
-
     private String normalizeBaseUrl(String baseUrl) {
         return baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
     }
 
     private void clearAuthState() {
-        SharedPreferences prefs = context.getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE);
-        prefs.edit()
-            .remove(Config.PREF_TOKEN)
-            .remove(Config.PREF_USER)
-            .apply();
+        securePreferences.remove(Config.PREF_TOKEN);
+        securePreferences.remove(Config.PREF_USER);
     }
 }

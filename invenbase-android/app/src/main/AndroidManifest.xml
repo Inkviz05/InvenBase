@@ -20,7 +20,7 @@
         android:roundIcon="@drawable/app_icon_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.InvenBase"
-        android:usesCleartextTraffic="false"
+        android:usesCleartextTraffic="${usesCleartextTraffic}"
         tools:targetApi="31">
         
         <service android:name=".MyHuaweiMessagingService" android:exported="false">

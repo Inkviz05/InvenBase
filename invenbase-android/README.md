@@ -22,15 +22,16 @@ Release variant существует, но signing config в проекте не
 
 ## API URL
 
-Константа находится в `app/src/main/java/com/invenbase/app/Config.java`:
+URL задаётся на этапе сборки через `BuildConfig.API_BASE_URL`:
 
-```java
-public static final String DEFAULT_API_URL = "https://invenbase.inkviz05.online";
+```text
+debug:   http://10.0.2.2:8080
+release: https://invenbase.inkviz05.online
 ```
 
-`ApiClient` читает переопределение из `SharedPreferences` по ключу `api_url`. Retrofit-методы содержат абсолютные пути `/api/...`, поэтому base URL указывается без `/api`.
+Переопределение передаётся Gradle property или одноимённой переменной окружения `DEBUG_API_URL`/`RELEASE_API_URL`. Release URL обязан использовать HTTPS. Сохранённое прежними версиями пользовательское значение `api_url` удаляется и больше не влияет на endpoint. Retrofit-методы содержат абсолютные пути `/api/...`, поэтому base URL указывается без `/api`.
 
-В manifest задано `android:usesCleartextTraffic="false"`. Поэтому обычный `http://10.0.2.2:8080` или LAN HTTP URL не заработает без изменения network security для debug-сборки. Для текущей конфигурации нужен HTTPS endpoint.
+Debug manifest разрешает cleartext для локальной разработки; `10.0.2.2` направляет Android Emulator на localhost компьютера. Release manifest запрещает cleartext.
 
 ## Реализованные экраны
 
@@ -44,7 +45,7 @@ public static final String DEFAULT_API_URL = "https://invenbase.inkviz05.online"
 
 ## Авторизация и локальные данные
 
-JWT, сериализованный пользователь и push-токены шифруются AES-GCM; ключ создаётся и хранится в Android Keystore. При обновлении приложения прежние чувствительные значения однократно переносятся из обычных `SharedPreferences` и удаляются оттуда. Зашифрованный preference-файл исключён из Android backup. API URL и нечувствительные настройки остаются в обычных `SharedPreferences`.
+JWT, сериализованный пользователь и push-токены шифруются AES-GCM; ключ создаётся и хранится в Android Keystore. При обновлении приложения прежние чувствительные значения однократно переносятся из обычных `SharedPreferences` и удаляются оттуда. Зашифрованный preference-файл исключён из Android backup. API URL в локальном хранилище не сохраняется.
 
 ## Push
 
@@ -62,7 +63,7 @@ Firebase/FCM, Google Services plugin и `google-services.json` в проекте
 
 ## Тесты и ограничения
 
-Gradle содержит зависимости JUnit и Espresso, но каталогов с test/androidTest исходниками в репозитории сейчас нет. Android debug build включён в GitHub Actions.
+Gradle содержит зависимости JUnit и Espresso, но каталогов с test/androidTest исходниками в репозитории сейчас нет. GitHub Actions собирает debug и unsigned release variants, публикуя debug APK.
 
 Архитектура в основном Activity/Fragment + прямые Retrofit-вызовы; полноценного repository/ViewModel слоя нет.
 ## Huawei Push
