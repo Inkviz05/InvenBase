@@ -432,11 +432,9 @@ async fn send_push_to_user_direct_legacy(
     }
 
     log::info!(
-        "Sending push notification to user {} ({} devices): title='{}', body='{}'",
+        "Sending push notification to user {} ({} devices)",
         user_id,
-        devices.len(),
-        title,
-        body
+        devices.len()
     );
 
     // Общие поля data
@@ -550,11 +548,6 @@ async fn send_push_to_user_direct_legacy(
             "time_to_live": 86400
         });
 
-        log::debug!(
-            "FCM Legacy API payload: {}",
-            serde_json::to_string(&payload).unwrap_or_default()
-        );
-
         let res = client
             .post("https://fcm.googleapis.com/fcm/send")
             .header("Authorization", format!("key={}", server_key))
@@ -566,36 +559,21 @@ async fn send_push_to_user_direct_legacy(
         match res {
             Ok(resp) => {
                 if resp.status().is_success() {
-                    log::info!(
-                        "FCM push sent successfully to user {} (token: {}...)",
-                        user_id,
-                        &token[..std::cmp::min(20, token.len())]
-                    );
+                    log::info!("FCM push sent successfully to user {}", user_id);
                 } else {
                     let status = resp.status();
-                    let error_text = resp.text().await.unwrap_or_else(|_| "unknown".to_string());
 
                     // Если 404, Legacy API отключен
                     if status == 404 {
                         log::error!(
-                            "FCM Legacy API returned 404 - API is disabled (deprecated July 2024). User: {}, token: {}...",
-                            user_id,
-                            &token[..std::cmp::min(20, token.len())]
+                            "FCM Legacy API is unavailable for user {}; configure FCM HTTP v1",
+                            user_id
                         );
-                        log::error!("⚠️ Legacy FCM API (fcm/send) was disabled in July 2024.");
-                        log::error!("📋 To fix this, you need to:");
-                        log::error!("   1. Get your Firebase Project ID from Firebase Console → Project Settings → General");
-                        log::error!("   2. Download Service Account JSON from Firebase Console → Project Settings → Service accounts → Generate new private key");
-                        log::error!("   3. Add to .env: FCM_PROJECT_ID=your-project-id");
-                        log::error!("   4. Add to .env: FCM_SERVICE_ACCOUNT_PATH=./path/to/service-account.json");
-                        log::error!("   5. Update code to use HTTP v1 API (see PUSH_NOTIFICATIONS_SERVER.md)");
                     } else {
                         log::error!(
-                            "FCM push failed for user {}: status={}, error={}, token={}...",
+                            "FCM push failed for user {} with status {}",
                             user_id,
-                            status,
-                            error_text,
-                            &token[..std::cmp::min(20, token.len())]
+                            status
                         );
                     }
                 }
@@ -649,11 +627,10 @@ async fn send_push_to_user_excluding_tokens_direct_legacy(
     }
 
     log::info!(
-        "Sending push to user {} ({} devices, {} excluded): title='{}'",
+        "Sending push to user {} ({} devices, {} excluded)",
         user_id,
         devices.len(),
-        exclude_tokens.len(),
-        title
+        exclude_tokens.len()
     );
 
     data.insert(
@@ -1028,11 +1005,9 @@ async fn send_push_v1(
 ) -> Result<usize, Box<dyn std::error::Error + Send + Sync>> {
     // Нормализуем путь (для Windows обрабатываем обратные слэши)
     let normalized_path = service_account_path.replace('\\', "/");
-    log::debug!("Reading Service Account from: {}", normalized_path);
-
     // Проверяем существование файла
     if !std::path::Path::new(&normalized_path).exists() {
-        return Err(format!("Service Account file not found: {}", normalized_path).into());
+        return Err("FCM service account file not found".into());
     }
 
     // Читаем Service Account JSON
@@ -1093,11 +1068,7 @@ async fn send_push_v1(
             .await?;
 
         if response.status().is_success() {
-            log::info!(
-                "FCM v1 push sent successfully to user {} (token: {}...)",
-                user_id,
-                &token[..std::cmp::min(20, token.len())]
-            );
+            log::info!("FCM v1 push sent successfully to user {}", user_id);
             sent_count += 1;
         } else {
             let status = response.status();
@@ -1126,20 +1097,14 @@ async fn send_push_v1(
                 .unwrap_or(false);
 
             if is_unregistered {
-                log::warn!(
-                    "FCM token is unregistered (device may have uninstalled app or token expired) for user {}: token={}...",
-                    user_id,
-                    &token[..std::cmp::min(20, token.len())]
-                );
+                log::warn!("FCM device token is unregistered for user {}", user_id);
                 // Сохраняем токен для удаления из БД
                 invalid_tokens.push(token.clone());
             } else {
                 log::error!(
-                    "FCM v1 push failed for user {}: status={}, error={}, token={}...",
+                    "FCM v1 push failed for user {} with status {}",
                     user_id,
-                    status,
-                    error_text,
-                    &token[..std::cmp::min(20, token.len())]
+                    status
                 );
                 // Для других ошибок продолжаем, но не удаляем токен (может быть временная проблема)
             }
@@ -1224,11 +1189,7 @@ async fn get_oauth_token(
 
     let status = token_response.status();
     if !status.is_success() {
-        let error_text = token_response
-            .text()
-            .await
-            .unwrap_or_else(|_| "unknown".to_string());
-        return Err(format!("Failed to get OAuth token: {} - {}", status, error_text).into());
+        return Err(format!("Failed to get FCM OAuth token: HTTP {status}").into());
     }
 
     let token_data: serde_json::Value = token_response.json().await?;

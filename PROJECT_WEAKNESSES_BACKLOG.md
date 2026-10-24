@@ -1,6 +1,6 @@
 # Технический бэклог InvenBase
 
-Проверено по репозиторию 23 октября 2026 года. Завершённые старые пункты удалены из списка; история доступна в Git.
+Проверено по репозиторию 24 октября 2026 года. Завершённые старые пункты удалены из списка; история доступна в Git.
 
 ## Критично перед production
 
@@ -13,7 +13,7 @@
 ## Высокий приоритет
 
 1. [Закрыто] Добавлены HTTP integration tests login, `401`/`403`, формата ошибок, request ID, multi-device notification flow, CRUD/role-сценариев users и equipment, а также полного lifecycle support.
-2. Нормализовать пустые FCM env и сократить диагностические логи конфигурации.
+2. [Закрыто] Пустые FCM/RuStore/Huawei env нормализуются как отсутствующие; из startup/push-логов убраны значения, пути, payload, текст уведомлений и фрагменты device token.
 3. Убрать или официально пометить legacy FCM fallback; рабочий предпочтительный путь — HTTP v1 с service account.
 4. Добавить secret scanning и запрет staged секретов.
 5. Защитить Android auth storage, разделить API URL по build type и настроить release signing/minification.

@@ -39,7 +39,7 @@ impl Config {
     pub fn from_env() -> Result<Self, Box<dyn std::error::Error>> {
         // Загружаем .env файл
         if let Err(e) = dotenv::dotenv() {
-            log::warn!("Failed to load .env file: {:?}", e);
+            log::debug!(".env file was not loaded: {:?}", e);
         }
 
         // Читаем переменные окружения
@@ -52,31 +52,15 @@ impl Config {
         let huawei_client_id = non_empty_value(env::var("HUAWEI_CLIENT_ID").ok());
         let huawei_client_secret = non_empty_value(env::var("HUAWEI_CLIENT_SECRET").ok());
 
-        log::info!("FCM configuration loaded:");
-        log::info!(
-            "  HTTP v1 project: {}",
-            if fcm_project_id.is_some() {
-                "SET"
-            } else {
-                "NOT SET"
-            }
-        );
-        log::info!(
-            "  Service account path: {}",
-            if fcm_service_account_path_raw.is_some() {
-                "SET"
-            } else {
-                "NOT SET"
-            }
-        );
-        log::info!(
-            "  FCM_SERVER_KEY: {}",
-            if fcm_server_key.is_some() {
-                "***SET***"
-            } else {
-                "NOT SET"
-            }
-        );
+        if !fcm_http_v1_configuration_is_complete(
+            fcm_project_id.as_deref(),
+            fcm_service_account_path_raw.as_deref(),
+        ) && (fcm_project_id.is_some() || fcm_service_account_path_raw.is_some())
+        {
+            log::warn!(
+                "FCM HTTP v1 configuration is incomplete; both project ID and service account path are required"
+            );
+        }
 
         // Нормализуем путь к Service Account (преобразуем относительный в абсолютный, если нужно)
         let fcm_service_account_path = fcm_service_account_path_raw.map(|path| {
@@ -88,7 +72,6 @@ impl Config {
                         .join(path.trim_start_matches("./"))
                         .to_string_lossy()
                         .to_string();
-                    log::debug!("FCM service account path normalized");
                     normalized
                 } else {
                     path
@@ -101,10 +84,8 @@ impl Config {
 
         // Проверяем существование файла Service Account, если путь указан
         if let Some(ref path) = fcm_service_account_path {
-            if std::path::Path::new(path).exists() {
-                log::info!("  Service Account file exists");
-            } else {
-                log::warn!("  Service Account file NOT FOUND");
+            if !std::path::Path::new(path).is_file() {
+                log::warn!("FCM service account file is unavailable");
             }
         }
 
@@ -199,9 +180,13 @@ fn non_empty_value(value: Option<String>) -> Option<String> {
     })
 }
 
+fn fcm_http_v1_configuration_is_complete(project_id: Option<&str>, path: Option<&str>) -> bool {
+    project_id.is_some() && path.is_some()
+}
+
 #[cfg(test)]
 mod tests {
-    use super::non_empty_value;
+    use super::{fcm_http_v1_configuration_is_complete, non_empty_value};
 
     #[test]
     fn empty_optional_configuration_is_treated_as_missing() {
@@ -216,5 +201,22 @@ mod tests {
             non_empty_value(Some("  configured-value  ".to_string())),
             Some("configured-value".to_string())
         );
+    }
+
+    #[test]
+    fn fcm_http_v1_requires_project_and_service_account() {
+        assert!(!fcm_http_v1_configuration_is_complete(None, None));
+        assert!(!fcm_http_v1_configuration_is_complete(
+            Some("project"),
+            None
+        ));
+        assert!(!fcm_http_v1_configuration_is_complete(
+            None,
+            Some("service-account.json")
+        ));
+        assert!(fcm_http_v1_configuration_is_complete(
+            Some("project"),
+            Some("service-account.json")
+        ));
     }
 }
