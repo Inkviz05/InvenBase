@@ -287,8 +287,11 @@ async fn login_and_notification_flow_targets_all_account_devices() -> Result<()>
     let invalid_login_response = test::call_service(&app, invalid_login).await;
     assert_eq!(invalid_login_response.status(), StatusCode::UNAUTHORIZED);
     assert_eq!(
-        invalid_login_response.headers()["x-request-id"],
-        "018f8f9e-7b2d-7b22-9f75-7b40f02e44d1"
+        invalid_login_response
+            .headers()
+            .get("x-request-id")
+            .and_then(|value| value.to_str().ok()),
+        Some("018f8f9e-7b2d-7b22-9f75-7b40f02e44d1")
     );
     let invalid_login_body: serde_json::Value = test::read_body_json(invalid_login_response).await;
     assert_eq!(invalid_login_body["code"], "INVALID_CREDENTIALS");
