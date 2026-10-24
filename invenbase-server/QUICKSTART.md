@@ -33,7 +33,8 @@ cargo run
 Ожидаемые адреса:
 
 - API: `http://127.0.0.1:8080/api`
-- healthcheck: `http://127.0.0.1:8080/health`
+- liveness: `http://127.0.0.1:8080/health`
+- readiness с проверкой PostgreSQL: `http://127.0.0.1:8080/ready`
 - legacy HTML: `http://127.0.0.1:8080/` и `/admin`
 
 React web запускается отдельно из `invenbase-client/web` на порту `3000`.

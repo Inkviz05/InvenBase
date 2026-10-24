@@ -16,9 +16,10 @@ cargo run
 
 ```text
 GET http://127.0.0.1:8080/health
+GET http://127.0.0.1:8080/ready
 ```
 
-`/health` не проверяет БД. Отдельного readiness endpoint в коде нет.
+`/health` — простая liveness-проверка процесса. `/ready` выполняет `SELECT 1` в PostgreSQL и возвращает `503`, если база недоступна.
 
 ## Конфигурация
 
@@ -75,7 +76,7 @@ GET http://127.0.0.1:8080/health
 
 ## Встроенные страницы
 
-Backend отдаёт legacy HTML из `static/` по `/` и `/admin`. Это не React web-клиент. В Docker Compose React build отдаётся nginx, а `/api` и `/health` проксируются к backend.
+Backend отдаёт legacy HTML из `static/` по `/` и `/admin`. Это не React web-клиент. В Docker Compose React build отдаётся nginx, а `/api`, `/health` и `/ready` проксируются к backend.
 
 ## Фоновые задачи и push
 
@@ -103,7 +104,7 @@ cargo test --locked
 ## Известные ограничения
 
 - Migrations запускаются приложением, отдельного migrate/rollback CLI нет.
-- `/ready` отсутствует.
+- `/ready` проверяет доступность PostgreSQL; Docker healthcheck использует его вместо статического `/health`.
 - HTTP integration tests маршрутов и middleware отсутствуют.
 - Часть SQL и бизнес-логики всё ещё находится в handlers.
 - `sqlx-postgres 0.7.4` выдаёт future-incompatibility warning на актуальном Rust, но текущую сборку не блокирует.

@@ -6,7 +6,7 @@
 - multi-stage release image Rust backend;
 - production React build, который отдаёт nginx.
 
-Публичен только web/nginx на `WEB_PORT` (default `80`). nginx проксирует `/api` и `/health` в backend. Backend и PostgreSQL host-порты не публикуются.
+Публичен только web/nginx на `WEB_PORT` (default `80`). nginx проксирует `/api`, `/health` и `/ready` в backend. Backend и PostgreSQL host-порты не публикуются.
 
 ## Запуск
 
@@ -26,7 +26,8 @@ docker compose up --build
 
 - UI: `http://localhost` или `http://localhost:<WEB_PORT>`;
 - API: `/api` на том же origin;
-- health: `/health` на том же origin.
+- liveness: `/health` на том же origin;
+- readiness с запросом к PostgreSQL: `/ready`.
 
 ## Первый admin
 
@@ -56,7 +57,7 @@ docker compose down -v
 
 Пул backend настраивается через `DATABASE_MAX_CONNECTIONS` и `DATABASE_ACQUIRE_TIMEOUT_SECONDS`; defaults — `10` и `5` секунд.
 
-Web image собирается с `VITE_API_URL=/api`. nginx имеет SPA fallback на `index.html`, прокси API и healthcheck; directory listing backend отключён.
+Web image собирается с `VITE_API_URL=/api`. nginx имеет SPA fallback на `index.html`, прокси API/liveness/readiness; directory listing backend отключён.
 
 ## Push в Docker
 
@@ -77,7 +78,7 @@ cd ..\..
 ## Чего эта конфигурация не предоставляет
 
 - TLS/HTTPS и автоматические сертификаты.
-- Readiness check с запросом к БД; используется статический `/health`.
+- Docker healthcheck backend использует `/ready` с запросом к БД; `/health` остаётся независимой liveness-проверкой процесса.
 - Backup/restore automation.
 - Отдельный migrate/rollback job.
 - Resource limits и внешнюю observability.

@@ -272,6 +272,27 @@ pub fn configure_web(cfg: &mut web::ServiceConfig) {
         web::get().to(|| async { HttpResponse::Ok().json(serde_json::json!({ "status": "ok" })) }),
     )
     .route(
+        "/ready",
+        web::get().to(|state: web::Data<AppState>| async move {
+            match sqlx::query_scalar::<_, i32>("SELECT 1")
+                .fetch_one(&state.db.pool)
+                .await
+            {
+                Ok(1) => HttpResponse::Ok().json(serde_json::json!({ "status": "ready" })),
+                Ok(_) => {
+                    log::warn!("Readiness query returned an unexpected value");
+                    HttpResponse::ServiceUnavailable()
+                        .json(serde_json::json!({ "status": "not_ready" }))
+                }
+                Err(error) => {
+                    log::warn!("Readiness database check failed: {}", error);
+                    HttpResponse::ServiceUnavailable()
+                        .json(serde_json::json!({ "status": "not_ready" }))
+                }
+            }
+        }),
+    )
+    .route(
         "/",
         web::get().to(|| async {
             HttpResponse::Ok()

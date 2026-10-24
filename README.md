@@ -29,7 +29,7 @@ cargo run
 
 `JWT_SECRET` обязателен и должен содержать не менее 32 символов. Если `CREATE_DEFAULT_ADMIN=true`, обязателен `DEFAULT_ADMIN_PASSWORD` длиной не менее 12 символов. Администратор создаётся только при отсутствии пользователя с таким именем; существующий пароль не перезаписывается.
 
-Backend применяет SQLx migrations при старте. API доступен на `http://127.0.0.1:8080/api`, healthcheck — на `http://127.0.0.1:8080/health`.
+Backend применяет SQLx migrations при старте. API доступен на `http://127.0.0.1:8080/api`, liveness — на `/health`, readiness с проверкой PostgreSQL — на `/ready`.
 
 ### Web
 
@@ -94,7 +94,7 @@ cd ..\..
 
 ## Важные ограничения
 
-- `/health` проверяет только HTTP-процесс; отдельного `/ready` с запросом к БД нет.
+- `/health` проверяет HTTP-процесс, а `/ready` возвращает `200` только при доступной PostgreSQL.
 - OpenAPI/Swagger в репозитории нет.
 - CI собирает Android debug APK, запускает Rust library tests, полный backend DB/HTTP integration suite на чистом PostgreSQL 16, web tests/build/audit и Docker browser smoke.
 - Release Android собирается без минификации (`minifyEnabled false`), API URL не разделён по build flavors.

@@ -108,7 +108,7 @@ Compose smoke job:
 
 - устанавливает Chromium;
 - собирает полный Compose stack;
-- ждёт `/health` через nginx;
+- ждёт `/ready` через nginx, включая проверку PostgreSQL;
 - выполняет login → создание equipment → создание booking;
 - на failure загружает Playwright artifacts.
 

@@ -26,7 +26,7 @@ function Wait-ForStack {
 
     for ($i = 0; $i -lt 90; $i++) {
         try {
-            $response = Invoke-WebRequest -Uri "$BaseUrl/health" -TimeoutSec 3
+            $response = Invoke-WebRequest -Uri "$BaseUrl/ready" -TimeoutSec 3
             if ($response.StatusCode -eq 200) {
                 return
             }
@@ -37,7 +37,7 @@ function Wait-ForStack {
 
     docker compose -p $projectName -f $composeFile ps
     docker compose -p $projectName -f $composeFile logs --no-color
-    throw "Docker Compose stack did not become healthy at $BaseUrl"
+    throw "Docker Compose stack did not become ready at $BaseUrl"
 }
 
 Assert-CommandExists "docker"

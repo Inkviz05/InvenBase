@@ -22,7 +22,7 @@
 1. Добавить HTTP integration tests через `actix_web::test` для login, ролей, users, equipment и support.
 2. Унифицировать JSON-ошибки полями `code`, `message`, `details`; сейчас публичной спецификации нет.
 3. Добавить OpenAPI и проверку контрактов для React и Android.
-4. Добавить `/ready`, который реально выполняет запрос к PostgreSQL; `/health` сейчас возвращает статический `200`.
+4. [Выполнено] Добавлен `/ready` с `SELECT 1` в PostgreSQL и ответом `503` при недоступной БД; `/health` оставлен простой liveness-проверкой. Docker и Compose smoke ожидают readiness.
 5. Убрать подробное диагностическое логирование FCM-конфигурации и нормализовать пустые FCM env как `None`.
 
 ### 2. База данных и эксплуатация

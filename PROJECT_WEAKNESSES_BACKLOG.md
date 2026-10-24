@@ -6,7 +6,7 @@
 
 1. **Нет TLS-конфигурации.** Compose публикует nginx по HTTP. Нужен внешний TLS-терминатор или отдельная production-конфигурация.
 2. **Нет документированной процедуры backup/restore и отдельного migrate job.** Backend автоматически применяет migrations при старте.
-3. **Нет readiness-проверки БД.** `/health` всегда отвечает `200`, если HTTP-процесс работает.
+3. [Закрыто] Добавлен `/ready` с запросом к PostgreSQL и `503` при недоступной БД; Docker healthcheck использует readiness, `/health` остаётся liveness-проверкой.
 4. **Нет полного API-контракта.** OpenAPI/Swagger и contract tests отсутствуют.
 5. [Закрыто] CI поднимает чистый PostgreSQL 16 и выполняет полный `cargo test --locked`, включая DB/HTTP integration tests.
 
