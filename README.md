@@ -99,10 +99,10 @@ cd ..\..
 ## Важные ограничения
 
 - `/health` проверяет HTTP-процесс, а `/ready` возвращает `200` только при доступной PostgreSQL.
-- OpenAPI/Swagger в репозитории нет.
+- OpenAPI 3.1 опубликован на `/openapi.json`, Swagger UI — на `/docs`; основные предметные схемы описаны, оставшиеся перечислены в плане доработок.
 - CI собирает Android debug APK, запускает Rust library tests, полный backend DB/HTTP integration suite на чистом PostgreSQL 16, web tests/build/audit и Docker browser smoke.
 - Release Android собирается без минификации (`minifyEnabled false`), API URL не разделён по build flavors.
-- Миграции запускаются самим backend; отдельной production-команды migrate/rollback нет.
+- Для production есть отдельная команда миграции `cargo run --release --locked --bin migrate`; в Compose её выполняет одноразовый сервис `migrate` до запуска backend. Автоматические миграции при старте оставлены для локальной разработки.
 
 ## Документация
 

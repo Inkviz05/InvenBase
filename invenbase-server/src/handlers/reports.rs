@@ -144,7 +144,7 @@ pub async fn get_booking_detailed_report(
     let bookings: Vec<BookingWithDetails> = sqlx::query_as::<sqlx::Postgres, _>(
         r#"
         SELECT
-            b.id, b.user_id, u.username, b.equipment_id, e.name as equipment_name,
+            b.id, b.user_id, u.username, u.full_name, b.equipment_id, e.name as equipment_name,
             b.group_id, g.name as group_name, b.quantity, b.start_date, b.end_date,
             b.purpose, b.status, b.permission_type, b.created_at, b.updated_at
         FROM bookings b
