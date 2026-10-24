@@ -180,7 +180,7 @@ pub async fn get_booking(
 
     // Проверяем права доступа
     if claims.role != "admin" && claims.role != "responsible" && booking.user_id != user_id {
-        return Err(AppError::Unauthorized("Access denied".to_string()));
+        return Err(AppError::Forbidden("Access denied".to_string()));
     }
 
     Ok(HttpResponse::Ok().json(booking))
@@ -213,7 +213,7 @@ pub async fn update_booking(
 
     if booking.user_id != current_user_id && claims.role != "admin" && claims.role != "responsible"
     {
-        return Err(AppError::Unauthorized("Access denied".to_string()));
+        return Err(AppError::Forbidden("Access denied".to_string()));
     }
 
     if booking.status != booking_service::STATUS_PENDING {
@@ -532,7 +532,7 @@ async fn cancel_booking_for_claims(
     .ok_or_else(|| AppError::NotFound("Booking not found".to_string()))?;
 
     if booking.user_id != user_id && claims.role != "admin" && claims.role != "responsible" {
-        return Err(AppError::Unauthorized("Access denied".to_string()));
+        return Err(AppError::Forbidden("Access denied".to_string()));
     }
 
     if booking.status == "approved" && claims.role != "admin" && claims.role != "responsible" {

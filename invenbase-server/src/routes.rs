@@ -1,6 +1,7 @@
 use crate::app_state::AppState;
 use crate::handlers::*;
 use crate::middleware::{AdminOnly, AdminOrResponsible, Authenticated};
+use crate::openapi;
 use actix_web::{web, HttpResponse};
 
 pub fn configure_api(cfg: &mut web::ServiceConfig) {
@@ -267,45 +268,48 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
 }
 
 pub fn configure_web(cfg: &mut web::ServiceConfig) {
-    cfg.route(
-        "/health",
-        web::get().to(|| async { HttpResponse::Ok().json(serde_json::json!({ "status": "ok" })) }),
-    )
-    .route(
-        "/ready",
-        web::get().to(|state: web::Data<AppState>| async move {
-            match sqlx::query_scalar::<_, i32>("SELECT 1")
-                .fetch_one(&state.db.pool)
-                .await
-            {
-                Ok(1) => HttpResponse::Ok().json(serde_json::json!({ "status": "ready" })),
-                Ok(_) => {
-                    log::warn!("Readiness query returned an unexpected value");
-                    HttpResponse::ServiceUnavailable()
-                        .json(serde_json::json!({ "status": "not_ready" }))
+    cfg.route("/openapi.json", web::get().to(openapi::openapi_json))
+        .route("/docs", web::get().to(openapi::swagger_ui))
+        .route(
+            "/health",
+            web::get()
+                .to(|| async { HttpResponse::Ok().json(serde_json::json!({ "status": "ok" })) }),
+        )
+        .route(
+            "/ready",
+            web::get().to(|state: web::Data<AppState>| async move {
+                match sqlx::query_scalar::<_, i32>("SELECT 1")
+                    .fetch_one(&state.db.pool)
+                    .await
+                {
+                    Ok(1) => HttpResponse::Ok().json(serde_json::json!({ "status": "ready" })),
+                    Ok(_) => {
+                        log::warn!("Readiness query returned an unexpected value");
+                        HttpResponse::ServiceUnavailable()
+                            .json(serde_json::json!({ "status": "not_ready" }))
+                    }
+                    Err(error) => {
+                        log::warn!("Readiness database check failed: {}", error);
+                        HttpResponse::ServiceUnavailable()
+                            .json(serde_json::json!({ "status": "not_ready" }))
+                    }
                 }
-                Err(error) => {
-                    log::warn!("Readiness database check failed: {}", error);
-                    HttpResponse::ServiceUnavailable()
-                        .json(serde_json::json!({ "status": "not_ready" }))
-                }
-            }
-        }),
-    )
-    .route(
-        "/",
-        web::get().to(|| async {
-            HttpResponse::Ok()
-                .content_type("text/html; charset=utf-8")
-                .body(include_str!("../static/index.html"))
-        }),
-    )
-    .route(
-        "/admin",
-        web::get().to(|| async {
-            HttpResponse::Ok()
-                .content_type("text/html; charset=utf-8")
-                .body(include_str!("../static/admin.html"))
-        }),
-    );
+            }),
+        )
+        .route(
+            "/",
+            web::get().to(|| async {
+                HttpResponse::Ok()
+                    .content_type("text/html; charset=utf-8")
+                    .body(include_str!("../static/index.html"))
+            }),
+        )
+        .route(
+            "/admin",
+            web::get().to(|| async {
+                HttpResponse::Ok()
+                    .content_type("text/html; charset=utf-8")
+                    .body(include_str!("../static/admin.html"))
+            }),
+        );
 }

@@ -58,7 +58,8 @@ describe('Login', () => {
   it('shows API error message when login fails', async () => {
     const user = userEvent.setup();
     loginMock.mockRejectedValue({
-      response: { data: { error: 'Invalid credentials' } },
+      apiMessage: 'Invalid credentials',
+      response: { data: { code: 'INVALID_CREDENTIALS', message: 'Invalid credentials' } },
     });
 
     render(<Login />);

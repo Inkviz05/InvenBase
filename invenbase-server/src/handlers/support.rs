@@ -347,7 +347,7 @@ pub async fn add_support_message(
     let (owner_id, status) =
         row.ok_or_else(|| AppError::NotFound("Заявка не найдена".to_string()))?;
     if owner_id != user_id {
-        return Err(AppError::Unauthorized(
+        return Err(AppError::Forbidden(
             "Добавлять сообщения может только автор заявки.".to_string(),
         ));
     }

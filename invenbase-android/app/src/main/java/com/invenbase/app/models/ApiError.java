@@ -1,14 +1,35 @@
 package com.invenbase.app.models;
 
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.JsonElement;
 
-/** Ответ сервера при ошибке (400, 404 и т.д.): {"error":"...", "message":"..."} */
+/** Единый ответ API при ошибке: code, message, details и request_id. */
 public class ApiError {
+    @SerializedName("code")
+    private String code;
+
     @SerializedName("message")
     private String message;
 
-    // Метод getMessage: возвращает нужное значение для текущего контекста.
+    @SerializedName("request_id")
+    private String requestId;
+
+    @SerializedName("details")
+    private JsonElement details;
+
+    public String getCode() {
+        return code;
+    }
+
     public String getMessage() {
         return message;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public JsonElement getDetails() {
+        return details;
     }
 }

@@ -119,11 +119,11 @@ mod tests {
 
         assert!(matches!(
             AuthService::require_role(&claims, "responsible"),
-            Err(AppError::Unauthorized(_))
+            Err(AppError::Forbidden(_))
         ));
         assert!(matches!(
             AuthService::require_any_role(&claims, &["admin", "responsible"]),
-            Err(AppError::Unauthorized(_))
+            Err(AppError::Forbidden(_))
         ));
     }
 
@@ -200,7 +200,7 @@ impl AuthService {
         if claims.role == required_role || claims.role == "admin" {
             Ok(())
         } else {
-            Err(AppError::Unauthorized(format!(
+            Err(AppError::Forbidden(format!(
                 "Required role: {}",
                 required_role
             )))
@@ -211,7 +211,7 @@ impl AuthService {
         if roles.contains(&claims.role.as_str()) || claims.role == "admin" {
             Ok(())
         } else {
-            Err(AppError::Unauthorized(format!(
+            Err(AppError::Forbidden(format!(
                 "Required one of roles: {:?}",
                 roles
             )))

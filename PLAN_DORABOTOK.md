@@ -20,8 +20,8 @@
 ### 1. Backend API и безопасность
 
 1. Добавить HTTP integration tests через `actix_web::test` для login, ролей, users, equipment и support.
-2. Унифицировать JSON-ошибки полями `code`, `message`, `details`; сейчас публичной спецификации нет.
-3. Добавить OpenAPI и проверку контрактов для React и Android.
+2. [Выполнено] JSON-ошибки унифицированы полями `code`, `message`, `details`, `request_id`; добавлен `X-Request-ID`, внутренние диагностические сообщения не выдаются клиенту, `401` и `403` разделены.
+3. [Частично выполнено] Добавлены OpenAPI 3.1 `/openapi.json`, Swagger UI `/docs`, перечень всех маршрутов, Bearer JWT, базовые auth/error schemas и contract tests. Ещё нужны детальные предметные schemas для всех request/response моделей и генерация клиентских типов.
 4. [Выполнено] Добавлен `/ready` с `SELECT 1` в PostgreSQL и ответом `503` при недоступной БД; `/health` оставлен простой liveness-проверкой. Docker и Compose smoke ожидают readiness.
 5. Убрать подробное диагностическое логирование FCM-конфигурации и нормализовать пустые FCM env как `None`.
 

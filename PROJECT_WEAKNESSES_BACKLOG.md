@@ -7,12 +7,12 @@
 1. **Нет TLS-конфигурации.** Compose публикует nginx по HTTP. Нужен внешний TLS-терминатор или отдельная production-конфигурация.
 2. [Закрыто] Добавлены отдельный migrate binary/Compose job, документированная production-процедура, backup/restore-скрипты и CI restore drill. Необратимые migrations откатываются восстановлением проверенного backup.
 3. [Закрыто] Добавлен `/ready` с запросом к PostgreSQL и `503` при недоступной БД; Docker healthcheck использует readiness, `/health` остаётся liveness-проверкой.
-4. **Нет полного API-контракта.** OpenAPI/Swagger и contract tests отсутствуют.
+4. [Частично закрыто] Опубликованы OpenAPI 3.1 и Swagger UI, описаны все маршруты, JWT и базовый auth/error контракт, добавлены contract tests. Детальные schemas всех предметных моделей и генерация клиентских типов ещё не выполнены.
 5. [Закрыто] CI поднимает чистый PostgreSQL 16 и выполняет полный `cargo test --locked`, включая DB/HTTP integration tests.
 
 ## Высокий приоритет
 
-1. Добавить backend HTTP integration tests для middleware, ролей и формата ошибок.
+1. [Частично выполнено] Добавлены HTTP integration tests login, `401`/`403`, формата ошибок, request ID и multi-device notification flow. Ещё нужны полные CRUD/role tests для users, equipment и support.
 2. Нормализовать пустые FCM env и сократить диагностические логи конфигурации.
 3. Убрать или официально пометить legacy FCM fallback; рабочий предпочтительный путь — HTTP v1 с service account.
 4. Добавить secret scanning и запрет staged секретов.
@@ -28,7 +28,7 @@
 ## Средний приоритет
 
 1. Продолжить разделение backend handlers и services/repositories.
-2. Ввести единый документированный формат API errors.
+2. [Закрыто] Введён документированный формат API errors `code/message/details/request_id`, безопасные internal errors и `X-Request-ID`.
 3. Добавить structured logging, request ID и метрики.
 4. Расширить web unit/e2e тесты на reports, support и полный lifecycle бронирования.
 5. Разбить крупные React-страницы и внедрить lazy loading.

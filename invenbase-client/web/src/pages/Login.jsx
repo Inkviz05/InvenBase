@@ -26,7 +26,7 @@ const Login = () => {
       navigate('/');
     } catch (err) {
       console.error('Login: Login failed:', err);
-      const errorMessage = err.response?.data?.error || err.message || 'Ошибка входа. Проверьте логин и пароль.';
+      const errorMessage = err.apiMessage || err.response?.data?.message || err.message || 'Ошибка входа. Проверьте логин и пароль.';
       setError(errorMessage);
       console.error('Login error details:', {
         status: err.response?.status,

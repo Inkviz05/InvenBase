@@ -33,6 +33,8 @@ cargo run
 
 В production Compose migrations выполняет отдельный одноразовый сервис `migrate`; backend стартует только после его успешного завершения. Backup/restore-команды и порядок обновления описаны в [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md).
 
+OpenAPI доступен на `/openapi.json`, интерактивный Swagger UI — на `/docs`. Ошибки API используют единый JSON-формат `code`, `message`, `details`, `request_id`; фактический request ID также всегда возвращается заголовком `X-Request-ID`.
+
 ### Web
 
 Нужны Node.js и npm:

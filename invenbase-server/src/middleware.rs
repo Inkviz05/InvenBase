@@ -1,9 +1,43 @@
-use actix_web::{web, Error as ActixError, FromRequest, HttpRequest};
+use actix_web::{
+    body::MessageBody,
+    dev::{ServiceRequest, ServiceResponse},
+    http::header::{HeaderName, HeaderValue},
+    middleware::Next,
+    web, Error as ActixError, FromRequest, HttpMessage, HttpRequest,
+};
 use futures::future::{ready, Ready};
+use uuid::Uuid;
 
 use crate::app_state::AppState;
 use crate::auth::{AuthService, Claims};
 use crate::errors::AppError;
+
+pub const REQUEST_ID_HEADER: &str = "x-request-id";
+
+#[derive(Clone)]
+pub struct RequestId(pub String);
+
+pub async fn request_id_middleware(
+    req: ServiceRequest,
+    next: Next<impl MessageBody>,
+) -> Result<ServiceResponse<impl MessageBody>, ActixError> {
+    let request_id = req
+        .headers()
+        .get(REQUEST_ID_HEADER)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| Uuid::parse_str(value).ok())
+        .map(|value| value.to_string())
+        .unwrap_or_else(|| Uuid::new_v4().to_string());
+
+    req.extensions_mut().insert(RequestId(request_id.clone()));
+    let mut response = next.call(req).await?;
+    if let Ok(value) = HeaderValue::from_str(&request_id) {
+        response
+            .headers_mut()
+            .insert(HeaderName::from_static(REQUEST_ID_HEADER), value);
+    }
+    Ok(response)
+}
 
 // Middleware для проверки JWT токена
 pub struct Authenticated(Claims);
@@ -61,7 +95,7 @@ impl FromRequest for AdminOnly {
                 if claims.role == "admin" {
                     ready(Ok(AdminOnly(claims)))
                 } else {
-                    ready(Err(ActixError::from(AppError::Unauthorized(
+                    ready(Err(ActixError::from(AppError::Forbidden(
                         "Admin access required".to_string(),
                     ))))
                 }
@@ -86,7 +120,7 @@ impl FromRequest for AdminOrResponsible {
                 if claims.role == "admin" || claims.role == "responsible" {
                     ready(Ok(AdminOrResponsible(claims)))
                 } else {
-                    ready(Err(ActixError::from(AppError::Unauthorized(
+                    ready(Err(ActixError::from(AppError::Forbidden(
                         "Admin or responsible access required".to_string(),
                     ))))
                 }

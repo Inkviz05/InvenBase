@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use actix_web::{http::StatusCode, test, web, App};
+use actix_web::{http::StatusCode, middleware::from_fn, test, web, App};
 use anyhow::Result;
 use chrono::Utc;
 use uuid::Uuid;
@@ -9,6 +9,7 @@ use kvantoriym_server::app_state::AppState;
 use kvantoriym_server::auth::AuthService;
 use kvantoriym_server::config::Config;
 use kvantoriym_server::database::Database;
+use kvantoriym_server::middleware::request_id_middleware;
 use kvantoriym_server::models::User;
 use kvantoriym_server::routes;
 
@@ -125,6 +126,7 @@ async fn push_device_http_lifecycle_is_user_scoped() -> Result<()> {
     let app = test::init_service(
         App::new()
             .app_data(web::Data::new(state))
+            .wrap(from_fn(request_id_middleware))
             .service(web::scope("/api").configure(routes::configure_api)),
     )
     .await;
@@ -269,21 +271,30 @@ async fn login_and_notification_flow_targets_all_account_devices() -> Result<()>
     let app = test::init_service(
         App::new()
             .app_data(web::Data::new(state))
+            .wrap(from_fn(request_id_middleware))
             .service(web::scope("/api").configure(routes::configure_api)),
     )
     .await;
 
     let invalid_login = test::TestRequest::post()
         .uri("/api/auth/login")
+        .insert_header(("x-request-id", "018f8f9e-7b2d-7b22-9f75-7b40f02e44d1"))
         .set_json(serde_json::json!({
             "username": user.username,
             "password": "wrong-password"
         }))
         .to_request();
+    let invalid_login_response = test::call_service(&app, invalid_login).await;
+    assert_eq!(invalid_login_response.status(), StatusCode::UNAUTHORIZED);
     assert_eq!(
-        test::call_service(&app, invalid_login).await.status(),
-        StatusCode::UNAUTHORIZED
+        invalid_login_response.headers()["x-request-id"],
+        "018f8f9e-7b2d-7b22-9f75-7b40f02e44d1"
     );
+    let invalid_login_body: serde_json::Value = test::read_body_json(invalid_login_response).await;
+    assert_eq!(invalid_login_body["code"], "INVALID_CREDENTIALS");
+    assert_eq!(invalid_login_body["message"], "Invalid credentials");
+    assert!(invalid_login_body["details"].is_null());
+    assert!(invalid_login_body["request_id"].is_null());
 
     let user_login = test::TestRequest::post()
         .uri("/api/auth/login")
@@ -314,6 +325,21 @@ async fn login_and_notification_flow_targets_all_account_devices() -> Result<()>
         .as_str()
         .expect("admin login response must contain a token")
         .to_string();
+
+    let forbidden_notification = test::TestRequest::post()
+        .uri("/api/notifications")
+        .insert_header(("Authorization", format!("Bearer {user_token}")))
+        .set_json(serde_json::json!({
+            "user_id": user.id,
+            "title": "Forbidden notification",
+            "message": "A regular user cannot create this",
+            "notification_type": "integration"
+        }))
+        .to_request();
+    let forbidden_response = test::call_service(&app, forbidden_notification).await;
+    assert_eq!(forbidden_response.status(), StatusCode::FORBIDDEN);
+    let forbidden_body: serde_json::Value = test::read_body_json(forbidden_response).await;
+    assert_eq!(forbidden_body["code"], "FORBIDDEN");
 
     for device in ["phone", "tablet"] {
         let request = test::TestRequest::post()

@@ -7,7 +7,7 @@
 - multi-stage release image Rust backend;
 - production React build, который отдаёт nginx.
 
-Публичен только web/nginx на `WEB_PORT` (default `80`). nginx проксирует `/api`, `/health` и `/ready` в backend. Backend и PostgreSQL host-порты не публикуются.
+Публичен только web/nginx на `WEB_PORT` (default `80`). nginx проксирует `/api`, `/health`, `/ready`, `/openapi.json` и `/docs` в backend. Backend и PostgreSQL host-порты не публикуются.
 
 ## Запуск
 

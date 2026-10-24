@@ -1,5 +1,5 @@
 use actix_cors::Cors;
-use actix_web::{web, App, HttpServer};
+use actix_web::{middleware::from_fn, web, App, HttpServer};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -8,6 +8,7 @@ use kvantoriym_server::background_tasks;
 use kvantoriym_server::config::Config;
 use kvantoriym_server::database::Database;
 use kvantoriym_server::routes;
+use kvantoriym_server::{errors::AppError, middleware::request_id_middleware};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -82,10 +83,11 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(app_state_for_server.clone()))
             .app_data(web::JsonConfig::default().error_handler(|err, _req| {
                 log::error!("JSON deserialization error: {:?}", err);
-                actix_web::error::ErrorBadRequest(format!("Invalid JSON: {}", err))
+                AppError::BadRequest(format!("Invalid JSON: {err}")).into()
             }))
             .wrap(cors)
             .wrap(actix_web::middleware::Logger::default())
+            .wrap(from_fn(request_id_middleware))
             .service(actix_files::Files::new("/static", "./static"))
             .service(web::scope("/api").configure(routes::configure_api))
             .service(web::scope("").configure(routes::configure_web))

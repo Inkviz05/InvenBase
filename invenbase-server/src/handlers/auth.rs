@@ -25,7 +25,7 @@ pub async fn login(
 
     let user = user.ok_or_else(|| {
         log::info!("Login failed: user not found - {}", req.username);
-        AppError::Unauthorized("Invalid credentials".to_string())
+        AppError::InvalidCredentials
     })?;
 
     log::info!("User found: {} (role: {})", user.username, user.role);
@@ -45,7 +45,7 @@ pub async fn login(
         AppError::InternalError(format!("Password verification failed: {}", e))
     })? {
         log::info!("Login failed: invalid password for user - {}", req.username);
-        return Err(AppError::Unauthorized("Invalid credentials".to_string()));
+        return Err(AppError::InvalidCredentials);
     }
 
     let token = auth_service.generate_token(&user).map_err(|e| {

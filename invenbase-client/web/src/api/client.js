@@ -46,6 +46,12 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    const apiError = error.response?.data;
+    if (apiError && typeof apiError === 'object') {
+      error.apiCode = apiError.code || null;
+      error.apiMessage = apiError.message || null;
+      error.requestId = apiError.request_id || error.response?.headers?.['x-request-id'] || null;
+    }
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
