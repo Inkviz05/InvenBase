@@ -19,7 +19,7 @@
 
 ### 1. Backend API и безопасность
 
-1. Добавить HTTP integration tests через `actix_web::test` для login, ролей, users, equipment и support.
+1. [Выполнено] Добавлены HTTP integration tests через `actix_web::test` для login, ролей, users, equipment и полного lifecycle support; тесты выполняются на отдельной PostgreSQL через `TEST_DATABASE_URL`.
 2. [Выполнено] JSON-ошибки унифицированы полями `code`, `message`, `details`, `request_id`; добавлен `X-Request-ID`, внутренние диагностические сообщения не выдаются клиенту, `401` и `403` разделены.
 3. [Выполнено] Добавлены OpenAPI 3.1 `/openapi.json`, Swagger UI `/docs`, все маршруты, Bearer JWT, единая error schema, предметные request/response schemas, path/query-параметры, JSON и бинарные ответы. Contract tests проверяют ключевые операции и разрешение всех `$ref`. Генерация клиентских типов вынесена в отдельный следующий этап.
 4. [Выполнено] Добавлен `/ready` с `SELECT 1` в PostgreSQL и ответом `503` при недоступной БД; `/health` оставлен простой liveness-проверкой. Docker и Compose smoke ожидают readiness.

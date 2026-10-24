@@ -89,7 +89,7 @@ pub async fn get_user(
             .map_err(|_| AppError::BadRequest("Invalid user ID".to_string()))?;
 
         if current_user_id != user_id {
-            return Err(AppError::Unauthorized("Access denied".to_string()));
+            return Err(AppError::Forbidden("Access denied".to_string()));
         }
     }
 
@@ -118,7 +118,7 @@ pub async fn update_user(
 
     // Только админы могут изменять других пользователей
     if user_id != current_user_id && claims.role != "admin" {
-        return Err(AppError::Unauthorized("Access denied".to_string()));
+        return Err(AppError::Forbidden("Access denied".to_string()));
     }
 
     // Проверяем, что пользователь существует

@@ -12,7 +12,7 @@
 
 ## Высокий приоритет
 
-1. [Частично выполнено] Добавлены HTTP integration tests login, `401`/`403`, формата ошибок, request ID и multi-device notification flow. Ещё нужны полные CRUD/role tests для users, equipment и support.
+1. [Закрыто] Добавлены HTTP integration tests login, `401`/`403`, формата ошибок, request ID, multi-device notification flow, CRUD/role-сценариев users и equipment, а также полного lifecycle support.
 2. Нормализовать пустые FCM env и сократить диагностические логи конфигурации.
 3. Убрать или официально пометить legacy FCM fallback; рабочий предпочтительный путь — HTTP v1 с service account.
 4. Добавить secret scanning и запрет staged секретов.
