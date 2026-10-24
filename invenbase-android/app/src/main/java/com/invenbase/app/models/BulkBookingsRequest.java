@@ -1,9 +1,12 @@
 package com.invenbase.app.models;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /** Тело запроса POST /api/bookings/bulk. */
 public class BulkBookingsRequest {
+    @SerializedName("bookings")
     private List<CreateBookingItem> bookings;
 
     // Конструктор BulkBookingsRequest: инициализирует объект и его зависимости.

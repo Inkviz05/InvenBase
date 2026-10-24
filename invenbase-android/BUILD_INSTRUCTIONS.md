@@ -49,10 +49,21 @@ app/build/outputs/apk/debug/app-debug.apk
 ## Release variant
 
 ```powershell
-.\gradlew.bat assembleRelease
+$env:ANDROID_KEYSTORE_PATH="D:\secure\invenbase-release.keystore"
+$env:ANDROID_KEYSTORE_PASSWORD="your-store-password"
+$env:ANDROID_KEY_ALIAS="invenbase"
+$env:ANDROID_KEY_PASSWORD="your-key-password"
+.\gradlew.bat assembleRelease bundleRelease
 ```
 
-В репозитории не настроены signing credentials. `release` также собирается с `minifyEnabled false`; это не готовая инструкция публикации в магазин.
+Signing включается, только если заданы все четыре переменные. При частичной конфигурации сборка завершается ошибкой; ключ и пароли не сохраняются в Git или Gradle-файлах. Release включает R8 (`minifyEnabled`) и удаление неиспользуемых ресурсов. Результаты:
+
+```text
+app/build/outputs/apk/release/app-release.apk
+app/build/outputs/bundle/release/app-release.aab
+```
+
+Для CI используются secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`. При их наличии workflow декодирует keystore во временный каталог и публикует подписанные APK/AAB; без secrets release всё равно собирается как unsigned проверка R8. Keystore необходимо хранить в резервной копии: без прежнего ключа нельзя выпустить обновление уже установленного приложения.
 
 ## Backend
 

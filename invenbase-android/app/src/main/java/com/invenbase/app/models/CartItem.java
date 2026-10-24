@@ -1,8 +1,13 @@
 package com.invenbase.app.models;
 
+import com.google.gson.annotations.SerializedName;
+
 public class CartItem {
+    @SerializedName("equipmentId")
     private String equipmentId;
+    @SerializedName("equipmentName")
     private String equipmentName;
+    @SerializedName("quantity")
     private int quantity;
 
     // Конструктор CartItem: инициализирует объект и его зависимости.

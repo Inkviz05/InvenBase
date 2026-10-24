@@ -16,7 +16,7 @@
 2. [Закрыто] Пустые RuStore/Huawei env нормализуются как отсутствующие; из startup/push-логов убраны значения, пути, payload, текст уведомлений и фрагменты device token.
 3. [Закрыто] Firebase/FCM полностью удалён из Android и backend: Google Services plugin, SDK, service, transport, OAuth/service-account код, env и зависимости. Миграция удаляет старые FCM device tokens.
 4. [Закрыто] Реальные `.env`, mobile provider configs, service-account JSON, приватные ключи и keystore исключены из Git; tracked/staged файлы проверяет PowerShell guard, история Git сканируется Gitleaks в CI. Репозиторный pre-commit hook включается через `git config core.hooksPath .githooks`.
-5. [Частично выполнено] Android auth/user/push-token storage защищён AES-GCM и Android Keystore; API URL разделён по debug/release, release требует HTTPS. Остаются release signing и minification.
+5. [Закрыто] Android auth/user/push-token storage защищён AES-GCM и Android Keystore; API URL разделён по debug/release; release требует HTTPS, включает R8/resource shrinking и опциональное env/CI signing без хранения ключей в Git.
 6. [Частично выполнено] Android debug build добавлен в CI; unit/instrumentation tests появятся после добавления тестовых исходников.
 7. Добавить role guards на маршрутах web, не полагаясь только на скрытие пунктов меню и backend `403`.
 8. Продолжить provider-independent архитектуру: RuStore и Huawei реализованы на сервере и Android; остаются проверка transports на реальном устройстве и единое `NotificationEvent`.
@@ -24,6 +24,7 @@
 10. [Закрыто] Transactional outbox, retries/backoff и журнал доставки добавлены; in-app уведомление и outbox создаются одной транзакцией, payload содержит `notification_id`.
 11. [Отложено] End-to-end проверка уведомлений на реальных Android-устройствах: multi-device доставка, восстановление WorkManager после потери сети и `onDeletedMessages`, деактивация устройства после logout. Выполнить позже по решению пользователя.
 12. [Закрыто] Добавлен CI integration job с чистым PostgreSQL и HTTP-сценарий login → регистрация двух устройств → создание и чтение уведомления → outbox для обоих устройств.
+13. Добавить multi-instance onboarding Android: единый APK/AAB, QR/setup-ссылка с HTTPS URL и одноразовым кодом школы, проверка instance/protocol до сохранения и явный сброс привязки. Короткий код без URL возможен только через отдельный центральный discovery-каталог.
 
 ## Средний приоритет
 
@@ -46,7 +47,7 @@
 - Backend также содержит встроенные страницы `/` и `/admin` из `invenbase-server/static`; production Compose отдаёт React через nginx, поэтому эти страницы не являются основным web UI.
 - PostgreSQL не опубликован наружу основным Compose-файлом.
 - Android debug разрешает cleartext и использует emulator endpoint `10.0.2.2`; release запрещает cleartext и требует HTTPS URL.
-- Android release build имеет `minifyEnabled false`.
+- Android release собирается с R8/resource shrinking; поведение после обфускации пока не проверено ручным сценарием на реальном устройстве.
 - Автоматической ротации JWT/refresh token нет: API выдаёт один JWT с временем жизни из `JWT_EXPIRATION`.
 - Отдельного logout endpoint на backend нет; клиенты удаляют локальный токен.
 - `user_devices` моделирует provider/device lifecycle и несколько устройств; сервер и Android реализуют RuStore/Huawei. Оба provider ещё не проверены на зарегистрированных сборках реальных устройств.

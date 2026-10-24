@@ -89,6 +89,11 @@ jobs:
   android-build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
     steps:
       - name: Check out repository
@@ -107,15 +112,33 @@ jobs:
         working-directory: invenbase-android
         run: chmod +x gradlew
 
-      - name: Build Android debug and unsigned release variants
+      - name: Prepare optional Android release signing
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
+        shell: bash
+        run: |
+          keystore_path="$RUNNER_TEMP/invenbase-release.keystore"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
+          echo "ANDROID_KEYSTORE_PATH=$keystore_path" >> "$GITHUB_ENV"
+
+      - name: Build Android debug, release APK and release AAB
         working-directory: invenbase-android
-        run: ./gradlew :app:assembleDebug :app:assembleRelease --no-daemon --console=plain
+        run: ./gradlew :app:assembleDebug :app:assembleRelease :app:bundleRelease --no-daemon --console=plain
 
       - name: Upload Android debug APK
         uses: actions/upload-artifact@v4
         with:
           name: invenbase-android-debug
           path: invenbase-android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Upload signed Android release artifacts
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: invenbase-android-release-signed
+          path: |
+            invenbase-android/app/build/outputs/apk/release/app-release.apk
+            invenbase-android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
 
   quality:

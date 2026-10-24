@@ -39,6 +39,21 @@ def validateApiUrl = { name, value, requireHttps ->
 validateApiUrl("DEBUG_API_URL", debugApiUrl, false)
 validateApiUrl("RELEASE_API_URL", releaseApiUrl, true)
 
+def signingEnvironment = [
+        storeFile: System.getenv("ANDROID_KEYSTORE_PATH"),
+        storePassword: System.getenv("ANDROID_KEYSTORE_PASSWORD"),
+        keyAlias: System.getenv("ANDROID_KEY_ALIAS"),
+        keyPassword: System.getenv("ANDROID_KEY_PASSWORD")
+]
+def signingValuesPresent = signingEnvironment.values().count { it != null && !it.trim().isEmpty() }
+if (signingValuesPresent > 0 && signingValuesPresent < signingEnvironment.size()) {
+    throw new GradleException("Android release signing requires all ANDROID_KEYSTORE_* variables")
+}
+def releaseSigningEnabled = signingValuesPresent == signingEnvironment.size()
+if (releaseSigningEnabled && !file(signingEnvironment.storeFile).isFile()) {
+    throw new GradleException("ANDROID_KEYSTORE_PATH does not point to a file")
+}
+
 android {
     namespace 'com.invenbase.app'
     compileSdk 34
@@ -56,6 +71,17 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (releaseSigningEnabled) {
+            release {
+                storeFile file(signingEnvironment.storeFile)
+                storePassword signingEnvironment.storePassword
+                keyAlias signingEnvironment.keyAlias
+                keyPassword signingEnvironment.keyPassword
+            }
+        }
+    }
+
     buildTypes {
         debug {
             buildConfigField "String", "API_BASE_URL", "\"${debugApiUrl}\""
@@ -64,7 +90,11 @@ android {
         release {
             buildConfigField "String", "API_BASE_URL", "\"${releaseApiUrl}\""
             manifestPlaceholders = [usesCleartextTraffic: "false"]
-            minifyEnabled false
+            if (releaseSigningEnabled) {
+                signingConfig signingConfigs.release
+            }
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

@@ -18,7 +18,7 @@
 
 APK: `app/build/outputs/apk/debug/app-debug.apk`.
 
-Release variant существует, но signing config в проекте не задан, а `minifyEnabled=false`. Готовой production release-процедуры документация не заявляет.
+Release включает R8/minification и resource shrinking. Signing credentials читаются только из `ANDROID_KEYSTORE_*` env; без них CI собирает unsigned release для проверки, а при наличии GitHub secrets публикует подписанные APK/AAB. Инструкция находится в [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md).
 
 ## API URL
 
@@ -63,7 +63,7 @@ Firebase/FCM, Google Services plugin и `google-services.json` в проекте
 
 ## Тесты и ограничения
 
-Gradle содержит зависимости JUnit и Espresso, но каталогов с test/androidTest исходниками в репозитории сейчас нет. GitHub Actions собирает debug и unsigned release variants, публикуя debug APK.
+Gradle содержит зависимости JUnit и Espresso, но каталогов с test/androidTest исходниками в репозитории сейчас нет. GitHub Actions всегда собирает debug и R8 release variants, публикуя debug APK; подписанные release APK/AAB публикуются только при наличии signing secrets.
 
 Архитектура в основном Activity/Fragment + прямые Retrofit-вызовы; полноценного repository/ViewModel слоя нет.
 ## Huawei Push

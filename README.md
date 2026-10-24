@@ -100,8 +100,8 @@ cd ..\..
 
 - `/health` проверяет HTTP-процесс, а `/ready` возвращает `200` только при доступной PostgreSQL.
 - OpenAPI 3.1 опубликован на `/openapi.json`, Swagger UI — на `/docs`; маршруты, параметры и предметные request/response-схемы описаны и проверяются contract tests.
-- CI собирает Android debug и unsigned release variants, публикует debug APK, запускает Rust library tests, полный backend DB/HTTP integration suite на чистом PostgreSQL 16, web tests/build/audit и Docker browser smoke.
-- Android debug по умолчанию использует `http://10.0.2.2:8080`, release — `https://invenbase.inkviz05.online`; значения переопределяются build property/env. Release собирается без минификации (`minifyEnabled false`).
+- CI собирает Android debug и R8 release variants, публикует debug APK и при наличии signing secrets — подписанные release APK/AAB. Также запускаются Rust tests, полный backend DB/HTTP integration suite на чистом PostgreSQL 16, web tests/build/audit и Docker browser smoke.
+- Android debug по умолчанию использует `http://10.0.2.2:8080`, release — `https://invenbase.inkviz05.online`; значения переопределяются build property/env. Release включает minification и resource shrinking.
 - Для production есть отдельная команда миграции `cargo run --release --locked --bin migrate`; в Compose её выполняет одноразовый сервис `migrate` до запуска backend. Автоматические миграции при старте оставлены для локальной разработки.
 
 ## Документация

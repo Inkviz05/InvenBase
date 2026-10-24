@@ -68,7 +68,7 @@
 2. [Выполнено] API URL вынесен в `BuildConfig` по build type: локальный emulator URL для debug, HTTPS production URL для release, оба переопределяются Gradle property/env. Пользовательское сохранение endpoint удалено.
 3. Ввести repository/ViewModel слой и сократить API/UI-логику в Activity/Fragment.
 4. Добавить unit и instrumentation tests; сейчас Gradle содержит зависимости JUnit/Espresso, но тестовых исходников в проекте нет.
-5. Проверить release signing, включить и протестировать R8/ProGuard.
+5. [Выполнено] Release включает R8/resource shrinking и проверяется в CI; signing читается из `ANDROID_KEYSTORE_*`, а CI при наличии secrets публикует подписанные APK/AAB. Keystore и пароли не хранятся в Git.
 6. [Частично выполнено] Android RuStore Push SDK 7.5.0 и Huawei Push SDK подключены: получение/обновление token, регистрация provider/device и деактивация при logout. Huawei включается при наличии `app/agconnect-services.json`. WorkManager-сверка пропущенных уведомлений реализована. Остаются проверка RuStore/Huawei на реальных устройствах и SSE.
 
 ### 7. Delivery
@@ -76,6 +76,14 @@
 1. [Выполнено] Добавить Android debug и unsigned release builds в CI на JDK 21 с Gradle cache и публикацией debug APK-артефакта.
 2. [Выполнено] Добавить secret scanning и проверку случайно staged `.env`/service-account/provider config/private key файлов: локальный pre-commit hook и CI guard проверяют имена и содержимое, Gitleaks сканирует историю Git.
 3. Определить production TLS и reverse proxy перед публичным развёртыванием; текущий Compose — production-shaped локальный стек без TLS.
+
+### 8. Multi-instance onboarding
+
+1. Сделать один release-клиент для разных школ: при первом запуске показывать экран привязки к серверу вместо зашитого production URL.
+2. Поддержать QR/setup-ссылку с HTTPS URL сервера и одноразовым кодом привязки; ручной ввод URL оставить запасным вариантом.
+3. Добавить backend endpoint метаданных instance и обмен одноразового кода на подтверждённую конфигурацию. Код без URL требует отдельного центрального каталога серверов и пока не является базовым вариантом.
+4. Проверять HTTPS, ожидаемый API protocol/version и идентификатор instance до сохранения; конфигурацию защищать Android Keystore, позволять пользователю явно сбросить привязку.
+5. Не помещать администраторские credentials или долгоживущие secrets в QR/deep link. Одноразовый код должен иметь TTL, ограничение попыток и отзыв.
 
 ## Не планируется без отдельного решения
 

@@ -34,6 +34,13 @@
 -keep class * implements com.google.gson.TypeAdapterFactory
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Models are instantiated and populated reflectively by Gson. Their field names are
+# defined by @SerializedName, so classes may still be optimized and obfuscated.
+-keep,allowoptimization,allowobfuscation class com.invenbase.app.models.** { <fields>; }
 
 # OkHttp
 -dontwarn okhttp3.**
