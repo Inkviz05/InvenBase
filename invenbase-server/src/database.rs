@@ -32,12 +32,17 @@ impl Database {
         &self,
         default_admin: Option<&DefaultAdminConfig>,
     ) -> Result<(), sqlx::Error> {
-        MIGRATOR.run(&self.pool).await?;
+        self.migrate().await?;
 
         if let Some(default_admin) = default_admin {
             self.create_default_admin(default_admin).await?;
         }
 
+        Ok(())
+    }
+
+    pub async fn migrate(&self) -> Result<(), sqlx::Error> {
+        MIGRATOR.run(&self.pool).await?;
         Ok(())
     }
 

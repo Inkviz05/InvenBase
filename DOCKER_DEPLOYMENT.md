@@ -3,6 +3,7 @@
 Основной `docker-compose.yml` поднимает:
 
 - `postgres:16-alpine` с named volume `postgres_data`;
+- одноразовый `migrate`, который применяет SQLx migrations и при необходимости создаёт первого администратора;
 - multi-stage release image Rust backend;
 - production React build, который отдаёт nginx.
 
@@ -47,6 +48,15 @@ docker compose logs -f backend
 docker compose down
 ```
 
+Backend в Compose запускается с `RUN_MIGRATIONS_ON_STARTUP=false` и ждёт успешного завершения `migrate`. При обычном локальном `cargo run` автамиграции по умолчанию остаются включёнными; их можно отключить через `RUN_MIGRATIONS_ON_STARTUP=false`.
+
+Отдельный локальный запуск миграций:
+
+```powershell
+cd invenbase-server
+cargo run --locked --bin migrate
+```
+
 Удаление БД вместе с volume — необратимая для этого volume операция:
 
 ```powershell
@@ -75,12 +85,45 @@ cd ..\..
 
 Подробности: [REAL_SMOKE_TESTING.md](REAL_SMOKE_TESTING.md).
 
+## Backup и восстановление
+
+Скриптам нужны PostgreSQL client tools (`pg_dump`, `pg_restore`, `psql`, `createdb`) той же или более новой major-версии, чем сервер.
+
+Создание backup в custom-формате, проверка архива и хранение последних 14 дней:
+
+```powershell
+$env:DATABASE_URL = "postgresql://postgres:password@localhost:5432/kvantoriym"
+.\scripts\backup-postgres.ps1
+```
+
+По умолчанию файлы создаются в игнорируемом Git каталоге `backups/`. Можно задать `-OutputPath` и `-RetentionDays`. Пароль передаётся дочерним PostgreSQL-процессам через `PGPASSWORD` и не включается в их аргументы.
+
+Безопасная проверка восстановления в отдельную базу:
+
+```powershell
+.\scripts\restore-postgres.ps1 `
+  -BackupPath .\backups\invenbase-YYYYMMDD-HHMMSS.dump `
+  -TargetDatabaseUrl "postgresql://postgres:password@localhost:5432/invenbase_restore_test" `
+  -ConfirmRestore
+```
+
+Скрипт по умолчанию разрешает только имена баз, содержащие `test`, `restore` или `staging`. Для иной базы требуется явный `-AllowNonTestDatabase`; это не отменяет необходимость остановить запись данных и подтвердить выбранную точку восстановления.
+
+Production-порядок обновления:
+
+1. Остановить или заблокировать операции записи.
+2. Создать backup и дождаться успешной проверки `pg_restore --list`.
+3. Запустить `docker compose up --build`; `migrate` завершится до старта backend.
+4. Проверить `/ready` и smoke-сценарий.
+5. При несовместимой миграции остановить приложение, восстановить backup в проверенную базу и только затем вернуть старую версию приложения.
+
+CI после backend integration tests создаёт настоящий `pg_dump`, восстанавливает его в чистую базу и повторно запускает schema/readiness tests против восстановленной копии.
+
 ## Чего эта конфигурация не предоставляет
 
 - TLS/HTTPS и автоматические сертификаты.
 - Docker healthcheck backend использует `/ready` с запросом к БД; `/health` остаётся независимой liveness-проверкой процесса.
-- Backup/restore automation.
-- Отдельный migrate/rollback job.
+- Автоматический rollback migrations: для необратимых изменений используется восстановление проверенного backup.
 - Resource limits и внешнюю observability.
 
 Перед публичным production-развёртыванием эти пункты необходимо решить в инфраструктуре.

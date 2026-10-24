@@ -114,4 +114,6 @@ Compose smoke job:
 
 Backend integration job поднимает отдельный чистый PostgreSQL 16, задаёт `TEST_DATABASE_URL`, применяет migrations и выполняет полный `cargo test --locked`, включая тесты из `invenbase-server/tests/`.
 
+После тестов CI создаёт custom-format backup через `pg_dump`, проверяет его, восстанавливает в новую базу `invenbase_restore_ci` и повторно запускает schema/readiness tests против восстановленной копии.
+
 CI не выполняет Android unit/instrumentation tests, lint или secret scan.

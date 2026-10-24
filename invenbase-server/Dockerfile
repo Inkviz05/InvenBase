@@ -12,7 +12,7 @@ COPY invenbase-server/migrations ./migrations
 COPY invenbase-server/static ./static
 COPY invenbase-server/src ./src
 
-RUN cargo build --release --locked
+RUN cargo build --release --locked --bins
 
 FROM debian:bookworm-slim AS runtime
 
@@ -23,6 +23,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/target/release/kvantoriym-server /usr/local/bin/kvantoriym-server
+COPY --from=builder /app/target/release/migrate /usr/local/bin/invenbase-migrate
 COPY --from=builder /app/static ./static
 
 ENV HOST=0.0.0.0

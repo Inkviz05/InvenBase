@@ -40,9 +40,32 @@ jobs:
         with:
           components: rustfmt
 
+      - name: Install PostgreSQL client tools
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
       - name: Run backend tests against clean PostgreSQL
         working-directory: invenbase-server
         run: cargo test --locked
+
+      - name: Create and validate PostgreSQL backup
+        shell: pwsh
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/invenbase_test
+          BACKUP_PATH: ${{ runner.temp }}/invenbase-ci.dump
+        run: ./scripts/backup-postgres.ps1 -OutputPath $env:BACKUP_PATH -RetentionDays 0
+
+      - name: Restore PostgreSQL backup into a clean database
+        shell: pwsh
+        env:
+          BACKUP_PATH: ${{ runner.temp }}/invenbase-ci.dump
+          RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/invenbase_restore_ci
+        run: ./scripts/restore-postgres.ps1 -BackupPath $env:BACKUP_PATH -TargetDatabaseUrl $env:RESTORE_DATABASE_URL -ConfirmRestore
+
+      - name: Test restored PostgreSQL database
+        working-directory: invenbase-server
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/invenbase_restore_ci
+        run: cargo test --locked --test database_schema --test readiness
 
   android-build:
     runs-on: ubuntu-latest

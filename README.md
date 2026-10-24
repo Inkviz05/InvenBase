@@ -29,7 +29,9 @@ cargo run
 
 `JWT_SECRET` обязателен и должен содержать не менее 32 символов. Если `CREATE_DEFAULT_ADMIN=true`, обязателен `DEFAULT_ADMIN_PASSWORD` длиной не менее 12 символов. Администратор создаётся только при отсутствии пользователя с таким именем; существующий пароль не перезаписывается.
 
-Backend применяет SQLx migrations при старте. API доступен на `http://127.0.0.1:8080/api`, liveness — на `/health`, readiness с проверкой PostgreSQL — на `/ready`.
+При локальном запуске backend по умолчанию применяет SQLx migrations при старте. API доступен на `http://127.0.0.1:8080/api`, liveness — на `/health`, readiness с проверкой PostgreSQL — на `/ready`.
+
+В production Compose migrations выполняет отдельный одноразовый сервис `migrate`; backend стартует только после его успешного завершения. Backup/restore-команды и порядок обновления описаны в [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md).
 
 ### Web
 

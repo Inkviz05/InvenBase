@@ -39,12 +39,17 @@ async fn main() -> std::io::Result<()> {
         .unwrap(),
     );
 
-    // Инициализация базы данных (создание таблиц)
-    db.init(config.default_admin.as_ref())
-        .await
-        .expect("Не удалось инициализировать базу данных");
-
-    log::info!("База данных инициализирована");
+    let run_migrations_on_startup = std::env::var("RUN_MIGRATIONS_ON_STARTUP")
+        .map(|value| value.eq_ignore_ascii_case("true"))
+        .unwrap_or(true);
+    if run_migrations_on_startup {
+        db.init(config.default_admin.as_ref())
+            .await
+            .expect("Не удалось инициализировать базу данных");
+        log::info!("Миграции базы данных применены при запуске");
+    } else {
+        log::info!("Автоматические миграции отключены; ожидается отдельный migrate job");
+    }
 
     let app_state = AppState::new(db.clone(), config.clone());
     let shared_app_state = Arc::new(app_state.clone());

@@ -28,7 +28,7 @@
 ### 2. База данных и эксплуатация
 
 1. Не использовать основную БД для integration tests: создавать отдельную БД и задавать `TEST_DATABASE_URL`.
-2. Добавить явную production-процедуру backup, migrate и restore. Сейчас migrations выполняются при запуске backend.
+2. [Выполнено] Добавлены отдельный migrate binary/Compose job, управляемые автамиграции для локальной разработки, PowerShell backup/restore с проверками и CI restore drill на чистой базе. Автоматического rollback migrations нет: recovery выполняется восстановлением проверенного backup.
 3. Проверить исторические данные перед валидацией оставшихся `NOT VALID` constraints.
 4. [Выполнено] Добавлен CI job с отдельным чистым PostgreSQL 16 для полного `cargo test --locked`, включая migrations и HTTP/DB integration tests.
 

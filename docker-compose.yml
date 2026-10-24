@@ -14,6 +14,27 @@ services:
       timeout: 5s
       retries: 10
 
+  migrate:
+    build:
+      context: .
+      dockerfile: invenbase-server/Dockerfile
+    restart: "no"
+    command: ["invenbase-migrate"]
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-kvantoriym}
+      DATABASE_MAX_CONNECTIONS: ${DATABASE_MAX_CONNECTIONS:-10}
+      DATABASE_ACQUIRE_TIMEOUT_SECONDS: ${DATABASE_ACQUIRE_TIMEOUT_SECONDS:-5}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      CREATE_DEFAULT_ADMIN: ${CREATE_DEFAULT_ADMIN:-false}
+      DEFAULT_ADMIN_USERNAME: ${DEFAULT_ADMIN_USERNAME:-admin}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:-}
+      DEFAULT_ADMIN_EMAIL: ${DEFAULT_ADMIN_EMAIL:-admin@kvantoriym.local}
+      DEFAULT_ADMIN_FULL_NAME: ${DEFAULT_ADMIN_FULL_NAME:-Administrator}
+      RUST_LOG: ${RUST_LOG:-info}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   backend:
     build:
       context: .
@@ -23,6 +44,7 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-kvantoriym}
       DATABASE_MAX_CONNECTIONS: ${DATABASE_MAX_CONNECTIONS:-10}
       DATABASE_ACQUIRE_TIMEOUT_SECONDS: ${DATABASE_ACQUIRE_TIMEOUT_SECONDS:-5}
+      RUN_MIGRATIONS_ON_STARTUP: "false"
       HOST: 0.0.0.0
       PORT: 8080
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
@@ -42,8 +64,8 @@ services:
       HUAWEI_CLIENT_SECRET: ${HUAWEI_CLIENT_SECRET:-}
       RUST_LOG: ${RUST_LOG:-info}
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   web:
     build:
