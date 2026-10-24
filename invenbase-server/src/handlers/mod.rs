@@ -3,6 +3,7 @@ pub mod bookings;
 pub mod categories;
 pub mod equipment;
 pub mod groups;
+pub mod instance;
 pub mod logs;
 pub mod notifications;
 pub mod permissions;

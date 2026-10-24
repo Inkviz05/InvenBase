@@ -143,6 +143,44 @@ fn add_path_parameters(paths: &mut Map<String, Value>) {
 fn describe_domain_contracts(paths: &mut Map<String, Value>) {
     set_response(
         paths,
+        "/api/instance",
+        "get",
+        "200",
+        "Installation metadata",
+        schema_ref("InstanceResponse"),
+    );
+    set_request(paths, "/api/instance/pair", "post", "PairInstanceRequest");
+    set_response(
+        paths,
+        "/api/instance/pair",
+        "post",
+        "200",
+        "Pairing confirmed",
+        schema_ref("PairInstanceResponse"),
+    );
+    set_request(
+        paths,
+        "/api/instance/setup-codes",
+        "post",
+        "CreateSetupCodeRequest",
+    );
+    set_response(
+        paths,
+        "/api/instance/setup-codes",
+        "post",
+        "201",
+        "One-time setup code created",
+        schema_ref("CreateSetupCodeResponse"),
+    );
+    paths["/api/instance/setup-codes/{id}"]["delete"]["responses"]
+        .as_object_mut()
+        .expect("responses must be an object")
+        .remove("200");
+    paths["/api/instance/setup-codes/{id}"]["delete"]["responses"]["204"] =
+        json!({"description":"Setup code revoked"});
+
+    set_response(
+        paths,
         "/api/auth/login",
         "post",
         "200",
@@ -717,6 +755,44 @@ fn domain_schemas() -> Map<String, Value> {
     let date_time = || json!({ "type": "string", "format": "date-time" });
 
     add(
+        "InstanceResponse",
+        &[
+            "product",
+            "instance_id",
+            "instance_name",
+            "api_protocol_version",
+            "api_base_path",
+        ],
+        json!({
+            "product":{"type":"string","const":"InvenBase"},
+            "instance_id":uuid(),
+            "instance_name":{"type":"string"},
+            "api_protocol_version":{"type":"integer","minimum":1},
+            "api_base_path":{"type":"string","const":"/api"}
+        }),
+    );
+    add(
+        "CreateSetupCodeRequest",
+        &[],
+        json!({"expires_in_minutes":{"type":["integer","null"],"minimum":1,"maximum":60,"default":10}}),
+    );
+    add(
+        "CreateSetupCodeResponse",
+        &["id", "setup_code", "expires_at"],
+        json!({"id":uuid(),"setup_code":{"type":"string","pattern":"^[0-9A-F]{4}(-[0-9A-F]{4}){5}$"},"expires_at":date_time()}),
+    );
+    add(
+        "PairInstanceRequest",
+        &["setup_code"],
+        json!({"setup_code":{"type":"string"}}),
+    );
+    add(
+        "PairInstanceResponse",
+        &["instance", "paired_at"],
+        json!({"instance":schema_ref("InstanceResponse"),"paired_at":date_time()}),
+    );
+
+    add(
         "UserResponse",
         &["id", "username", "email", "full_name", "role"],
         json!({
@@ -1200,6 +1276,34 @@ pub fn document() -> Value {
     for (path, method, tag, summary, protected) in [
         ("/health", "get", "System", "Liveness check", false),
         ("/ready", "get", "System", "Database readiness check", false),
+        (
+            "/api/instance",
+            "get",
+            "Instance",
+            "Get installation metadata",
+            false,
+        ),
+        (
+            "/api/instance/pair",
+            "post",
+            "Instance",
+            "Consume a one-time setup code",
+            false,
+        ),
+        (
+            "/api/instance/setup-codes",
+            "post",
+            "Instance",
+            "Create a one-time setup code",
+            true,
+        ),
+        (
+            "/api/instance/setup-codes/{id}",
+            "delete",
+            "Instance",
+            "Revoke an unused setup code",
+            true,
+        ),
         (
             "/api/auth/login",
             "post",

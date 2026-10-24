@@ -69,6 +69,8 @@ async fn migrations_create_core_tables() -> Result<()> {
         "support_request_messages",
         "user_devices",
         "notification_outbox",
+        "app_instance",
+        "mobile_setup_codes",
     ] {
         assert!(
             relation_exists(&db.pool, table).await?,
@@ -96,6 +98,7 @@ async fn migrations_create_critical_indexes() -> Result<()> {
         "idx_user_devices_active_user",
         "idx_notification_outbox_pending",
         "idx_notification_outbox_user",
+        "idx_mobile_setup_codes_active",
     ] {
         assert!(
             relation_exists(&db.pool, index).await?,

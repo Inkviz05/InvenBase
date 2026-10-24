@@ -37,6 +37,7 @@ fn test_config(database_url: String) -> Config {
         jwt_secret: JWT_SECRET.to_string(),
         jwt_expiration: 3600,
         cors_allowed_origins: vec![],
+        instance_name: "Test InvenBase".to_string(),
         rustore_project_id: None,
         rustore_service_token: None,
         huawei_client_id: None,

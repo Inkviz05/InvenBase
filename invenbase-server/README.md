@@ -37,6 +37,7 @@ GET http://127.0.0.1:8080/docs
 | `JWT_SECRET` | Обязательна, минимум 32 символа |
 | `JWT_EXPIRATION` | Default `86400` секунд |
 | `CORS_ALLOWED_ORIGINS` | Список через запятую; default localhost/127.0.0.1:3000 |
+| `INSTANCE_NAME` | Название школы/установки, показываемое мобильному клиенту при привязке; default `InvenBase` |
 | `CREATE_DEFAULT_ADMIN` | Default `false` |
 | `DEFAULT_ADMIN_PASSWORD` | Обязательна при bootstrap, минимум 12 символов |
 | `DEFAULT_ADMIN_USERNAME` | Default `admin` |
@@ -56,9 +57,10 @@ GET http://127.0.0.1:8080/docs
 
 ## HTTP API
 
-Все перечисленные маршруты, кроме login, требуют Bearer JWT. Роли реально проверяются middleware и handlers.
+Большинство предметных маршрутов требует Bearer JWT. Публичными являются login, чтение метаданных instance и обмен одноразового setup-кода. Роли реально проверяются middleware и handlers.
 
 - `POST /api/auth/login`
+- Instance: публичные `GET /api/instance` и `POST /api/instance/pair`; admin-only `POST /api/instance/setup-codes` и `DELETE /api/instance/setup-codes/{id}`. Setup-код действует 1–60 минут, хранится только как SHA-256 hash, может быть отозван и после успешного обмена повторно не используется. Он подтверждает привязку к серверу, но не авторизует пользователя и не выдаёт JWT.
 - Users: `GET /api/users/me`; admin-only `GET|POST /api/users`; authenticated `GET|PUT /api/users/{id}`; admin-only `DELETE /api/users/{id}`.
 - Equipment: `GET|POST /api/equipment`, `GET|PUT|DELETE /api/equipment/{id}`, `GET /api/equipment/qr/{qr_code}`, `GET /api/equipment/{id}/movements`, `POST /api/equipment/{id}/move`. Изменения требуют `admin` или `responsible`.
 - Categories: `GET|POST /api/categories`, `GET|PUT|DELETE /api/categories/{id}`; изменения требуют `admin` или `responsible`.
@@ -73,7 +75,7 @@ GET http://127.0.0.1:8080/docs
 - Push: `POST /api/push/register-token` регистрирует или обновляет конкретное устройство; `POST /api/push/unregister-device` деактивирует устройство при logout.
 - Support: `GET|POST /api/support/requests`, admin-only `PUT|DELETE /api/support/requests/{id}`, authenticated `POST /api/support/requests/{id}/messages`.
 
-Отдельной OpenAPI/Swagger-спецификации нет.
+OpenAPI 3.1 доступен через `/openapi.json`, Swagger UI — через `/docs`.
 
 ## Встроенные страницы
 

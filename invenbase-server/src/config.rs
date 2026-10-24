@@ -18,6 +18,8 @@ pub struct Config {
     pub jwt_secret: String,
     pub jwt_expiration: u64,
     pub cors_allowed_origins: Vec<String>,
+    /// Human-readable organization or installation name shown during pairing.
+    pub instance_name: String,
     /// Project ID сервиса RuStore Push.
     pub rustore_project_id: Option<String>,
     /// Сервисный токен RuStore Push из консоли разработчика.
@@ -110,6 +112,8 @@ impl Config {
                 .filter(|origin| !origin.is_empty())
                 .map(ToOwned::to_owned)
                 .collect(),
+            instance_name: non_empty_value(env::var("INSTANCE_NAME").ok())
+                .unwrap_or_else(|| "InvenBase".to_string()),
             rustore_project_id,
             rustore_service_token,
             huawei_client_id,

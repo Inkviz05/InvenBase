@@ -9,6 +9,19 @@ pub fn configure_api(cfg: &mut web::ServiceConfig) {
         // Аутентификация (публичные endpoints)
         .route("/auth/login", web::post().to(auth::login))
 
+        // Привязка единого мобильного клиента к конкретной установке
+        .service(
+            web::scope("/instance")
+                .route("", web::get().to(instance::get_instance))
+                .route("/pair", web::post().to(instance::pair_instance))
+                .route("/setup-codes", web::post().to(|state: web::Data<AppState>, auth: AdminOnly, req: web::Json<_>| async move {
+                    instance::create_setup_code(state, &auth.claims(), req).await
+                }))
+                .route("/setup-codes/{id}", web::delete().to(|state: web::Data<AppState>, _auth: AdminOnly, path: web::Path<_>| async move {
+                    instance::revoke_setup_code(state, path).await
+                }))
+        )
+
         // Пользователи
         .service(
             web::scope("/users")

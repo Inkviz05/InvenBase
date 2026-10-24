@@ -35,6 +35,8 @@ cargo run
 
 OpenAPI доступен на `/openapi.json`, интерактивный Swagger UI — на `/docs`. Ошибки API используют единый JSON-формат `code`, `message`, `details`, `request_id`; фактический request ID также всегда возвращается заголовком `X-Request-ID`.
 
+Для будущего единого Android-приложения backend предоставляет публичные метаданные установки через `GET /api/instance`. Администратор создаёт одноразовый код посредством `POST /api/instance/setup-codes`, а приложение подтверждает привязку через `POST /api/instance/pair`. Название организации задаётся переменной `INSTANCE_NAME`; код не заменяет обычную авторизацию пользователя.
+
 ### Web
 
 Нужны Node.js и npm:

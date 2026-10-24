@@ -41,6 +41,11 @@ async fn openapi_document_and_swagger_ui_are_public() {
         "CreatePermissionRequest",
         "ActivityLog",
         "QrCodeData",
+        "InstanceResponse",
+        "CreateSetupCodeRequest",
+        "CreateSetupCodeResponse",
+        "PairInstanceRequest",
+        "PairInstanceResponse",
     ] {
         assert!(
             document["components"]["schemas"][schema].is_object(),
@@ -87,6 +92,21 @@ async fn openapi_document_and_swagger_ui_are_public() {
     assert!(document["paths"]["/api/logs"]["get"]["parameters"]
         .as_array()
         .is_some_and(|parameters| parameters.len() == 4));
+    assert!(document["paths"]["/api/instance"]["get"]
+        .get("security")
+        .is_none());
+    assert!(document["paths"]["/api/instance/pair"]["post"]
+        .get("security")
+        .is_none());
+    assert_eq!(
+        document["paths"]["/api/instance/setup-codes"]["post"]["security"],
+        serde_json::json!([{"bearerAuth": []}])
+    );
+    assert_eq!(
+        document["paths"]["/api/instance/setup-codes/{id}"]["delete"]["responses"]["204"]
+            ["description"],
+        "Setup code revoked"
+    );
 
     let docs_request = test::TestRequest::get().uri("/docs").to_request();
     let docs_response = test::call_service(&app, docs_request).await;
