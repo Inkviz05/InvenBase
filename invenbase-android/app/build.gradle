@@ -1,6 +1,10 @@
 plugins {
     id 'com.android.application'
-    id 'com.google.gms.google-services'
+}
+
+def firebaseEnabled = file('google-services.json').exists()
+if (firebaseEnabled) {
+    apply plugin: 'com.google.gms.google-services'
 }
 
 def huaweiEnabled = file('agconnect-services.json').exists()
@@ -23,6 +27,7 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0.0"
+        buildConfigField "boolean", "FIREBASE_ENABLED", firebaseEnabled.toString()
         buildConfigField "boolean", "HUAWEI_ENABLED", huaweiEnabled.toString()
 
         buildConfigField "String", "RUSTORE_PROJECT_ID", "\"${rustoreProjectId}\""

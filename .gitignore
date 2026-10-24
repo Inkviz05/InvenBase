@@ -5,8 +5,14 @@
 !.env.docker.example
 *.pem
 *.key
+*.p12
+*.pfx
+*.jks
+*.keystore
 *service-account*.json
 firebase-service-account.json
+google-services.json
+agconnect-services.json
 
 # Logs
 *.log

@@ -59,11 +59,11 @@ JWT, сериализованный пользователь и API URL сохр
 - планирует WorkManager-сверку непрочитанных уведомлений каждые 15 минут при наличии сети и немедленно после login/`onDeletedMessages`;
 - хранит до 500 обработанных `notification_id`, чтобы не показывать повторно уже полученный push.
 
-Для сборки Firebase нужен `app/google-services.json`; он не должен попадать в git. RuStore project ID задаётся через Gradle property или одноимённую переменную окружения `RUSTORE_PROJECT_ID`. Подробности: [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md), [FIREBASE_SETUP.md](FIREBASE_SETUP.md) и [PUSH_NOTIFICATIONS_SERVER.md](PUSH_NOTIFICATIONS_SERVER.md).
+Для включения Firebase нужен локальный `app/google-services.json`; без него приложение собирается с отключённым FCM. Файл не должен попадать в Git. RuStore project ID задаётся через Gradle property или одноимённую переменную окружения `RUSTORE_PROJECT_ID`. Подробности: [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md), [FIREBASE_SETUP.md](FIREBASE_SETUP.md) и [PUSH_NOTIFICATIONS_SERVER.md](PUSH_NOTIFICATIONS_SERVER.md).
 
 ## Тесты и ограничения
 
-Gradle содержит зависимости JUnit и Espresso, но каталогов с test/androidTest исходниками в репозитории сейчас нет. Android build также не включён в GitHub Actions.
+Gradle содержит зависимости JUnit и Espresso, но каталогов с test/androidTest исходниками в репозитории сейчас нет. Android debug build включён в GitHub Actions и не требует Firebase-конфигурации.
 
 Архитектура в основном Activity/Fragment + прямые Retrofit-вызовы; полноценного repository/ViewModel слоя нет.
 ## Huawei Push

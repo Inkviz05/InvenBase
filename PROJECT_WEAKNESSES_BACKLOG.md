@@ -15,7 +15,7 @@
 1. [Закрыто] Добавлены HTTP integration tests login, `401`/`403`, формата ошибок, request ID, multi-device notification flow, CRUD/role-сценариев users и equipment, а также полного lifecycle support.
 2. [Закрыто] Пустые FCM/RuStore/Huawei env нормализуются как отсутствующие; из startup/push-логов убраны значения, пути, payload, текст уведомлений и фрагменты device token.
 3. [Закрыто] Legacy `FCM_SERVER_KEY`, endpoint `fcm/send` и неиспользуемые синхронные fallback-функции удалены; Firebase-доставка работает только через HTTP v1 с service account.
-4. Добавить secret scanning и запрет staged секретов.
+4. [Закрыто] Реальные `.env`, mobile provider configs, service-account JSON, приватные ключи и keystore исключены из Git; tracked/staged файлы проверяет PowerShell guard, история Git сканируется Gitleaks в CI. Репозиторный pre-commit hook включается через `git config core.hooksPath .githooks`.
 5. Защитить Android auth storage, разделить API URL по build type и настроить release signing/minification.
 6. [Частично выполнено] Android debug build добавлен в CI; unit/instrumentation tests появятся после добавления тестовых исходников.
 7. Добавить role guards на маршрутах web, не полагаясь только на скрытие пунктов меню и backend `403`.

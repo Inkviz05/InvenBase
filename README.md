@@ -120,5 +120,6 @@ cd ..\..
 - После создания администратора установить `CREATE_DEFAULT_ADMIN=false`.
 - Ограничить `CORS_ALLOWED_ORIGINS` реальными web-origin.
 - Не коммитить `.env`, `google-services.json` и Firebase service account.
+- Один раз включить репозиторный pre-commit hook командой `git config core.hooksPath .githooks`; CI дополнительно проверяет tracked-файлы и историю Git через Gitleaks.
 - Использовать HTTPS перед публичным доступом; Compose-конфигурация сама TLS не настраивает.
 - Настроить резервное копирование PostgreSQL и проверить восстановление до обновления production.

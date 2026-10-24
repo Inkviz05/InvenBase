@@ -5,10 +5,12 @@
 - Android SDK 34.
 - JDK 17 или 21.
 - Интернет при первой Gradle sync для загрузки зависимостей.
-- `app/google-services.json` от Firebase-проекта `com.invenbase.app`.
+- `app/google-services.json` от Firebase-проекта `com.invenbase.app`, только если нужен FCM; файл хранится локально и исключён из Git.
 - ID проекта Push из RuStore Console, если требуется RuStore transport.
 
 JDK 25 для текущего Gradle/Android toolchain не рекомендуется.
+
+Без `app/google-services.json` debug/release варианты собираются с отключённым FCM. Положите собственный файл в `app/`, чтобы Google Services plugin и FCM включились автоматически.
 
 RuStore project ID передаётся без сохранения в git:
 

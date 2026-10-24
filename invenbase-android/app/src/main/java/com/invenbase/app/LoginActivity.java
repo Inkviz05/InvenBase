@@ -99,19 +99,19 @@ public class LoginActivity extends BaseActivity {
                     com.invenbase.app.utils.PushManager.getInstance(LoginActivity.this)
                             .sendStoredTokenIfNeeded();
 
-                    // На всякий случай запрашиваем актуальный токен
-                    android.util.Log.d("FCM", "Requesting FCM token from Firebase...");
-                    FirebaseMessaging.getInstance().getToken()
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful() && task.getResult() != null) {
-                                    String token = task.getResult();
-                                    android.util.Log.d("FCM", "FCM token received: " + token.substring(0, Math.min(30, token.length())) + "...");
-                                    com.invenbase.app.utils.PushManager.getInstance(LoginActivity.this)
-                                            .registerToken(token);
-                                } else {
-                                    android.util.Log.e("FCM", "Failed to get FCM token: " + (task.getException() != null ? task.getException().getMessage() : "unknown error"));
-                                }
-                            });
+                    if (BuildConfig.FIREBASE_ENABLED) {
+                        // На всякий случай запрашиваем актуальный токен
+                        android.util.Log.d("FCM", "Requesting FCM token from Firebase...");
+                        FirebaseMessaging.getInstance().getToken()
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful() && task.getResult() != null) {
+                                        com.invenbase.app.utils.PushManager.getInstance(LoginActivity.this)
+                                                .registerToken(task.getResult());
+                                    } else {
+                                        android.util.Log.e("FCM", "Failed to get FCM token", task.getException());
+                                    }
+                                });
+                    }
 
                     if (!BuildConfig.RUSTORE_PROJECT_ID.isEmpty()) {
                         RuStorePushClient.INSTANCE.getToken()

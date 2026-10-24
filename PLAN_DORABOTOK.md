@@ -74,7 +74,7 @@
 ### 7. Delivery
 
 1. [Выполнено] Добавить Android debug build в CI на JDK 21 с Gradle cache и публикацией APK-артефакта.
-2. Добавить secret scanning и проверку случайно staged `.env`/service-account файлов.
+2. [Выполнено] Добавить secret scanning и проверку случайно staged `.env`/service-account/provider config/private key файлов: локальный pre-commit hook и CI guard проверяют имена и содержимое, Gitleaks сканирует историю Git.
 3. Определить production TLS и reverse proxy перед публичным развёртыванием; текущий Compose — production-shaped локальный стек без TLS.
 
 ## Не планируется без отдельного решения

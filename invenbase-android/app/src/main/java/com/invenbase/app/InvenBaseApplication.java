@@ -19,7 +19,19 @@ public class InvenBaseApplication extends Application {
         super.onCreate();
         createNotificationChannel();
         NotificationSyncScheduler.schedulePeriodic(this);
-        FirebaseApp.initializeApp(this);
+        if (BuildConfig.FIREBASE_ENABLED) {
+            FirebaseApp.initializeApp(this);
+            FirebaseMessaging.getInstance().subscribeToTopic("all")
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            android.util.Log.d("FCM", "Subscribed to notifications topic");
+                        } else {
+                            android.util.Log.e("FCM", "Failed to subscribe", task.getException());
+                        }
+                    });
+        } else {
+            android.util.Log.i("FCM", "google-services.json is not configured; FCM disabled");
+        }
         if (BuildConfig.HUAWEI_ENABLED) {
             new Thread(() -> {
                 try {
@@ -44,16 +56,6 @@ public class InvenBaseApplication extends Application {
         } else {
             android.util.Log.i("RuStorePush", "RUSTORE_PROJECT_ID is not configured; SDK disabled");
         }
-        
-        // Подписываемся на топик уведомлений
-        FirebaseMessaging.getInstance().subscribeToTopic("all")
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        android.util.Log.d("FCM", "Subscribed to notifications topic");
-                    } else {
-                        android.util.Log.e("FCM", "Failed to subscribe", task.getException());
-                    }
-                });
     }
 
     private void createNotificationChannel() {

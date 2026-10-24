@@ -14,8 +14,10 @@
 2. Добавьте Android app с package name `com.invenbase.app`.
 3. Скачайте `google-services.json`.
 4. Поместите файл в `invenbase-android/app/google-services.json`.
-5. Решите политику хранения явно: текущий корневой `.gitignore` не исключает `google-services.json`. Service account JSON и приватные ключи коммитить нельзя.
+5. Не добавляйте файл в Git: корневой `.gitignore`, pre-commit hook и CI отклоняют `google-services.json`. Service account JSON и приватные ключи также коммитить нельзя.
 6. Выполните Gradle sync и соберите debug APK.
+
+Без `google-services.json` проект собирается, но FCM не инициализируется. Это позволяет CI проверять Android без сохранения Firebase-конфигурации в репозитории. RuStore, Huawei и периодическая синхронизация уведомлений настраиваются независимо.
 
 Регистрация токена требует авторизованного пользователя, потому что `POST /api/push/register-token` защищён Bearer JWT.
 
