@@ -179,7 +179,9 @@ jobs:
             invenbase-android/app/src/main/AndroidManifest.xml \
             invenbase-android/app/src/main/java \
             docker-compose.yml .env.docker.example invenbase-server/.env.example \
-            | grep -vF 'remove(PREF_TOKEN_PREFIX + "fcm")'; then
+            | grep -vF \
+              -e '.remove("fcm_token")' \
+              -e 'remove(PREF_TOKEN_PREFIX + "fcm")'; then
             echo "Firebase/FCM must stay removed from active code and configuration"
             exit 1
           fi
