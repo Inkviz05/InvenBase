@@ -36,8 +36,6 @@ fn test_config(database_url: String) -> Config {
         jwt_secret: JWT_SECRET.to_string(),
         jwt_expiration: 3600,
         cors_allowed_origins: vec![],
-        fcm_project_id: None,
-        fcm_service_account_path: None,
         rustore_project_id: None,
         rustore_service_token: None,
         huawei_client_id: None,
@@ -135,7 +133,7 @@ async fn push_device_http_lifecycle_is_user_scoped() -> Result<()> {
         .set_json(serde_json::json!({
             "token": original_push_token,
             "device_id": phone_id,
-            "provider": "fcm"
+            "provider": "huawei"
         }))
         .to_request();
     assert_eq!(
@@ -151,7 +149,7 @@ async fn push_device_http_lifecycle_is_user_scoped() -> Result<()> {
                 "token": push_token,
                 "platform": "android",
                 "device_id": phone_id,
-                "provider": "fcm"
+                "provider": "huawei"
             }))
             .to_request();
         assert_eq!(
@@ -163,7 +161,7 @@ async fn push_device_http_lifecycle_is_user_scoped() -> Result<()> {
     let phone: (i64, String, bool) = sqlx::query_as(
         "SELECT COUNT(*), MAX(push_token), BOOL_AND(active)
          FROM user_devices
-         WHERE user_id = $1 AND provider = 'fcm' AND device_id = $2",
+         WHERE user_id = $1 AND provider = 'huawei' AND device_id = $2",
     )
     .bind(first_user.id)
     .bind(&phone_id)
@@ -201,7 +199,7 @@ async fn push_device_http_lifecycle_is_user_scoped() -> Result<()> {
             "token": current_push_token,
             "platform": "android",
             "device_id": phone_id,
-            "provider": "fcm"
+            "provider": "huawei"
         }))
         .to_request();
     assert_eq!(
@@ -210,7 +208,7 @@ async fn push_device_http_lifecycle_is_user_scoped() -> Result<()> {
     );
 
     let token_owner: Uuid = sqlx::query_scalar(
-        "SELECT user_id FROM user_devices WHERE provider = 'fcm' AND push_token = $1",
+        "SELECT user_id FROM user_devices WHERE provider = 'huawei' AND push_token = $1",
     )
     .bind(&current_push_token)
     .fetch_one(&pool)
@@ -222,7 +220,7 @@ async fn push_device_http_lifecycle_is_user_scoped() -> Result<()> {
         .insert_header(("Authorization", format!("Bearer {second_token}")))
         .set_json(serde_json::json!({
             "device_id": phone_id,
-            "provider": "fcm"
+            "provider": "huawei"
         }))
         .to_request();
     assert_eq!(
@@ -232,7 +230,7 @@ async fn push_device_http_lifecycle_is_user_scoped() -> Result<()> {
 
     let second_device_active: bool = sqlx::query_scalar(
         "SELECT active FROM user_devices
-         WHERE user_id = $1 AND provider = 'fcm' AND device_id = $2",
+         WHERE user_id = $1 AND provider = 'huawei' AND device_id = $2",
     )
     .bind(second_user.id)
     .bind(&phone_id)
@@ -351,7 +349,7 @@ async fn login_and_notification_flow_targets_all_account_devices() -> Result<()>
                 "token": format!("{device}-token-{}", user.id),
                 "platform": "android",
                 "device_id": format!("{device}-{}", user.id),
-                "provider": "fcm"
+                "provider": "rustore"
             }))
             .to_request();
         assert_eq!(

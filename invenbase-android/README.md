@@ -7,7 +7,7 @@
 - Android Gradle Plugin 8.1.0, Gradle Wrapper 8.7.
 - `compileSdk 34`, `targetSdk 34`, `minSdk 24`.
 - Java source/target compatibility 8; для запуска Gradle рекомендуется JDK 17 или 21.
-- Retrofit/Gson/OkHttp, Material/AndroidX, ZXing, Glide, Firebase Messaging и RuStore Push SDK 7.5.0.
+- Retrofit/Gson/OkHttp, Material/AndroidX, ZXing, Glide, RuStore Push SDK 7.5.0 и Huawei Push Kit.
 - Package/application ID: `com.invenbase.app`.
 
 ## Сборка
@@ -44,26 +44,25 @@ public static final String DEFAULT_API_URL = "https://invenbase.inkviz05.online"
 
 ## Авторизация и локальные данные
 
-JWT, сериализованный пользователь и API URL сохраняются в обычных `SharedPreferences`. `EncryptedSharedPreferences` в проекте не используется — это известное ограничение безопасности.
+JWT, сериализованный пользователь и push-токены шифруются AES-GCM; ключ создаётся и хранится в Android Keystore. При обновлении приложения прежние чувствительные значения однократно переносятся из обычных `SharedPreferences` и удаляются оттуда. Зашифрованный preference-файл исключён из Android backup. API URL и нечувствительные настройки остаются в обычных `SharedPreferences`.
 
 ## Push
 
 Приложение:
 
-- подключает Firebase Messaging;
 - подключает RuStore Push SDK при заданном build-параметре `RUSTORE_PROJECT_ID`;
-- подписывается на topic `all` при старте;
-- обрабатывает обновление FCM/RuStore tokens и входящие сообщения;
-- после авторизации регистрирует оба доступных token через `POST /api/push/register-token` с соответствующим provider;
-- перед локальным logout вызывает `POST /api/push/unregister-device` для FCM и RuStore, поэтому отключается только текущее устройство, а остальные устройства учётной записи остаются активными.
+- подключает Huawei Push Kit при наличии `app/agconnect-services.json`;
+- обрабатывает обновление RuStore/Huawei tokens и входящие сообщения;
+- после авторизации регистрирует доступные tokens через `POST /api/push/register-token` с соответствующим provider;
+- перед локальным logout вызывает `POST /api/push/unregister-device` для RuStore и Huawei, поэтому отключается только текущее устройство, а остальные устройства учётной записи остаются активными;
 - планирует WorkManager-сверку непрочитанных уведомлений каждые 15 минут при наличии сети и немедленно после login/`onDeletedMessages`;
 - хранит до 500 обработанных `notification_id`, чтобы не показывать повторно уже полученный push.
 
-Для включения Firebase нужен локальный `app/google-services.json`; без него приложение собирается с отключённым FCM. Файл не должен попадать в Git. RuStore project ID задаётся через Gradle property или одноимённую переменную окружения `RUSTORE_PROJECT_ID`. Подробности: [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md), [FIREBASE_SETUP.md](FIREBASE_SETUP.md) и [PUSH_NOTIFICATIONS_SERVER.md](PUSH_NOTIFICATIONS_SERVER.md).
+Firebase/FCM, Google Services plugin и `google-services.json` в проекте не используются. RuStore project ID задаётся через Gradle property или одноимённую переменную окружения `RUSTORE_PROJECT_ID`. Подробности: [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md) и [PUSH_NOTIFICATIONS_SERVER.md](PUSH_NOTIFICATIONS_SERVER.md).
 
 ## Тесты и ограничения
 
-Gradle содержит зависимости JUnit и Espresso, но каталогов с test/androidTest исходниками в репозитории сейчас нет. Android debug build включён в GitHub Actions и не требует Firebase-конфигурации.
+Gradle содержит зависимости JUnit и Espresso, но каталогов с test/androidTest исходниками в репозитории сейчас нет. Android debug build включён в GitHub Actions.
 
 Архитектура в основном Activity/Fragment + прямые Retrofit-вызовы; полноценного repository/ViewModel слоя нет.
 ## Huawei Push

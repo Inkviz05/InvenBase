@@ -1184,13 +1184,13 @@ fn domain_schemas() -> Map<String, Value> {
 
     add(
         "RegisterPushTokenRequest",
-        &["token"],
-        json!({"token":{"type":"string"},"platform":nullable_string(),"device_id":nullable_string(),"provider":nullable_string()}),
+        &["token", "provider"],
+        json!({"token":{"type":"string"},"platform":nullable_string(),"device_id":nullable_string(),"provider":{"type":"string","enum":["rustore","huawei"]}}),
     );
     add(
         "UnregisterPushDeviceRequest",
-        &["device_id"],
-        json!({"device_id":{"type":"string"},"provider":nullable_string()}),
+        &["device_id", "provider"],
+        json!({"device_id":{"type":"string"},"provider":{"type":"string","enum":["rustore","huawei"]}}),
     );
     schemas
 }

@@ -1,10 +1,8 @@
 package com.invenbase.app.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.invenbase.app.Config;
 import com.invenbase.app.api.ApiClient;
 import com.invenbase.app.api.ApiService;
 
@@ -22,14 +20,12 @@ import retrofit2.Response;
  */
 public class PushManager {
 
-    public static final String PROVIDER_FCM = "fcm";
     public static final String PROVIDER_RUSTORE = "rustore";
     public static final String PROVIDER_HUAWEI = "huawei";
     private static final String PREF_TOKEN_PREFIX = "push_token_";
-    private static final String LEGACY_FCM_TOKEN = "fcm_token";
 
     private static PushManager instance;
-    private final SharedPreferences prefs;
+    private final SecurePreferences securePrefs;
     private final ApiService apiService;
     private final AuthManager authManager;
     private final String deviceId;
@@ -37,16 +33,17 @@ public class PushManager {
     // Конструктор PushManager: инициализирует объект и его зависимости.
     private PushManager(Context context) {
         Context appContext = context.getApplicationContext();
-        this.prefs = appContext.getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE);
+        this.securePrefs = new SecurePreferences(appContext);
         this.apiService = ApiClient.getInstance(appContext).getApiService();
         this.authManager = AuthManager.getInstance(appContext);
         this.deviceId = DeviceIdentity.get(appContext);
-        if (!prefs.contains(PREF_TOKEN_PREFIX + PROVIDER_FCM) && prefs.contains(LEGACY_FCM_TOKEN)) {
-            prefs.edit()
-                    .putString(PREF_TOKEN_PREFIX + PROVIDER_FCM, prefs.getString(LEGACY_FCM_TOKEN, null))
-                    .remove(LEGACY_FCM_TOKEN)
-                    .apply();
-        }
+        migrateLegacyPushToken(appContext, PROVIDER_RUSTORE);
+        migrateLegacyPushToken(appContext, PROVIDER_HUAWEI);
+        appContext.getSharedPreferences(com.invenbase.app.Config.PREF_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .remove("fcm_token")
+                .remove(PREF_TOKEN_PREFIX + "fcm")
+                .commit();
     }
 
     // Метод getInstance: возвращает нужное значение для текущего контекста.
@@ -61,20 +58,15 @@ public class PushManager {
      * Сохраняем токен локально и пытаемся отправить его на сервер.
      * Если пользователь еще не авторизован, токен будет отправлен при следующем успешном входе.
      */
-    public void registerToken(String token) {
-        registerToken(PROVIDER_FCM, token);
-    }
-
     public void registerToken(String provider, String token) {
         if (token == null || token.isEmpty()) {
             return;
         }
-        if (!PROVIDER_FCM.equals(provider) && !PROVIDER_RUSTORE.equals(provider)
-                && !PROVIDER_HUAWEI.equals(provider)) {
+        if (!PROVIDER_RUSTORE.equals(provider) && !PROVIDER_HUAWEI.equals(provider)) {
             Log.w("Push", "Unsupported push provider: " + provider);
             return;
         }
-        prefs.edit().putString(PREF_TOKEN_PREFIX + provider, token).apply();
+        securePrefs.putString(PREF_TOKEN_PREFIX + provider, token);
 
         if (!authManager.isAuthenticated()) {
             // Пользователь пока не залогинен — отправим позже.
@@ -92,12 +84,27 @@ public class PushManager {
         if (!authManager.isAuthenticated()) {
             return;
         }
-        for (String provider : new String[]{PROVIDER_FCM, PROVIDER_RUSTORE, PROVIDER_HUAWEI}) {
-            String token = prefs.getString(PREF_TOKEN_PREFIX + provider, null);
+        for (String provider : new String[]{PROVIDER_RUSTORE, PROVIDER_HUAWEI}) {
+            String token = securePrefs.getString(PREF_TOKEN_PREFIX + provider);
             if (token != null) {
                 sendTokenToServer(provider, token);
             }
         }
+    }
+
+    private void migrateLegacyPushToken(Context appContext, String provider) {
+        android.content.SharedPreferences legacyPrefs = appContext.getSharedPreferences(
+                com.invenbase.app.Config.PREF_NAME,
+                Context.MODE_PRIVATE
+        );
+        String key = PREF_TOKEN_PREFIX + provider;
+        if (!securePrefs.contains(key)) {
+            String legacyToken = legacyPrefs.getString(key, null);
+            if (legacyToken != null) {
+                securePrefs.putString(key, legacyToken);
+            }
+        }
+        legacyPrefs.edit().remove(key).commit();
     }
 
     // Метод sendTokenToServer: выполняет основную бизнес- или UI-логику данного участка кода.

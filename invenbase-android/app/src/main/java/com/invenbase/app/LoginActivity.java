@@ -9,7 +9,6 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 
-import com.google.firebase.messaging.FirebaseMessaging;
 import ru.rustore.sdk.pushclient.RuStorePushClient;
 import com.invenbase.app.notifications.NotificationSyncScheduler;
 import com.invenbase.app.api.ApiClient;
@@ -94,24 +93,9 @@ public class LoginActivity extends BaseActivity {
                     authManager.saveUser(loginResponse.getUser());
                     NotificationSyncScheduler.enqueueImmediate(LoginActivity.this);
 
-                    // Отправляем FCM-токен на сервер, если он уже есть
-                    android.util.Log.d("FCM", "Login successful, checking for stored token...");
+                    // Отправляем уже полученные RuStore/Huawei токены на сервер.
                     com.invenbase.app.utils.PushManager.getInstance(LoginActivity.this)
                             .sendStoredTokenIfNeeded();
-
-                    if (BuildConfig.FIREBASE_ENABLED) {
-                        // На всякий случай запрашиваем актуальный токен
-                        android.util.Log.d("FCM", "Requesting FCM token from Firebase...");
-                        FirebaseMessaging.getInstance().getToken()
-                                .addOnCompleteListener(task -> {
-                                    if (task.isSuccessful() && task.getResult() != null) {
-                                        com.invenbase.app.utils.PushManager.getInstance(LoginActivity.this)
-                                                .registerToken(task.getResult());
-                                    } else {
-                                        android.util.Log.e("FCM", "Failed to get FCM token", task.getException());
-                                    }
-                                });
-                    }
 
                     if (!BuildConfig.RUSTORE_PROJECT_ID.isEmpty()) {
                         RuStorePushClient.INSTANCE.getToken()

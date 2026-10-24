@@ -37,8 +37,6 @@ fn test_config(database_url: String) -> Config {
         jwt_secret: JWT_SECRET.to_string(),
         jwt_expiration: 3600,
         cors_allowed_origins: vec![],
-        fcm_project_id: None,
-        fcm_service_account_path: None,
         rustore_project_id: None,
         rustore_service_token: None,
         huawei_client_id: None,

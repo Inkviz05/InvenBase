@@ -5,8 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.invenbase.app.utils.PushManager;
 import com.invenbase.app.notifications.NotificationSyncScheduler;
 
@@ -19,19 +17,6 @@ public class InvenBaseApplication extends Application {
         super.onCreate();
         createNotificationChannel();
         NotificationSyncScheduler.schedulePeriodic(this);
-        if (BuildConfig.FIREBASE_ENABLED) {
-            FirebaseApp.initializeApp(this);
-            FirebaseMessaging.getInstance().subscribeToTopic("all")
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            android.util.Log.d("FCM", "Subscribed to notifications topic");
-                        } else {
-                            android.util.Log.e("FCM", "Failed to subscribe", task.getException());
-                        }
-                    });
-        } else {
-            android.util.Log.i("FCM", "google-services.json is not configured; FCM disabled");
-        }
         if (BuildConfig.HUAWEI_ENABLED) {
             new Thread(() -> {
                 try {

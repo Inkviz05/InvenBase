@@ -77,7 +77,7 @@ APK: `invenbase-android/app/build/outputs/apk/debug/app-debug.apk`. Текущи
 - Пользователи, категории, оборудование, перемещения, группы и отряды.
 - Одиночные и пакетные бронирования; approve, reject, cancel, return и автоматическое истечение.
 - QR-коды и сканирование.
-- In-app уведомления, multi-device реестр и отправка push через FCM HTTP v1, RuStore и Huawei Push Kit; Android-клиент регистрирует токены всех трёх providers. Удалённый Google legacy FCM API не используется.
+- In-app уведомления, multi-device реестр и отправка push через RuStore и Huawei Push Kit; Android-клиент регистрирует токены обоих providers. Firebase/FCM из проекта удалён.
 - Журнал действий, отчёты и экспорт XLSX в web.
 - Заявки поддержки и сообщения в них.
 
@@ -110,7 +110,7 @@ cd ..\..
 - [Web-клиент](invenbase-client/web/README.md)
 - [Docker deployment](DOCKER_DEPLOYMENT.md)
 - [Тестирование](TESTING.md)
-- [Native Android](invenbase-android/README.md), [сборка](invenbase-android/BUILD_INSTRUCTIONS.md), [Firebase](invenbase-android/FIREBASE_SETUP.md), [push backend](invenbase-android/PUSH_NOTIFICATIONS_SERVER.md)
+- [Native Android](invenbase-android/README.md), [сборка](invenbase-android/BUILD_INSTRUCTIONS.md), [push backend](invenbase-android/PUSH_NOTIFICATIONS_SERVER.md)
 - [Текущий план работ](PLAN_DORABOTOK.md)
 - [Актуальный технический бэклог](PROJECT_WEAKNESSES_BACKLOG.md)
 
@@ -119,7 +119,7 @@ cd ..\..
 - Использовать уникальные `POSTGRES_PASSWORD`, `JWT_SECRET` и пароль первого администратора.
 - После создания администратора установить `CREATE_DEFAULT_ADMIN=false`.
 - Ограничить `CORS_ALLOWED_ORIGINS` реальными web-origin.
-- Не коммитить `.env`, `google-services.json` и Firebase service account.
+- Не коммитить `.env`, mobile provider configs, service-account JSON и приватные ключи.
 - Один раз включить репозиторный pre-commit hook командой `git config core.hooksPath .githooks`; CI дополнительно проверяет tracked-файлы и историю Git через Gitleaks.
 - Использовать HTTPS перед публичным доступом; Compose-конфигурация сама TLS не настраивает.
 - Настроить резервное копирование PostgreSQL и проверить восстановление до обновления production.

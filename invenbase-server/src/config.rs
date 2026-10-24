@@ -18,10 +18,6 @@ pub struct Config {
     pub jwt_secret: String,
     pub jwt_expiration: u64,
     pub cors_allowed_origins: Vec<String>,
-    /// Project ID для FCM HTTP v1 API
-    pub fcm_project_id: Option<String>,
-    /// Путь к Service Account JSON файлу для FCM HTTP v1 API
-    pub fcm_service_account_path: Option<String>,
     /// Project ID сервиса RuStore Push.
     pub rustore_project_id: Option<String>,
     /// Сервисный токен RuStore Push из консоли разработчика.
@@ -41,50 +37,10 @@ impl Config {
         }
 
         // Читаем переменные окружения
-        let fcm_project_id = non_empty_value(env::var("FCM_PROJECT_ID").ok());
-        let fcm_service_account_path_raw =
-            non_empty_value(env::var("FCM_SERVICE_ACCOUNT_PATH").ok());
         let rustore_project_id = non_empty_value(env::var("RUSTORE_PROJECT_ID").ok());
         let rustore_service_token = non_empty_value(env::var("RUSTORE_SERVICE_TOKEN").ok());
         let huawei_client_id = non_empty_value(env::var("HUAWEI_CLIENT_ID").ok());
         let huawei_client_secret = non_empty_value(env::var("HUAWEI_CLIENT_SECRET").ok());
-
-        if !fcm_http_v1_configuration_is_complete(
-            fcm_project_id.as_deref(),
-            fcm_service_account_path_raw.as_deref(),
-        ) && (fcm_project_id.is_some() || fcm_service_account_path_raw.is_some())
-        {
-            log::warn!(
-                "FCM HTTP v1 configuration is incomplete; both project ID and service account path are required"
-            );
-        }
-
-        // Нормализуем путь к Service Account (преобразуем относительный в абсолютный, если нужно)
-        let fcm_service_account_path = fcm_service_account_path_raw.map(|path| {
-            // Если путь относительный, преобразуем в абсолютный относительно текущей директории
-            if path.starts_with("./") || (!path.contains(':') && !path.starts_with('/')) {
-                // Относительный путь
-                if let Ok(current_dir) = std::env::current_dir() {
-                    let normalized = current_dir
-                        .join(path.trim_start_matches("./"))
-                        .to_string_lossy()
-                        .to_string();
-                    normalized
-                } else {
-                    path
-                }
-            } else {
-                // Абсолютный путь - оставляем как есть
-                path
-            }
-        });
-
-        // Проверяем существование файла Service Account, если путь указан
-        if let Some(ref path) = fcm_service_account_path {
-            if !std::path::Path::new(path).is_file() {
-                log::warn!("FCM service account file is unavailable");
-            }
-        }
 
         let jwt_secret = env::var("JWT_SECRET")
             .map_err(|_| "JWT_SECRET is required and must contain at least 32 characters")?;
@@ -154,8 +110,6 @@ impl Config {
                 .filter(|origin| !origin.is_empty())
                 .map(ToOwned::to_owned)
                 .collect(),
-            fcm_project_id,
-            fcm_service_account_path,
             rustore_project_id,
             rustore_service_token,
             huawei_client_id,
@@ -176,13 +130,9 @@ fn non_empty_value(value: Option<String>) -> Option<String> {
     })
 }
 
-fn fcm_http_v1_configuration_is_complete(project_id: Option<&str>, path: Option<&str>) -> bool {
-    project_id.is_some() && path.is_some()
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{fcm_http_v1_configuration_is_complete, non_empty_value};
+    use super::non_empty_value;
 
     #[test]
     fn empty_optional_configuration_is_treated_as_missing() {
@@ -197,22 +147,5 @@ mod tests {
             non_empty_value(Some("  configured-value  ".to_string())),
             Some("configured-value".to_string())
         );
-    }
-
-    #[test]
-    fn fcm_http_v1_requires_project_and_service_account() {
-        assert!(!fcm_http_v1_configuration_is_complete(None, None));
-        assert!(!fcm_http_v1_configuration_is_complete(
-            Some("project"),
-            None
-        ));
-        assert!(!fcm_http_v1_configuration_is_complete(
-            None,
-            Some("service-account.json")
-        ));
-        assert!(fcm_http_v1_configuration_is_complete(
-            Some("project"),
-            Some("service-account.json")
-        ));
     }
 }

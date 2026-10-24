@@ -236,7 +236,7 @@ async fn user_devices_support_multiple_devices_and_deactivation() -> Result<()> 
         sqlx::query(
             "INSERT INTO user_devices
                 (user_id, device_id, provider, push_token, platform)
-             VALUES ($1, $2, 'fcm', $3, 'android')",
+             VALUES ($1, $2, 'rustore', $3, 'android')",
         )
         .bind(user_id)
         .bind(format!("{device_id}-{user_id}"))

@@ -2,11 +2,6 @@ plugins {
     id 'com.android.application'
 }
 
-def firebaseEnabled = file('google-services.json').exists()
-if (firebaseEnabled) {
-    apply plugin: 'com.google.gms.google-services'
-}
-
 def huaweiEnabled = file('agconnect-services.json').exists()
 if (huaweiEnabled) {
     apply plugin: 'com.huawei.agconnect'
@@ -27,7 +22,6 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0.0"
-        buildConfigField "boolean", "FIREBASE_ENABLED", firebaseEnabled.toString()
         buildConfigField "boolean", "HUAWEI_ENABLED", huaweiEnabled.toString()
 
         buildConfigField "String", "RUSTORE_PROJECT_ID", "\"${rustoreProjectId}\""
@@ -82,11 +76,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata:2.6.2'
     implementation 'androidx.work:work-runtime:2.9.0'
     
-    // Firebase Cloud Messaging
-    implementation platform('com.google.firebase:firebase-bom:32.7.0')
-    implementation 'com.google.firebase:firebase-messaging'
-    implementation 'com.google.firebase:firebase-analytics'
-
     // RuStore Push SDK
     implementation 'ru.rustore.sdk:pushclient:7.5.0'
     implementation 'com.huawei.hms:push:6.3.0.302'

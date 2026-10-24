@@ -2,30 +2,14 @@
 
 ## Поток данных
 
-1. Android получает FCM token.
-2. После login `PushManager` отправляет token, стабильный `device_id`, provider `fcm` и platform `android` на `POST /api/push/register-token` с Bearer JWT.
+1. Android получает token от RuStore или Huawei.
+2. После login `PushManager` отправляет token, стабильный `device_id`, provider и platform `android` на `POST /api/push/register-token` с Bearer JWT.
 3. Backend сохраняет устройство независимо от наличия credentials транспорта; повторная регистрация обновляет token, `active` и `last_seen_at`.
-4. In-app notification и outbox-задание создаются одной транзакцией; worker доставляет событие на все активные FCM/RuStore/Huawei устройства.
+4. In-app notification и outbox-задание создаются одной транзакцией; worker доставляет событие на все активные RuStore/Huawei-устройства.
 5. Payload содержит `notification_id`, а полное уведомление доступно через `/api/notifications`.
-6. WorkManager каждые 15 минут сверяет непрочитанные уведомления и показывает те, чьи `notification_id` не были обработаны push-сервисами. После `onDeletedMessages` FCM/RuStore запускается немедленная сверка.
+6. WorkManager каждые 15 минут сверяет непрочитанные уведомления и показывает пропущенные сообщения. RuStore `onDeletedMessages` запускает немедленную сверку.
 
-## Предпочтительная конфигурация: HTTP v1
-
-```env
-FCM_PROJECT_ID=your-project-id
-FCM_SERVICE_ACCOUNT_PATH=C:\secure\service-account.json
-```
-
-На Linux/Docker укажите путь, доступный внутри backend container, и смонтируйте секретный файл volume/secret. Текущий `docker-compose.yml` не монтирует service account автоматически — это нужно добавить в конкретное deployment-окружение.
-
-Backend вручную:
-
-- читает `client_email` и `private_key` из JSON;
-- подписывает OAuth assertion;
-- получает token через `https://oauth2.googleapis.com/token`;
-- отправляет каждое сообщение через FCM HTTP v1.
-
-Legacy `FCM_SERVER_KEY` и endpoint `https://fcm.googleapis.com/fcm/send` удалены из backend. Единственный поддерживаемый транспорт Firebase — FCM HTTP v1.
+Firebase/FCM из Android и backend удалён. Новая миграция удаляет прежние FCM device tokens и ограничивает `user_devices.provider` значениями `rustore` и `huawei`.
 
 ## RuStore transport
 
@@ -34,11 +18,20 @@ RUSTORE_PROJECT_ID=your-rustore-project-id
 RUSTORE_SERVICE_TOKEN=your-service-token
 ```
 
-Backend отправляет токены provider `rustore` через `https://vkpns.rustore.ru/v1/projects/{project_id}/messages:send`. Ответ `NOT_FOUND` деактивирует токен. Android использует RuStore Push SDK 7.5.0, получает token при старте и через `onNewToken`, сохраняет его до авторизации и регистрирует с provider `rustore`. Для инициализации задайте Gradle property или переменную окружения `RUSTORE_PROJECT_ID`; при пустом значении интеграция отключена.
+Backend отправляет tokens provider `rustore` через `https://vkpns.rustore.ru/v1/projects/{project_id}/messages:send`. Ответ `NOT_FOUND` деактивирует token. Android использует RuStore Push SDK 7.5.0, получает token при старте и через `onNewToken`, сохраняет его до авторизации и регистрирует с provider `rustore`. Для инициализации задайте Gradle property или переменную окружения `RUSTORE_PROJECT_ID`; при пустом значении интеграция отключена.
+
+## Huawei transport
+
+```env
+HUAWEI_CLIENT_ID=your-client-id
+HUAWEI_CLIENT_SECRET=your-client-secret
+```
+
+Backend получает OAuth token AppGallery Connect и отправляет сообщения через Huawei Push Kit. Provider code `80300007` деактивирует недействительный token. Android включает AG Connect только при наличии локального `app/agconnect-services.json`.
 
 ## Реальные маршруты
 
-- `POST /api/push/register-token` — регистрация token текущего пользователя.
+- `POST /api/push/register-token` — регистрация token текущего пользователя; поле `provider` обязательно и принимает `rustore` или `huawei`.
 - `POST /api/push/unregister-device` — деактивация конкретного provider/device при logout.
 - `GET /api/notifications` — in-app уведомления.
 - `GET /api/notifications/count` и `/unread-count` — число непрочитанных.
@@ -48,8 +41,8 @@ Backend отправляет токены provider `rustore` через `https:/
 
 ## Ограничения
 
-- RuStore требует отдельный проект для каждой комбинации package name и подписи; реальная доставка должна быть проверена debug/release сборками, зарегистрированными в RuStore Console.
-- Huawei transport и клиентский Huawei Push Kit отсутствуют.
-- Отдельных network contract tests FCM/OAuth и RuStore API пока нет.
+- RuStore требует отдельный проект для каждой комбинации package name и подписи.
+- Получение tokens и доставка RuStore/Huawei на реальных зарегистрированных устройствах пока отложены.
+- Отдельных network contract tests provider API пока нет.
 - WorkManager использует минимальный системный интервал 15 минут и не является каналом мгновенной доставки.
-- Service account rotation и secret mounting должны настраиваться вне приложения.
+- Provider credentials должны храниться в secrets deployment-окружения.

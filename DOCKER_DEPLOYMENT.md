@@ -71,7 +71,7 @@ Web image собирается с `VITE_API_URL=/api`. nginx имеет SPA fall
 
 ## Push в Docker
 
-Compose передаёт FCM env, но не монтирует service account JSON. Для FCM HTTP v1 deployment должен отдельно смонтировать файл внутрь backend container и указать container path в `FCM_SERVICE_ACCOUNT_PATH`. Не добавляйте JSON в image или git.
+RuStore и Huawei credentials передаются backend через переменные окружения. Храните их в secret manager deployment-окружения, а не в image или Git.
 
 ## Smoke test
 

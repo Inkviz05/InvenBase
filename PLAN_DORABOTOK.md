@@ -12,7 +12,7 @@
 - Добавлен GitHub Actions workflow: Android debug build, web audit/tests/build, `cargo fmt`, backend library tests, полный backend integration suite на чистом PostgreSQL 16 и Compose smoke.
 - Убраны production `console.log`, directory listing отключён, параметры пула БД вынесены в env.
 - Web использует локальный XLSX writer вместо зависимости `xlsx`.
-- Завершён первый этап multi-device push: provider-aware `user_devices`, стабильный `device_id`, active/last-seen lifecycle, register/unregister, деактивация невалидных FCM-токенов и рабочий `FcmTransport`.
+- Завершён первый этап multi-device push: provider-aware `user_devices`, стабильный `device_id`, active/last-seen lifecycle, register/unregister и рабочие RuStore/Huawei transports. Firebase/FCM удалён.
 - Добавлена transactional outbox-очередь push: in-app уведомление и задание доставки создаются в одной транзакции, payload содержит `notification_id`; worker поддерживает атомарный claim, retries с exponential backoff, восстановление зависших задач и журнал последней ошибки/итогового статуса.
 
 ## Следующие задачи
@@ -23,7 +23,7 @@
 2. [Выполнено] JSON-ошибки унифицированы полями `code`, `message`, `details`, `request_id`; добавлен `X-Request-ID`, внутренние диагностические сообщения не выдаются клиенту, `401` и `403` разделены.
 3. [Выполнено] Добавлены OpenAPI 3.1 `/openapi.json`, Swagger UI `/docs`, все маршруты, Bearer JWT, единая error schema, предметные request/response schemas, path/query-параметры, JSON и бинарные ответы. Contract tests проверяют ключевые операции и разрешение всех `$ref`. Генерация клиентских типов вынесена в отдельный следующий этап.
 4. [Выполнено] Добавлен `/ready` с `SELECT 1` в PostgreSQL и ответом `503` при недоступной БД; `/health` оставлен простой liveness-проверкой. Docker и Compose smoke ожидают readiness.
-5. [Выполнено] Пустые значения FCM/RuStore/Huawei env нормализуются как `None`; startup-логи не раскрывают значения, пути или наличие секретов, а push-логи не содержат payload, текст уведомления и фрагменты device token.
+5. [Выполнено] Пустые значения RuStore/Huawei env нормализуются как `None`; startup-логи не раскрывают значения, пути или наличие секретов, а push-логи не содержат payload, текст уведомления и фрагменты device token.
 
 ### 2. База данных и эксплуатация
 
@@ -45,14 +45,14 @@
 
 1. Ввести единое серверное событие `NotificationEvent` и сохранять каждое уведомление в PostgreSQL как источник истины.
 2. [Выполнено] Расширить модель устройств: `user_id`, стабильный `device_id`, `provider`, `push_token`, `platform`, `active`, `last_seen_at`. Одна учётная запись поддерживает несколько устройств и провайдеров на уровне схемы.
-3. [Выполнено] Добавить API регистрации, обновления и удаления устройства. Android logout деактивирует текущее устройство для FCM, RuStore и Huawei.
-4. [Выполнено] Введены интерфейс `PushTransport`, `FcmTransport`, `RuStoreTransport` и `HuaweiTransport`; Android получает и регистрирует токены всех трёх providers.
-5. [Выполнено на backend] Событие рассылается на все активные устройства пользователя соответствующих providers; FCM `UNREGISTERED`, RuStore `NOT_FOUND` и Huawei `80300007` деактивируют токен.
+3. [Выполнено] Добавить API регистрации, обновления и удаления устройства. Android logout деактивирует текущее устройство для RuStore и Huawei.
+4. [Выполнено] Введены интерфейс `PushTransport`, `RuStoreTransport` и `HuaweiTransport`; Android получает и регистрирует tokens обоих providers. Firebase/FCM удалён из Android, backend, конфигурации и зависимостей.
+5. [Выполнено на backend] Событие рассылается на все активные устройства пользователя соответствующих providers; RuStore `NOT_FOUND` и Huawei `80300007` деактивируют token.
 6. [Выполнено] Добавлена PostgreSQL transactional outbox: in-app запись и outbox создаются одной транзакцией, payload включает `notification_id`, worker выполняет retries с exponential backoff и сохраняет статус/последнюю ошибку. Полное содержимое доступно из авторизованного notifications API.
 7. Добавить SSE для мгновенного обновления открытых web/Android-клиентов. WebSocket использовать только если появится реальный двусторонний сценарий, например live-чат поддержки.
-8. [Выполнено] Android WorkManager каждые 15 минут синхронизирует непрочитанные уведомления при наличии сети; immediate sync запускается после login и `onDeletedMessages` FCM/RuStore. Локальный реестр `notification_id` предотвращает повторный показ уже обработанных push.
+8. [Выполнено] Android WorkManager каждые 15 минут синхронизирует непрочитанные уведомления при наличии сети; immediate sync запускается после login и RuStore `onDeletedMessages`. Локальный реестр `notification_id` предотвращает повторный показ уже обработанных push.
 9. Не использовать foreground service для постоянного соединения без отдельной продуктовой необходимости: он расходует батарею и требует постоянного системного уведомления.
-10. [Частично выполнено] Миграции, multi-device/deactivation lifecycle, атомарное создание notification/outbox и outbox claim/retry/complete покрыты PostgreSQL integration tests, backoff и нормализация FCM env — unit tests. HTTP lifecycle login → два устройства → notification/outbox, а также register/update/unregister покрыт через `actix_web::test` и выполняется в CI; ещё нужны contract tests новых transports.
+10. [Частично выполнено] Миграции, multi-device/deactivation lifecycle, атомарное создание notification/outbox и outbox claim/retry/complete покрыты PostgreSQL integration tests. HTTP lifecycle login → два устройства → notification/outbox, а также register/update/unregister покрыт через `actix_web::test` и выполняется в CI; ещё нужны network contract tests transports.
 11. [Отложено] Провести end-to-end проверку уведомлений на реальных Android-устройствах: доставка на несколько устройств одной учётной записи, восстановление после потери сети и `onDeletedMessages`, а также прекращение доставки после logout. Вернуться к проверке, когда будет готово реальное устройство и пользователь решит продолжить ручное тестирование.
 
 ### 5. Web
@@ -64,7 +64,7 @@
 
 ### 6. Native Android
 
-1. Убрать токены и пользовательские данные из обычных `SharedPreferences` в защищённое хранилище.
+1. [Выполнено] JWT, сериализованный пользователь и push-токены шифруются AES-GCM с ключом Android Keystore; plaintext-значения мигрируются и удаляются, зашифрованный файл исключён из backup.
 2. Вынести API URL в build types/flavors вместо одной константы и пользовательской настройки.
 3. Ввести repository/ViewModel слой и сократить API/UI-логику в Activity/Fragment.
 4. Добавить unit и instrumentation tests; сейчас Gradle содержит зависимости JUnit/Espresso, но тестовых исходников в проекте нет.

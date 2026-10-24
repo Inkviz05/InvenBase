@@ -42,15 +42,13 @@ GET http://127.0.0.1:8080/docs
 | `DEFAULT_ADMIN_USERNAME` | Default `admin` |
 | `DEFAULT_ADMIN_EMAIL` | Default `admin@kvantoriym.local` |
 | `DEFAULT_ADMIN_FULL_NAME` | Default `Administrator` |
-| `FCM_PROJECT_ID` | Опциональный project ID для FCM HTTP v1 |
-| `FCM_SERVICE_ACCOUNT_PATH` | Опциональный путь к service account JSON для HTTP v1 |
 | `RUSTORE_PROJECT_ID` | Опциональный ID проекта RuStore Push |
 | `RUSTORE_SERVICE_TOKEN` | Опциональный сервисный токен RuStore Push; хранить только в секретах окружения |
 | `HUAWEI_CLIENT_ID` | Опциональный OAuth 2.0 client ID приложения из AppGallery Connect |
 | `HUAWEI_CLIENT_SECRET` | Опциональный OAuth 2.0 client secret Huawei Push Kit; хранить только в секретах окружения |
 | `RUST_LOG` | Фильтр логов; backend по умолчанию использует `info` |
 
-Пустые строки FCM сейчас не нормализуются в `None`; лучше удалять незаданные FCM-переменные из `.env`, а не оставлять `KEY=`.
+Пустые строки опциональных RuStore/Huawei параметров нормализуются как отсутствующие значения.
 
 ### Первый администратор
 
@@ -83,9 +81,9 @@ Backend отдаёт legacy HTML из `static/` по `/` и `/admin`. Это н�
 
 ## Фоновые задачи и push
 
-При старте запускаются проверка истёкших бронирований и worker очереди push-доставки. In-app уведомление и задание в `notification_outbox` создаются одной транзакцией, а payload связывает их через `notification_id`. Затем push доставляется на все активные FCM-устройства; временные ошибки повторяются с exponential backoff, итог и последняя ошибка сохраняются в PostgreSQL.
+При старте запускаются проверка истёкших бронирований и worker очереди push-доставки. In-app уведомление и задание в `notification_outbox` создаются одной транзакцией, а payload связывает их через `notification_id`. Затем push доставляется на все активные RuStore/Huawei-устройства; временные ошибки повторяются с exponential backoff, итог и последняя ошибка сохраняются в PostgreSQL.
 
-FCM-конфигурация — `FCM_PROJECT_ID` + `FCM_SERVICE_ACCOUNT_PATH`; код самостоятельно получает OAuth token и вызывает только FCM HTTP v1. Legacy `FCM_SERVER_KEY` и endpoint `fcm/send` не поддерживаются. Для RuStore задаются `RUSTORE_PROJECT_ID` и `RUSTORE_SERVICE_TOKEN`; backend вызывает официальный RuStore Push API и деактивирует токены с ответом `NOT_FOUND`. Для Huawei задаются `HUAWEI_CLIENT_ID` и `HUAWEI_CLIENT_SECRET`; backend получает OAuth-токен и отправляет сообщения через Huawei Push Kit, деактивируя токен при коде `80300007`. Реестр `user_devices` поддерживает несколько устройств и параллельную доставку через providers `fcm`, `rustore` и `huawei`. Получение Huawei-токена на Android ещё не реализовано.
+Для RuStore задаются `RUSTORE_PROJECT_ID` и `RUSTORE_SERVICE_TOKEN`; backend вызывает официальный RuStore Push API и деактивирует токены с ответом `NOT_FOUND`. Для Huawei задаются `HUAWEI_CLIENT_ID` и `HUAWEI_CLIENT_SECRET`; backend получает OAuth-токен и отправляет сообщения через Huawei Push Kit, деактивируя token при коде `80300007`. Реестр `user_devices` поддерживает несколько устройств и параллельную доставку через providers `rustore` и `huawei`. Firebase/FCM не поддерживается.
 
 ## Тесты
 

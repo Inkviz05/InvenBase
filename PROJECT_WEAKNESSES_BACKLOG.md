@@ -13,13 +13,13 @@
 ## Высокий приоритет
 
 1. [Закрыто] Добавлены HTTP integration tests login, `401`/`403`, формата ошибок, request ID, multi-device notification flow, CRUD/role-сценариев users и equipment, а также полного lifecycle support.
-2. [Закрыто] Пустые FCM/RuStore/Huawei env нормализуются как отсутствующие; из startup/push-логов убраны значения, пути, payload, текст уведомлений и фрагменты device token.
-3. [Закрыто] Legacy `FCM_SERVER_KEY`, endpoint `fcm/send` и неиспользуемые синхронные fallback-функции удалены; Firebase-доставка работает только через HTTP v1 с service account.
+2. [Закрыто] Пустые RuStore/Huawei env нормализуются как отсутствующие; из startup/push-логов убраны значения, пути, payload, текст уведомлений и фрагменты device token.
+3. [Закрыто] Firebase/FCM полностью удалён из Android и backend: Google Services plugin, SDK, service, transport, OAuth/service-account код, env и зависимости. Миграция удаляет старые FCM device tokens.
 4. [Закрыто] Реальные `.env`, mobile provider configs, service-account JSON, приватные ключи и keystore исключены из Git; tracked/staged файлы проверяет PowerShell guard, история Git сканируется Gitleaks в CI. Репозиторный pre-commit hook включается через `git config core.hooksPath .githooks`.
-5. Защитить Android auth storage, разделить API URL по build type и настроить release signing/minification.
+5. [Частично выполнено] Android auth/user/push-token storage защищён AES-GCM и Android Keystore. Остаются API URL по build type и release signing/minification.
 6. [Частично выполнено] Android debug build добавлен в CI; unit/instrumentation tests появятся после добавления тестовых исходников.
 7. Добавить role guards на маршрутах web, не полагаясь только на скрытие пунктов меню и backend `403`.
-8. Продолжить provider-independent архитектуру: FCM, RuStore и Huawei реализованы на сервере и Android; остаются проверка transports на реальном устройстве и единое `NotificationEvent`.
+8. Продолжить provider-independent архитектуру: RuStore и Huawei реализованы на сервере и Android; остаются проверка transports на реальном устройстве и единое `NotificationEvent`.
 9. [Закрыто] Добавлен HTTP integration test register/update/unregister устройства, нескольких устройств одной учётной записи и смены пользователя на одном физическом устройстве.
 10. [Закрыто] Transactional outbox, retries/backoff и журнал доставки добавлены; in-app уведомление и outbox создаются одной транзакцией, payload содержит `notification_id`.
 11. [Отложено] End-to-end проверка уведомлений на реальных Android-устройствах: multi-device доставка, восстановление WorkManager после потери сети и `onDeletedMessages`, деактивация устройства после logout. Выполнить позже по решению пользователя.
@@ -39,7 +39,7 @@
 
 1. Систематизировать повторяющиеся web-компоненты: статусы, фильтры, таблицы и booking actions.
 2. Рассмотреть TypeScript после стабилизации API-контрактов.
-3. Проверить RuStore и Huawei transports на реальном устройстве и определить условия отключения FCM fallback. Huawei внедрён через общий серверный `PushTransport`, Android token lifecycle реализован.
+3. Проверить RuStore и Huawei transports на реальном устройстве. Huawei внедрён через общий серверный `PushTransport`, Android token lifecycle реализован; FCM fallback удалён.
 
 ## Подтверждённые ограничения текущей реализации
 
@@ -49,7 +49,7 @@
 - Android release build имеет `minifyEnabled false`.
 - Автоматической ротации JWT/refresh token нет: API выдаёт один JWT с временем жизни из `JWT_EXPIRATION`.
 - Отдельного logout endpoint на backend нет; клиенты удаляют локальный токен.
-- `user_devices` моделирует provider/device lifecycle и несколько устройств; сервер и Android реализуют FCM/RuStore/Huawei. RuStore и Huawei ещё не проверены на зарегистрированных сборках реальных устройств.
+- `user_devices` моделирует provider/device lifecycle и несколько устройств; сервер и Android реализуют RuStore/Huawei. Оба provider ещё не проверены на зарегистрированных сборках реальных устройств.
 - Для открытых клиентов нет SSE/WebSocket. Android WorkManager сверяет непрочитанные уведомления и восстанавливает пропущенные push; серверная очередь повторной доставки атомарно связана с in-app уведомлением.
 
 Приоритетный порядок: readiness и production DB-процедура → HTTP/API tests и контракт → multi-device notifications/outbox/transports → CI с PostgreSQL → Android security/build → SSE/WorkManager → архитектурные рефакторинги.

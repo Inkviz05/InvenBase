@@ -173,9 +173,14 @@ jobs:
             echo "Static directory listing must stay disabled"
             exit 1
           fi
-          if grep -R -E "FCM_SERVER_KEY|fcm\.googleapis\.com/fcm/send" \
-            invenbase-server/src docker-compose.yml .env.docker.example invenbase-server/.env.example; then
-            echo "Legacy FCM configuration and endpoint must stay removed"
+          if grep -R -i -E "firebase|fcm|google-services" \
+            invenbase-server/src invenbase-server/Cargo.toml \
+            invenbase-android/build.gradle invenbase-android/app/build.gradle \
+            invenbase-android/app/src/main/AndroidManifest.xml \
+            invenbase-android/app/src/main/java \
+            docker-compose.yml .env.docker.example invenbase-server/.env.example \
+            | grep -vF 'remove(PREF_TOKEN_PREFIX + "fcm")'; then
+            echo "Firebase/FCM must stay removed from active code and configuration"
             exit 1
           fi
 

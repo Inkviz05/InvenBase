@@ -18,15 +18,18 @@ import retrofit2.Response;
 
 public class AuthManager {
     private static AuthManager instance;
-    private SharedPreferences prefs;
-    private Gson gson;
-    private Context appContext;
+    private final SharedPreferences legacyPrefs;
+    private final SecurePreferences securePrefs;
+    private final Gson gson;
+    private final Context appContext;
 
     // Конструктор AuthManager: инициализирует объект и его зависимости.
     private AuthManager(Context context) {
         appContext = context.getApplicationContext();
-        prefs = appContext.getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE);
+        legacyPrefs = appContext.getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE);
+        securePrefs = new SecurePreferences(appContext);
         gson = new Gson();
+        migrateLegacySession();
     }
 
     // Метод getInstance: возвращает нужное значение для текущего контекста.
@@ -39,23 +42,23 @@ public class AuthManager {
 
     // Метод saveToken: выполняет основную бизнес- или UI-логику данного участка кода.
     public void saveToken(String token) {
-        prefs.edit().putString(Config.PREF_TOKEN, token).apply();
+        securePrefs.putString(Config.PREF_TOKEN, token);
     }
 
     // Метод getToken: возвращает нужное значение для текущего контекста.
     public String getToken() {
-        return prefs.getString(Config.PREF_TOKEN, null);
+        return securePrefs.getString(Config.PREF_TOKEN);
     }
 
     // Метод saveUser: выполняет основную бизнес- или UI-логику данного участка кода.
     public void saveUser(User user) {
         String userJson = gson.toJson(user);
-        prefs.edit().putString(Config.PREF_USER, userJson).apply();
+        securePrefs.putString(Config.PREF_USER, userJson);
     }
 
     // Метод getUser: возвращает нужное значение для текущего контекста.
     public User getUser() {
-        String userJson = prefs.getString(Config.PREF_USER, null);
+        String userJson = securePrefs.getString(Config.PREF_USER);
         if (userJson == null) {
             return null;
         }
@@ -72,15 +75,27 @@ public class AuthManager {
         String token = getToken();
         if (token != null) {
             String deviceId = DeviceIdentity.get(appContext);
-            unregisterPushDevice(token, deviceId, PushManager.PROVIDER_FCM);
             unregisterPushDevice(token, deviceId, PushManager.PROVIDER_RUSTORE);
             unregisterPushDevice(token, deviceId, PushManager.PROVIDER_HUAWEI);
         }
 
-        prefs.edit()
-            .remove(Config.PREF_TOKEN)
-            .remove(Config.PREF_USER)
-            .apply();
+        securePrefs.remove(Config.PREF_TOKEN);
+        securePrefs.remove(Config.PREF_USER);
+    }
+
+    private void migrateLegacySession() {
+        migrateLegacyValue(Config.PREF_TOKEN);
+        migrateLegacyValue(Config.PREF_USER);
+    }
+
+    private void migrateLegacyValue(String key) {
+        if (!securePrefs.contains(key)) {
+            String legacyValue = legacyPrefs.getString(key, null);
+            if (legacyValue != null) {
+                securePrefs.putString(key, legacyValue);
+            }
+        }
+        legacyPrefs.edit().remove(key).commit();
     }
 
     private void unregisterPushDevice(String authToken, String deviceId, String provider) {
