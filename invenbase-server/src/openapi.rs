@@ -27,6 +27,10 @@ fn operation(tag: &str, summary: &str, protected: bool) -> Value {
                 "description": "State conflict",
                 "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } } }
             },
+            "429": {
+                "description": "Rate limit exceeded",
+                "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } } }
+            },
             "500": {
                 "description": "Internal server error",
                 "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } } }

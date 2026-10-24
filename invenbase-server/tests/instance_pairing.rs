@@ -162,5 +162,28 @@ async fn setup_code_is_admin_only_and_can_be_consumed_once() -> Result<()> {
     .await;
     assert_eq!(revoked_pair.status(), StatusCode::UNAUTHORIZED);
 
+    for _ in 0..7 {
+        let malformed = test::call_service(
+            &app,
+            test::TestRequest::post()
+                .uri("/api/instance/pair")
+                .set_json(json!({"setup_code": "invalid"}))
+                .to_request(),
+        )
+        .await;
+        assert_eq!(malformed.status(), StatusCode::BAD_REQUEST);
+    }
+    let rate_limited = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri("/api/instance/pair")
+            .set_json(json!({"setup_code": "invalid"}))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(rate_limited.status(), StatusCode::TOO_MANY_REQUESTS);
+    let rate_limited_body: Value = test::read_body_json(rate_limited).await;
+    assert_eq!(rate_limited_body["code"], "RATE_LIMITED");
+
     Ok(())
 }

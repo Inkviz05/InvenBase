@@ -24,10 +24,12 @@ import androidx.fragment.app.Fragment;
 
 import com.invenbase.app.CartActivity;
 import com.invenbase.app.EquipmentDetailActivity;
+import com.invenbase.app.ServerSetupActivity;
 import com.invenbase.app.R;
 import com.invenbase.app.api.ApiClient;
 import com.invenbase.app.api.ApiService;
 import com.invenbase.app.models.Equipment;
+import com.invenbase.app.utils.SetupLink;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
@@ -307,6 +309,13 @@ public class ScannerFragment extends Fragment {
 
     // Метод handleQrCode: выполняет основную бизнес- или UI-логику данного участка кода.
     private void handleQrCode(String qrCode) {
+        if (SetupLink.parse(qrCode) != null) {
+            stopScanning();
+            Intent setup = new Intent(requireContext(), ServerSetupActivity.class);
+            setup.setData(android.net.Uri.parse(qrCode));
+            startActivity(setup);
+            return;
+        }
         android.util.Log.d("ScannerFragment", "Processing QR code: " + qrCode);
         updateScanStatus(getString(R.string.searching_equipment), true);
         

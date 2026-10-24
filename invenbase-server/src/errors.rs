@@ -19,6 +19,7 @@ pub enum AppError {
     InvalidCredentials,
     Forbidden(String),
     Conflict(String),
+    TooManyRequests(String),
     BadRequest(String),
     InternalError(String),
 }
@@ -32,6 +33,7 @@ impl AppError {
             AppError::InvalidCredentials => "INVALID_CREDENTIALS",
             AppError::Forbidden(_) => "FORBIDDEN",
             AppError::Conflict(_) => "CONFLICT",
+            AppError::TooManyRequests(_) => "RATE_LIMITED",
             AppError::BadRequest(_) => "VALIDATION_ERROR",
             AppError::InternalError(_) => "INTERNAL_ERROR",
         }
@@ -48,6 +50,7 @@ impl AppError {
             | AppError::Unauthorized(message)
             | AppError::Forbidden(message)
             | AppError::Conflict(message)
+            | AppError::TooManyRequests(message)
             | AppError::BadRequest(message) => message.clone(),
         }
     }
@@ -71,6 +74,7 @@ impl fmt::Display for AppError {
             AppError::InvalidCredentials => write!(f, "Invalid credentials"),
             AppError::Forbidden(message) => write!(f, "Forbidden: {message}"),
             AppError::Conflict(message) => write!(f, "Conflict: {message}"),
+            AppError::TooManyRequests(message) => write!(f, "Rate limited: {message}"),
             AppError::BadRequest(message) => write!(f, "Bad request: {message}"),
             AppError::InternalError(message) => write!(f, "Internal error: {message}"),
         }
@@ -87,6 +91,7 @@ impl ResponseError for AppError {
             AppError::Unauthorized(_) | AppError::InvalidCredentials => StatusCode::UNAUTHORIZED,
             AppError::Forbidden(_) => StatusCode::FORBIDDEN,
             AppError::Conflict(_) => StatusCode::CONFLICT,
+            AppError::TooManyRequests(_) => StatusCode::TOO_MANY_REQUESTS,
             AppError::BadRequest(_) => StatusCode::BAD_REQUEST,
         }
     }
@@ -136,6 +141,11 @@ mod tests {
                 AppError::Conflict("duplicate".to_string()),
                 StatusCode::CONFLICT,
                 "CONFLICT",
+            ),
+            (
+                AppError::TooManyRequests("slow down".to_string()),
+                StatusCode::TOO_MANY_REQUESTS,
+                "RATE_LIMITED",
             ),
             (
                 AppError::BadRequest("invalid".to_string()),

@@ -23,6 +23,7 @@ const Users = React.lazy(() => import('./pages/Users'));
 const Reports = React.lazy(() => import('./pages/Reports'));
 const Logs = React.lazy(() => import('./pages/Logs'));
 const Support = React.lazy(() => import('./pages/Support'));
+const MobileSetup = React.lazy(() => import('./pages/MobileSetup'));
 
 const PageLoader = () => <div className="loading"><div className="spinner"></div></div>;
 
@@ -66,6 +67,7 @@ const AppRoutes = () => {
           <Route path="reports" element={<Reports />} />
           <Route path="logs" element={<Logs />} />
           <Route path="support" element={<Support />} />
+          <Route path="mobile-setup" element={<MobileSetup />} />
         </Route>
       </Routes>
     </Suspense>

@@ -1,6 +1,9 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpRequest, HttpResponse};
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, VecDeque};
+use std::sync::{Mutex, OnceLock};
+use std::time::{Duration as StdDuration, Instant};
 use uuid::Uuid;
 
 use crate::app_state::AppState;
@@ -11,6 +14,10 @@ const API_PROTOCOL_VERSION: u16 = 1;
 const SETUP_CODE_LENGTH: usize = 24;
 const DEFAULT_TTL_MINUTES: i64 = 10;
 const MAX_TTL_MINUTES: i64 = 60;
+const PAIR_RATE_LIMIT: usize = 10;
+const PAIR_RATE_WINDOW: StdDuration = StdDuration::from_secs(60);
+
+static PAIR_ATTEMPTS: OnceLock<Mutex<HashMap<String, VecDeque<Instant>>>> = OnceLock::new();
 
 #[derive(Debug, Serialize)]
 pub struct InstanceResponse {
@@ -133,8 +140,10 @@ pub async fn revoke_setup_code(
 
 pub async fn pair_instance(
     state: web::Data<AppState>,
+    http_request: HttpRequest,
     request: web::Json<PairInstanceRequest>,
 ) -> Result<HttpResponse, AppError> {
+    enforce_pair_rate_limit(&http_request)?;
     let normalized_code = normalize_setup_code(&request.setup_code)?;
     let paired_at = Utc::now();
     let consumed = sqlx::query_scalar::<_, Uuid>(
@@ -160,6 +169,37 @@ pub async fn pair_instance(
         instance: instance_response(&state).await?,
         paired_at,
     }))
+}
+
+fn enforce_pair_rate_limit(request: &HttpRequest) -> Result<(), AppError> {
+    let source = request
+        .connection_info()
+        .realip_remote_addr()
+        .map(str::to_string)
+        .or_else(|| request.peer_addr().map(|address| address.ip().to_string()))
+        .unwrap_or_else(|| "unknown".to_string());
+    let now = Instant::now();
+    let attempts = PAIR_ATTEMPTS.get_or_init(|| Mutex::new(HashMap::new()));
+    let mut attempts = attempts
+        .lock()
+        .map_err(|_| AppError::InternalError("Pair rate limiter lock poisoned".to_string()))?;
+    attempts.retain(|_, entries| {
+        while entries
+            .front()
+            .is_some_and(|at| now.duration_since(*at) >= PAIR_RATE_WINDOW)
+        {
+            entries.pop_front();
+        }
+        !entries.is_empty()
+    });
+    let entries = attempts.entry(source).or_default();
+    if entries.len() >= PAIR_RATE_LIMIT {
+        return Err(AppError::TooManyRequests(
+            "Too many pairing attempts; retry in one minute".to_string(),
+        ));
+    }
+    entries.push_back(now);
+    Ok(())
 }
 
 fn normalize_setup_code(value: &str) -> Result<String, AppError> {

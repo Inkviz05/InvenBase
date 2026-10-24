@@ -654,6 +654,7 @@ const Layout = () => {
             </>
           )}
           {isAdmin() && (
+            <>
             <Link
               to="/users"
               onClick={() => setShowMobileMenu(false)}
@@ -676,6 +677,22 @@ const Layout = () => {
               <span className="material-icons" style={{ fontSize: '20px' }}>people</span>
               Пользователи
             </Link>
+            <Link
+              to="/mobile-setup"
+              onClick={() => setShowMobileMenu(false)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 24px',
+                color: isActive('/mobile-setup') ? 'white' : 'rgba(255,255,255,0.8)',
+                textDecoration: 'none', fontWeight: isActive('/mobile-setup') ? 600 : 400,
+                background: isActive('/mobile-setup') ? 'var(--sidebar-hover)' : 'transparent',
+                borderLeft: isActive('/mobile-setup') ? '3px solid var(--primary-color)' : '3px solid transparent',
+                textTransform: 'uppercase', fontSize: '13px', letterSpacing: '0.5px'
+              }}
+            >
+              <span className="material-icons" style={{ fontSize: '20px' }}>phone_android</span>
+              Мобильное приложение
+            </Link>
+            </>
           )}
         </nav>
 

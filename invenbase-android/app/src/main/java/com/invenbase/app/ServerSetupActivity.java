@@ -15,6 +15,12 @@ import com.invenbase.app.models.PairInstanceRequest;
 import com.invenbase.app.models.PairInstanceResponse;
 import com.invenbase.app.utils.ApiErrorParser;
 import com.invenbase.app.utils.ServerConfiguration;
+import com.invenbase.app.utils.SetupLink;
+import com.invenbase.app.utils.AuthManager;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
+
+import androidx.activity.result.ActivityResultLauncher;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -25,6 +31,13 @@ public final class ServerSetupActivity extends BaseActivity {
     private EditText setupCode;
     private Button connectButton;
     private ProgressBar progressBar;
+    private final ActivityResultLauncher<ScanOptions> qrScanner =
+            registerForActivityResult(new ScanContract(), result -> {
+                if (result.getContents() == null) return;
+                if (!applySetupLink(result.getContents())) {
+                    Toast.makeText(this, R.string.invalid_server_setup_qr, Toast.LENGTH_LONG).show();
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +53,19 @@ public final class ServerSetupActivity extends BaseActivity {
             serverUrl.setText(BuildConfig.API_BASE_URL);
         }
         connectButton.setOnClickListener(view -> connect());
+        findViewById(R.id.button_scan_server_qr).setOnClickListener(view -> {
+            ScanOptions options = new ScanOptions();
+            options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
+            options.setPrompt(getString(R.string.scan_server_setup_qr));
+            options.setBeepEnabled(true);
+            options.setOrientationLocked(false);
+            qrScanner.launch(options);
+        });
+        if (getIntent() != null && getIntent().getData() != null) {
+            if (!applySetupLink(getIntent().getData().toString())) {
+                Toast.makeText(this, R.string.invalid_server_setup_link, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private void connect() {
@@ -96,8 +122,8 @@ public final class ServerSetupActivity extends BaseActivity {
                     return;
                 }
 
-                new ServerConfiguration(ServerSetupActivity.this)
-                        .save(baseUrl, body.getInstance());
+                AuthManager.getInstance(ServerSetupActivity.this).logout();
+                new ServerConfiguration(ServerSetupActivity.this).save(baseUrl, body.getInstance());
                 Toast.makeText(ServerSetupActivity.this,
                         getString(R.string.server_connected, body.getInstance().getInstanceName()),
                         Toast.LENGTH_LONG).show();
@@ -133,5 +159,13 @@ public final class ServerSetupActivity extends BaseActivity {
         serverUrl.setEnabled(!loading);
         setupCode.setEnabled(!loading);
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+    }
+
+    private boolean applySetupLink(String value) {
+        SetupLink link = SetupLink.parse(value);
+        if (link == null) return false;
+        serverUrl.setText(link.getServerUrl());
+        setupCode.setText(link.getSetupCode());
+        return true;
     }
 }

@@ -10,6 +10,9 @@
     <string name="server_connected">Подключено: %1$s</string>
     <string name="connected_server">Сервер: %1$s</string>
     <string name="change_server">Сменить сервер</string>
+    <string name="scan_server_setup_qr">Сканировать QR подключения</string>
+    <string name="invalid_server_setup_qr">QR-код не содержит корректную ссылку подключения InvenBase</string>
+    <string name="invalid_server_setup_link">Ссылка подключения InvenBase некорректна</string>
     <string name="app_name">InvenBase</string>
     
     <!-- Auth -->

@@ -57,8 +57,15 @@
 
         <activity
             android:name=".ServerSetupActivity"
-            android:exported="false"
-            android:theme="@style/Theme.InvenBase" />
+            android:exported="true"
+            android:theme="@style/Theme.InvenBase">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="invenbase" android:host="pair" />
+            </intent-filter>
+        </activity>
         
         <activity
             android:name=".MainActivity"

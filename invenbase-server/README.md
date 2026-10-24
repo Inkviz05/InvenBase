@@ -60,7 +60,7 @@ GET http://127.0.0.1:8080/docs
 Большинство предметных маршрутов требует Bearer JWT. Публичными являются login, чтение метаданных instance и обмен одноразового setup-кода. Роли реально проверяются middleware и handlers.
 
 - `POST /api/auth/login`
-- Instance: публичные `GET /api/instance` и `POST /api/instance/pair`; admin-only `POST /api/instance/setup-codes` и `DELETE /api/instance/setup-codes/{id}`. Setup-код действует 1–60 минут, хранится только как SHA-256 hash, может быть отозван и после успешного обмена повторно не используется. Он подтверждает привязку к серверу, но не авторизует пользователя и не выдаёт JWT.
+- Instance: публичные `GET /api/instance` и `POST /api/instance/pair`; admin-only `POST /api/instance/setup-codes` и `DELETE /api/instance/setup-codes/{id}`. Setup-код действует 1–60 минут, хранится только как SHA-256 hash, может быть отозван и после успешного обмена повторно не используется. Обмен ограничен десятью попытками в минуту с одного source IP. Код подтверждает привязку к серверу, но не авторизует пользователя и не выдаёт JWT.
 - Users: `GET /api/users/me`; admin-only `GET|POST /api/users`; authenticated `GET|PUT /api/users/{id}`; admin-only `DELETE /api/users/{id}`.
 - Equipment: `GET|POST /api/equipment`, `GET|PUT|DELETE /api/equipment/{id}`, `GET /api/equipment/qr/{qr_code}`, `GET /api/equipment/{id}/movements`, `POST /api/equipment/{id}/move`. Изменения требуют `admin` или `responsible`.
 - Categories: `GET|POST /api/categories`, `GET|PUT|DELETE /api/categories/{id}`; изменения требуют `admin` или `responsible`.

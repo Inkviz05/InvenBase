@@ -107,6 +107,7 @@ async fn openapi_document_and_swagger_ui_are_public() {
             ["description"],
         "Setup code revoked"
     );
+    assert!(document["paths"]["/api/instance/pair"]["post"]["responses"]["429"].is_object());
 
     let docs_request = test::TestRequest::get().uri("/docs").to_request();
     let docs_response = test::call_service(&app, docs_request).await;
