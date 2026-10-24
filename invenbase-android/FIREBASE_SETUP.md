@@ -30,9 +30,9 @@ FCM_SERVICE_ACCOUNT_PATH=C:\secure\firebase-service-account.json
 
 Service account JSON храните вне git и вне Docker image. Backend читает файл, создаёт OAuth JWT, получает access token и вызывает `https://fcm.googleapis.com/v1/projects/{project}/messages:send`.
 
-`FCM_SERVER_KEY` присутствует в коде только как legacy fallback. Legacy endpoint `fcm/send` отключён Google, поэтому на него нельзя рассчитывать как на рабочую production-конфигурацию.
+Legacy `FCM_SERVER_KEY` и endpoint `fcm/send` не поддерживаются и удалены из backend. Для FCM используется только HTTP v1.
 
-Backend сохраняет устройство и token независимо от наличия FCM credentials. Если transport не настроен, регистрация останется в БД, но внешняя доставка будет пропущена до настройки FCM.
+Backend сохраняет устройство и token независимо от наличия FCM credentials. Если transport не настроен, регистрация останется в БД, а outbox будет повторять доставку по своей retry-политике.
 
 ## Проверка
 

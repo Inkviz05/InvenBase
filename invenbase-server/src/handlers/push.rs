@@ -26,8 +26,6 @@ pub struct UnregisterPushDeviceRequest {
 }
 
 trait PushTransport {
-    fn provider(&self) -> &'static str;
-
     async fn send(
         &self,
         title: &str,
@@ -53,10 +51,6 @@ struct HuaweiTransport<'a> {
 }
 
 impl PushTransport for HuaweiTransport<'_> {
-    fn provider(&self) -> &'static str {
-        "huawei"
-    }
-
     async fn send(
         &self,
         title: &str,
@@ -91,10 +85,6 @@ impl PushTransport for HuaweiTransport<'_> {
 }
 
 impl PushTransport for RuStoreTransport<'_> {
-    fn provider(&self) -> &'static str {
-        "rustore"
-    }
-
     async fn send(
         &self,
         title: &str,
@@ -129,10 +119,6 @@ impl PushTransport for RuStoreTransport<'_> {
 }
 
 impl PushTransport for FcmTransport<'_> {
-    fn provider(&self) -> &'static str {
-        "fcm"
-    }
-
     async fn send(
         &self,
         title: &str,
@@ -140,33 +126,29 @@ impl PushTransport for FcmTransport<'_> {
         data: &serde_json::Map<String, serde_json::Value>,
         devices: &[(String,)],
     ) -> Result<usize, Box<dyn std::error::Error + Send + Sync>> {
-        if let (Some(project_id), Some(service_account_path)) = (
-            self.state.config.fcm_project_id.as_deref(),
-            self.state.config.fcm_service_account_path.as_deref(),
-        ) {
-            let sent = send_push_v1(
-                &self.state.db.pool,
-                project_id,
-                service_account_path,
-                title,
-                body,
-                data,
-                devices,
-                self.user_id,
-            )
-            .await?;
-            if sent > 0 || self.state.config.fcm_server_key.is_none() {
-                return Ok(sent);
-            }
-        }
-
-        if let Some(server_key) = self.state.config.fcm_server_key.as_deref() {
-            return Ok(
-                send_push_legacy(server_key, title, body, data, devices, self.user_id).await,
-            );
-        }
-
-        Err("FCM transport is not configured".into())
+        let project_id = self
+            .state
+            .config
+            .fcm_project_id
+            .as_deref()
+            .ok_or("FCM project ID is not configured")?;
+        let service_account_path = self
+            .state
+            .config
+            .fcm_service_account_path
+            .as_deref()
+            .ok_or("FCM service account path is not configured")?;
+        send_push_v1(
+            &self.state.db.pool,
+            project_id,
+            service_account_path,
+            title,
+            body,
+            data,
+            devices,
+            self.user_id,
+        )
+        .await
     }
 }
 
@@ -392,389 +374,6 @@ pub async fn deliver_outbox_push(
     }
 
     Ok(())
-}
-
-/// Старый синхронный путь доставки оставлен только как совместимый fallback-код.
-///
-/// Сначала пытается использовать HTTP v1 API (если настроен), затем fallback на Legacy API.
-#[allow(dead_code)]
-async fn send_push_to_user_direct_legacy(
-    state: &AppState,
-    user_id: Uuid,
-    title: &str,
-    body: &str,
-    mut data: serde_json::Map<String, serde_json::Value>,
-) {
-    // Загружаем все устройства пользователя
-    let transport = FcmTransport { state, user_id };
-    let devices: Vec<(String,)> = match sqlx::query_as::<sqlx::Postgres, (String,)>(
-        "SELECT push_token FROM user_devices
-         WHERE user_id = $1 AND provider = $2 AND active = TRUE",
-    )
-    .bind(user_id)
-    .bind(transport.provider())
-    .fetch_all(&state.db.pool)
-    .await
-    {
-        Ok(list) => list,
-        Err(err) => {
-            log::error!("Failed to load user devices for push: {:?}", err);
-            return;
-        }
-    };
-
-    if devices.is_empty() {
-        log::warn!(
-            "No devices found for user {}, push notification skipped",
-            user_id
-        );
-        return;
-    }
-
-    log::info!(
-        "Sending push notification to user {} ({} devices)",
-        user_id,
-        devices.len()
-    );
-
-    // Общие поля data
-    data.insert(
-        "title".to_string(),
-        serde_json::Value::String(title.to_string()),
-    );
-    data.insert(
-        "body".to_string(),
-        serde_json::Value::String(body.to_string()),
-    );
-
-    match transport.send(title, body, &data, &devices).await {
-        Ok(sent_count) => {
-            log::info!(
-                "Push transport completed for user {} ({} devices sent)",
-                user_id,
-                sent_count
-            );
-            return;
-        }
-        Err(error) => {
-            log::error!(
-                "FCM transport failed for user {}: {:?}; using compatibility fallback",
-                user_id,
-                error
-            );
-        }
-    }
-
-    // Пытаемся использовать HTTP v1 API, если настроен (приоритет)
-    if let (Some(project_id), Some(service_account_path)) = (
-        state.config.fcm_project_id.clone(),
-        state.config.fcm_service_account_path.clone(),
-    ) {
-        match send_push_v1(
-            &state.db.pool,
-            &project_id,
-            &service_account_path,
-            title,
-            body,
-            &data,
-            &devices,
-            user_id,
-        )
-        .await
-        {
-            Ok(sent_count) => {
-                if sent_count > 0 {
-                    log::info!("Push notifications sent successfully via HTTP v1 API to user {} ({} devices)", user_id, sent_count);
-                    return;
-                } else {
-                    log::warn!(
-                        "No valid devices found for user {}, falling back to Legacy API",
-                        user_id
-                    );
-                }
-            }
-            Err(e) => {
-                log::error!(
-                    "Failed to send push via HTTP v1 API: {:?}, falling back to Legacy API",
-                    e
-                );
-                // Fallback to Legacy API
-            }
-        }
-    }
-
-    // Fallback: Legacy API (если HTTP v1 не настроен или не сработал)
-    let server_key = match state.config.fcm_server_key.clone() {
-        Some(key) => key,
-        None => {
-            log::warn!("Neither HTTP v1 API nor Legacy API is configured. FCM_PROJECT_ID and FCM_SERVICE_ACCOUNT_PATH (for v1) or FCM_SERVER_KEY (for Legacy) must be set.");
-            return;
-        }
-    };
-
-    // Fallback: Legacy API (может не работать, так как отключен в июле 2024)
-    let client = reqwest::Client::new();
-
-    for (token,) in devices {
-        // Преобразуем data из Map в правильный формат для FCM Legacy API
-        // В Legacy API все значения в data должны быть строками
-        let mut fcm_data: std::collections::HashMap<String, String> =
-            std::collections::HashMap::new();
-        for (key, value) in &data {
-            let value_str = match value {
-                serde_json::Value::String(s) => s.clone(),
-                serde_json::Value::Number(n) => n.to_string(),
-                serde_json::Value::Bool(b) => b.to_string(),
-                serde_json::Value::Null => "null".to_string(),
-                serde_json::Value::Array(_) | serde_json::Value::Object(_) => {
-                    // Для сложных объектов сериализуем в JSON строку
-                    serde_json::to_string(value).unwrap_or_else(|_| value.to_string())
-                }
-            };
-            fcm_data.insert(key.clone(), value_str);
-        }
-
-        // Формат для Legacy FCM API
-        // ВАЖНО: Legacy API был отключен в июле 2024, но попробуем правильный формат
-        let payload = serde_json::json!({
-            "to": token,
-            "notification": {
-                "title": title,
-                "body": body,
-                "sound": "default"
-            },
-            "data": fcm_data,
-            "priority": "high",
-            "time_to_live": 86400
-        });
-
-        let res = client
-            .post("https://fcm.googleapis.com/fcm/send")
-            .header("Authorization", format!("key={}", server_key))
-            .header("Content-Type", "application/json")
-            .json(&payload)
-            .send()
-            .await;
-
-        match res {
-            Ok(resp) => {
-                if resp.status().is_success() {
-                    log::info!("FCM push sent successfully to user {}", user_id);
-                } else {
-                    let status = resp.status();
-
-                    // Если 404, Legacy API отключен
-                    if status == 404 {
-                        log::error!(
-                            "FCM Legacy API is unavailable for user {}; configure FCM HTTP v1",
-                            user_id
-                        );
-                    } else {
-                        log::error!(
-                            "FCM push failed for user {} with status {}",
-                            user_id,
-                            status
-                        );
-                    }
-                }
-            }
-            Err(err) => {
-                log::error!("Error sending FCM push to user {}: {:?}", user_id, err);
-            }
-        }
-    }
-}
-
-/// Отправка push админам, но не на устройства автора заявки (чтобы автор не получал уведомление о своей заявке).
-#[allow(dead_code)]
-async fn send_push_to_user_excluding_tokens_direct_legacy(
-    state: &AppState,
-    user_id: Uuid,
-    title: &str,
-    body: &str,
-    mut data: serde_json::Map<String, serde_json::Value>,
-    exclude_tokens: &[String],
-) {
-    let transport = FcmTransport { state, user_id };
-    let devices: Vec<(String,)> = match sqlx::query_as::<sqlx::Postgres, (String,)>(
-        "SELECT push_token FROM user_devices
-         WHERE user_id = $1 AND provider = $2 AND active = TRUE",
-    )
-    .bind(user_id)
-    .bind(transport.provider())
-    .fetch_all(&state.db.pool)
-    .await
-    {
-        Ok(list) => list,
-        Err(err) => {
-            log::error!("Failed to load user devices for push: {:?}", err);
-            return;
-        }
-    };
-
-    let exclude: HashSet<&str> = exclude_tokens.iter().map(String::as_str).collect();
-    let devices: Vec<(String,)> = devices
-        .into_iter()
-        .filter(|(t,)| !exclude.contains(t.as_str()))
-        .collect();
-
-    if devices.is_empty() {
-        log::info!(
-            "Skipping push to user {}: all devices are excluded (author's devices)",
-            user_id
-        );
-        return;
-    }
-
-    log::info!(
-        "Sending push to user {} ({} devices, {} excluded)",
-        user_id,
-        devices.len(),
-        exclude_tokens.len()
-    );
-
-    data.insert(
-        "title".to_string(),
-        serde_json::Value::String(title.to_string()),
-    );
-    data.insert(
-        "body".to_string(),
-        serde_json::Value::String(body.to_string()),
-    );
-
-    match transport.send(title, body, &data, &devices).await {
-        Ok(sent_count) => {
-            log::info!(
-                "Push transport completed for user {} ({} devices sent)",
-                user_id,
-                sent_count
-            );
-            return;
-        }
-        Err(error) => {
-            log::error!(
-                "FCM transport failed for user {}: {:?}; using compatibility fallback",
-                user_id,
-                error
-            );
-        }
-    }
-
-    if let (Some(project_id), Some(service_account_path)) = (
-        state.config.fcm_project_id.clone(),
-        state.config.fcm_service_account_path.clone(),
-    ) {
-        if let Ok(sent_count) = send_push_v1(
-            &state.db.pool,
-            &project_id,
-            &service_account_path,
-            title,
-            body,
-            &data,
-            &devices,
-            user_id,
-        )
-        .await
-        {
-            if sent_count > 0 {
-                log::info!(
-                    "Push sent via HTTP v1 to user {} ({} devices)",
-                    user_id,
-                    sent_count
-                );
-                return;
-            }
-        }
-    }
-
-    let server_key = match state.config.fcm_server_key.clone() {
-        Some(key) => key,
-        None => return,
-    };
-    let client = reqwest::Client::new();
-    for (token,) in devices {
-        let mut fcm_data: std::collections::HashMap<String, String> =
-            std::collections::HashMap::new();
-        for (key, value) in &data {
-            let value_str = match value {
-                serde_json::Value::String(s) => s.clone(),
-                serde_json::Value::Number(n) => n.to_string(),
-                serde_json::Value::Bool(b) => b.to_string(),
-                serde_json::Value::Null => "null".to_string(),
-                serde_json::Value::Array(_) | serde_json::Value::Object(_) => {
-                    serde_json::to_string(value).unwrap_or_else(|_| value.to_string())
-                }
-            };
-            fcm_data.insert(key.clone(), value_str);
-        }
-        let payload = serde_json::json!({
-            "to": token,
-            "notification": { "title": title, "body": body, "sound": "default" },
-            "data": fcm_data,
-            "priority": "high",
-            "time_to_live": 86400
-        });
-        let _ = client
-            .post("https://fcm.googleapis.com/fcm/send")
-            .header("Authorization", format!("key={}", server_key))
-            .header("Content-Type", "application/json")
-            .json(&payload)
-            .send()
-            .await;
-    }
-}
-
-async fn send_push_legacy(
-    server_key: &str,
-    title: &str,
-    body: &str,
-    data: &serde_json::Map<String, serde_json::Value>,
-    devices: &[(String,)],
-    user_id: Uuid,
-) -> usize {
-    let client = reqwest::Client::new();
-    let fcm_data: HashMap<String, String> = data
-        .iter()
-        .map(|(key, value)| {
-            let value = match value {
-                serde_json::Value::String(value) => value.clone(),
-                _ => serde_json::to_string(value).unwrap_or_else(|_| value.to_string()),
-            };
-            (key.clone(), value)
-        })
-        .collect();
-    let mut sent_count = 0;
-
-    for (token,) in devices {
-        let payload = json!({
-            "to": token,
-            "notification": { "title": title, "body": body, "sound": "default" },
-            "data": fcm_data,
-            "priority": "high",
-            "time_to_live": 86400
-        });
-        match client
-            .post("https://fcm.googleapis.com/fcm/send")
-            .header("Authorization", format!("key={server_key}"))
-            .json(&payload)
-            .send()
-            .await
-        {
-            Ok(response) if response.status().is_success() => sent_count += 1,
-            Ok(response) => log::error!(
-                "Legacy FCM delivery failed for user {} with status {}",
-                user_id,
-                response.status()
-            ),
-            Err(error) => log::error!(
-                "Legacy FCM request failed for user {}: {:?}",
-                user_id,
-                error
-            ),
-        }
-    }
-
-    sent_count
 }
 
 /// Отправка через официальный RuStore Push API.

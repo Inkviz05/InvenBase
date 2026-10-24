@@ -18,8 +18,6 @@ pub struct Config {
     pub jwt_secret: String,
     pub jwt_expiration: u64,
     pub cors_allowed_origins: Vec<String>,
-    /// Ключ сервера FCM для отправки push-уведомлений (Legacy API - отключен в июле 2024)
-    pub fcm_server_key: Option<String>,
     /// Project ID для FCM HTTP v1 API
     pub fcm_project_id: Option<String>,
     /// Путь к Service Account JSON файлу для FCM HTTP v1 API
@@ -46,7 +44,6 @@ impl Config {
         let fcm_project_id = non_empty_value(env::var("FCM_PROJECT_ID").ok());
         let fcm_service_account_path_raw =
             non_empty_value(env::var("FCM_SERVICE_ACCOUNT_PATH").ok());
-        let fcm_server_key = non_empty_value(env::var("FCM_SERVER_KEY").ok());
         let rustore_project_id = non_empty_value(env::var("RUSTORE_PROJECT_ID").ok());
         let rustore_service_token = non_empty_value(env::var("RUSTORE_SERVICE_TOKEN").ok());
         let huawei_client_id = non_empty_value(env::var("HUAWEI_CLIENT_ID").ok());
@@ -157,7 +154,6 @@ impl Config {
                 .filter(|origin| !origin.is_empty())
                 .map(ToOwned::to_owned)
                 .collect(),
-            fcm_server_key,
             fcm_project_id,
             fcm_service_account_path,
             rustore_project_id,

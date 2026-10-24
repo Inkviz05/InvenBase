@@ -77,7 +77,7 @@ APK: `invenbase-android/app/build/outputs/apk/debug/app-debug.apk`. Текущи
 - Пользователи, категории, оборудование, перемещения, группы и отряды.
 - Одиночные и пакетные бронирования; approve, reject, cancel, return и автоматическое истечение.
 - QR-коды и сканирование.
-- In-app уведомления, multi-device реестр и отправка push через FCM HTTP v1, RuStore и Huawei Push Kit; Android-клиент регистрирует токены всех трёх providers. Legacy FCM оставлен как fallback в коде.
+- In-app уведомления, multi-device реестр и отправка push через FCM HTTP v1, RuStore и Huawei Push Kit; Android-клиент регистрирует токены всех трёх providers. Удалённый Google legacy FCM API не используется.
 - Журнал действий, отчёты и экспорт XLSX в web.
 - Заявки поддержки и сообщения в них.
 

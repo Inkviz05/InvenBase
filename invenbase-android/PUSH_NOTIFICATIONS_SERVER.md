@@ -5,7 +5,7 @@
 1. Android получает FCM token.
 2. После login `PushManager` отправляет token, стабильный `device_id`, provider `fcm` и platform `android` на `POST /api/push/register-token` с Bearer JWT.
 3. Backend сохраняет устройство независимо от наличия credentials транспорта; повторная регистрация обновляет token, `active` и `last_seen_at`.
-4. In-app notification и outbox-задание создаются одной транзакцией; worker доставляет событие на все активные FCM/RuStore устройства.
+4. In-app notification и outbox-задание создаются одной транзакцией; worker доставляет событие на все активные FCM/RuStore/Huawei устройства.
 5. Payload содержит `notification_id`, а полное уведомление доступно через `/api/notifications`.
 6. WorkManager каждые 15 минут сверяет непрочитанные уведомления и показывает те, чьи `notification_id` не были обработаны push-сервисами. После `onDeletedMessages` FCM/RuStore запускается немедленная сверка.
 
@@ -25,9 +25,7 @@ Backend вручную:
 - получает token через `https://oauth2.googleapis.com/token`;
 - отправляет каждое сообщение через FCM HTTP v1.
 
-## Legacy fallback
-
-Переменная `FCM_SERVER_KEY` и вызов `https://fcm.googleapis.com/fcm/send` ещё присутствуют в коде. Этот API отключён Google с июля 2024 года. Используйте HTTP v1; legacy ветку следует считать совместимостью со старым кодом, а не рекомендованной настройкой.
+Legacy `FCM_SERVER_KEY` и endpoint `https://fcm.googleapis.com/fcm/send` удалены из backend. Единственный поддерживаемый транспорт Firebase — FCM HTTP v1.
 
 ## RuStore transport
 

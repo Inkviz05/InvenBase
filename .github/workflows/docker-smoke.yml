@@ -154,6 +154,11 @@ jobs:
             echo "Static directory listing must stay disabled"
             exit 1
           fi
+          if grep -R -E "FCM_SERVER_KEY|fcm\.googleapis\.com/fcm/send" \
+            invenbase-server/src docker-compose.yml .env.docker.example invenbase-server/.env.example; then
+            echo "Legacy FCM configuration and endpoint must stay removed"
+            exit 1
+          fi
 
   compose-smoke:
     runs-on: ubuntu-latest
