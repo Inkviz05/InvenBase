@@ -7,7 +7,7 @@
 1. **Нет TLS-конфигурации.** Compose публикует nginx по HTTP. Нужен внешний TLS-терминатор или отдельная production-конфигурация.
 2. [Закрыто] Добавлены отдельный migrate binary/Compose job, документированная production-процедура, backup/restore-скрипты и CI restore drill. Необратимые migrations откатываются восстановлением проверенного backup.
 3. [Закрыто] Добавлен `/ready` с запросом к PostgreSQL и `503` при недоступной БД; Docker healthcheck использует readiness, `/health` остаётся liveness-проверкой.
-4. [Частично закрыто] Опубликованы OpenAPI 3.1 и Swagger UI, описаны все маршруты, JWT и единый error-контракт, добавлены contract tests. Детально описаны request/response schemas для auth, users, equipment, bookings, notifications, support, reports и push-регистрации. Ещё нужны schemas для categories, groups, squads, permissions, logs и QR, после чего можно вводить генерацию клиентских типов.
+4. [Закрыто] Опубликованы OpenAPI 3.1 и Swagger UI, описаны все маршруты, JWT, единый error-контракт, предметные request/response schemas, path/query-параметры, JSON и бинарные ответы. Contract tests проверяют ключевые привязки и разрешение всех `$ref`. Отдельный следующий этап — генерация клиентских типов из контракта.
 5. [Закрыто] CI поднимает чистый PostgreSQL 16 и выполняет полный `cargo test --locked`, включая DB/HTTP integration tests.
 
 ## Высокий приоритет

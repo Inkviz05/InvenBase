@@ -79,6 +79,12 @@ fn set_response(
     description: &str,
     schema: Value,
 ) {
+    if status == "201" || status == "204" {
+        paths[path][method]["responses"]
+            .as_object_mut()
+            .expect("responses must be an object")
+            .remove("200");
+    }
     paths[path][method]["responses"][status] = json!({
         "description": description,
         "content": json_content(schema)
@@ -87,6 +93,24 @@ fn set_response(
 
 fn array_of(name: &str) -> Value {
     json!({ "type": "array", "items": schema_ref(name) })
+}
+
+fn add_query_parameter(
+    paths: &mut Map<String, Value>,
+    path: &str,
+    method: &str,
+    name: &str,
+    schema: Value,
+) {
+    let parameters = paths[path][method]
+        .as_object_mut()
+        .expect("operation must be an object")
+        .entry("parameters")
+        .or_insert_with(|| Value::Array(Vec::new()));
+    parameters
+        .as_array_mut()
+        .expect("parameters must be an array")
+        .push(json!({ "name": name, "in": "query", "required": false, "schema": schema }));
 }
 
 fn add_path_parameters(paths: &mut Map<String, Value>) {
@@ -176,6 +200,13 @@ fn describe_domain_contracts(paths: &mut Map<String, Value>) {
         "200",
         "Equipment",
         array_of("EquipmentWithDetails"),
+    );
+    add_query_parameter(
+        paths,
+        "/api/equipment",
+        "get",
+        "squad_id",
+        json!({"type":"string","format":"uuid"}),
     );
     set_request(paths, "/api/equipment", "post", "CreateEquipmentRequest");
     set_response(
@@ -401,6 +432,34 @@ fn describe_domain_contracts(paths: &mut Map<String, Value>) {
         "Detailed bookings",
         array_of("BookingWithDetails"),
     );
+    for path in ["/api/reports/bookings/detailed", "/api/reports/audit"] {
+        add_query_parameter(
+            paths,
+            path,
+            "get",
+            "from",
+            json!({"type":"string","format":"date"}),
+        );
+        add_query_parameter(
+            paths,
+            path,
+            "get",
+            "to",
+            json!({"type":"string","format":"date"}),
+        );
+    }
+    for (name, schema) in [
+        ("action", json!({"type":"string"})),
+        ("entity_type", json!({"type":"string"})),
+        ("user_id", json!({"type":"string","format":"uuid"})),
+        (
+            "limit",
+            json!({"type":"integer","minimum":0,"maximum":5000,"default":500}),
+        ),
+        ("offset", json!({"type":"integer","minimum":0,"default":0})),
+    ] {
+        add_query_parameter(paths, "/api/reports/audit", "get", name, schema);
+    }
     set_response(
         paths,
         "/api/reports/audit",
@@ -409,6 +468,225 @@ fn describe_domain_contracts(paths: &mut Map<String, Value>) {
         "Audit entries",
         array_of("AuditReportEntry"),
     );
+
+    set_response(
+        paths,
+        "/api/categories",
+        "get",
+        "200",
+        "Categories",
+        array_of("EquipmentCategoryWithSquad"),
+    );
+    add_query_parameter(
+        paths,
+        "/api/categories",
+        "get",
+        "squad_id",
+        json!({"type":"string","format":"uuid"}),
+    );
+    set_request(paths, "/api/categories", "post", "CreateCategoryRequest");
+    set_response(
+        paths,
+        "/api/categories",
+        "post",
+        "201",
+        "Category created",
+        schema_ref("EquipmentCategory"),
+    );
+    set_response(
+        paths,
+        "/api/categories/{id}",
+        "get",
+        "200",
+        "Category",
+        schema_ref("EquipmentCategory"),
+    );
+    set_request(
+        paths,
+        "/api/categories/{id}",
+        "put",
+        "CreateCategoryRequest",
+    );
+    set_response(
+        paths,
+        "/api/categories/{id}",
+        "put",
+        "200",
+        "Category updated",
+        schema_ref("EquipmentCategory"),
+    );
+
+    set_response(
+        paths,
+        "/api/groups",
+        "get",
+        "200",
+        "Equipment groups",
+        array_of("EquipmentGroup"),
+    );
+    set_request(paths, "/api/groups", "post", "CreateEquipmentGroupRequest");
+    set_response(
+        paths,
+        "/api/groups",
+        "post",
+        "201",
+        "Equipment group created",
+        schema_ref("EquipmentGroup"),
+    );
+    set_response(
+        paths,
+        "/api/groups/{id}",
+        "get",
+        "200",
+        "Equipment group",
+        schema_ref("EquipmentGroup"),
+    );
+    set_request(
+        paths,
+        "/api/groups/{id}",
+        "put",
+        "CreateEquipmentGroupRequest",
+    );
+    set_response(
+        paths,
+        "/api/groups/{id}",
+        "put",
+        "200",
+        "Equipment group updated",
+        schema_ref("EquipmentGroup"),
+    );
+
+    set_response(
+        paths,
+        "/api/squads",
+        "get",
+        "200",
+        "Squads",
+        array_of("SquadWithDetails"),
+    );
+    set_request(paths, "/api/squads", "post", "CreateSquadRequest");
+    set_response(
+        paths,
+        "/api/squads",
+        "post",
+        "201",
+        "Squad created",
+        schema_ref("Squad"),
+    );
+    set_response(
+        paths,
+        "/api/squads/{id}",
+        "get",
+        "200",
+        "Squad",
+        schema_ref("SquadWithDetails"),
+    );
+    set_request(paths, "/api/squads/{id}", "put", "UpdateSquadRequest");
+    set_response(
+        paths,
+        "/api/squads/{id}",
+        "put",
+        "200",
+        "Squad updated",
+        schema_ref("SquadWithDetails"),
+    );
+    set_response(
+        paths,
+        "/api/squads/{id}/equipment",
+        "get",
+        "200",
+        "Squad equipment",
+        array_of("EquipmentWithDetails"),
+    );
+
+    set_response(
+        paths,
+        "/api/permissions",
+        "get",
+        "200",
+        "Permissions",
+        array_of("Permission"),
+    );
+    set_request(paths, "/api/permissions", "post", "CreatePermissionRequest");
+    set_response(
+        paths,
+        "/api/permissions",
+        "post",
+        "201",
+        "Permission created",
+        schema_ref("Permission"),
+    );
+
+    set_response(
+        paths,
+        "/api/logs",
+        "get",
+        "200",
+        "Activity logs",
+        array_of("ActivityLog"),
+    );
+    add_query_parameter(
+        paths,
+        "/api/logs",
+        "get",
+        "user_id",
+        json!({"type":"string","format":"uuid"}),
+    );
+    add_query_parameter(
+        paths,
+        "/api/logs",
+        "get",
+        "entity_type",
+        json!({"type":"string"}),
+    );
+    add_query_parameter(
+        paths,
+        "/api/logs",
+        "get",
+        "limit",
+        json!({"type":"integer","minimum":0,"maximum":1000,"default":100}),
+    );
+    add_query_parameter(
+        paths,
+        "/api/logs",
+        "get",
+        "offset",
+        json!({"type":"integer","minimum":0,"default":0}),
+    );
+
+    paths["/api/qr/{id}"]["get"]["responses"]["200"] = json!({
+        "description":"QR code PNG",
+        "content":{"image/png":{"schema":{"type":"string","contentEncoding":"binary"}}}
+    });
+    set_response(
+        paths,
+        "/api/qr/{id}/data",
+        "get",
+        "200",
+        "QR code data",
+        schema_ref("QrCodeData"),
+    );
+
+    for (path, method) in [
+        ("/api/users/{id}", "delete"),
+        ("/api/equipment/{id}", "delete"),
+        ("/api/categories/{id}", "delete"),
+        ("/api/groups/{id}", "delete"),
+        ("/api/squads/{id}", "delete"),
+        ("/api/bookings/{id}", "delete"),
+        ("/api/permissions/{id}/revoke", "post"),
+        ("/api/support/requests/{id}", "delete"),
+        ("/api/notifications/{id}/read", "post"),
+        ("/api/notifications/read-all", "post"),
+        ("/api/push/register-token", "post"),
+        ("/api/push/unregister-device", "post"),
+    ] {
+        paths[path][method]["responses"]
+            .as_object_mut()
+            .expect("responses must be an object")
+            .remove("200");
+        paths[path][method]["responses"]["204"] = json!({"description":"No content"});
+    }
 
     set_request(
         paths,
@@ -780,6 +1058,128 @@ fn domain_schemas() -> Map<String, Value> {
             "created_at",
         ],
         json!({"id":uuid(),"user_id":nullable_uuid(),"username":nullable_string(),"full_name":nullable_string(),"action":{"type":"string"},"entity_type":{"type":"string"},"entity_id":nullable_uuid(),"entity_name":nullable_string(),"details":{"type":["object","null"],"additionalProperties":true},"created_at":date_time()}),
+    );
+
+    add(
+        "EquipmentCategory",
+        &["id", "name", "description", "squad_id", "created_at"],
+        json!({"id":uuid(),"name":{"type":"string"},"description":nullable_string(),"squad_id":nullable_uuid(),"created_at":date_time()}),
+    );
+    add(
+        "EquipmentCategoryWithSquad",
+        &[
+            "id",
+            "name",
+            "description",
+            "squad_id",
+            "squad_name",
+            "created_at",
+        ],
+        json!({"id":uuid(),"name":{"type":"string"},"description":nullable_string(),"squad_id":nullable_uuid(),"squad_name":nullable_string(),"created_at":date_time()}),
+    );
+    add(
+        "CreateCategoryRequest",
+        &["name"],
+        json!({"name":{"type":"string"},"description":nullable_string(),"squad_id":nullable_uuid()}),
+    );
+
+    add(
+        "EquipmentGroup",
+        &["id", "name", "description", "created_at"],
+        json!({"id":uuid(),"name":{"type":"string"},"description":nullable_string(),"created_at":date_time()}),
+    );
+    add(
+        "EquipmentGroupItemRequest",
+        &["equipment_id", "quantity"],
+        json!({"equipment_id":uuid(),"quantity":{"type":"integer","minimum":1}}),
+    );
+    add(
+        "CreateEquipmentGroupRequest",
+        &["name", "equipment_items"],
+        json!({"name":{"type":"string"},"description":nullable_string(),"equipment_items":{"type":"array","items":schema_ref("EquipmentGroupItemRequest")}}),
+    );
+
+    let squad_properties = json!({
+        "id":uuid(),"name":{"type":"string"},"description":nullable_string(),"location":nullable_string(),
+        "responsible_user_id":nullable_uuid(),"created_at":date_time(),"updated_at":date_time()
+    });
+    add(
+        "Squad",
+        &[
+            "id",
+            "name",
+            "description",
+            "location",
+            "responsible_user_id",
+            "created_at",
+            "updated_at",
+        ],
+        squad_properties.clone(),
+    );
+    let mut squad_details = squad_properties.as_object().unwrap().clone();
+    squad_details.insert("responsible_name".into(), nullable_string());
+    add(
+        "SquadWithDetails",
+        &[
+            "id",
+            "name",
+            "description",
+            "location",
+            "responsible_user_id",
+            "responsible_name",
+            "created_at",
+            "updated_at",
+        ],
+        Value::Object(squad_details),
+    );
+    add(
+        "CreateSquadRequest",
+        &["name"],
+        json!({"name":{"type":"string"},"description":nullable_string(),"location":nullable_string(),"responsible_user_id":nullable_uuid()}),
+    );
+    add(
+        "UpdateSquadRequest",
+        &[],
+        json!({"name":nullable_string(),"description":nullable_string(),"location":nullable_string(),"responsible_user_id":nullable_uuid()}),
+    );
+
+    add(
+        "Permission",
+        &[
+            "id",
+            "booking_id",
+            "equipment_id",
+            "permission_type",
+            "issued_by",
+            "issued_at",
+            "expires_at",
+            "status",
+        ],
+        json!({"id":uuid(),"booking_id":uuid(),"equipment_id":nullable_uuid(),"permission_type":{"type":"string"},"issued_by":nullable_uuid(),"issued_at":date_time(),"expires_at":{"type":["string","null"],"format":"date-time"},"status":{"type":"string"}}),
+    );
+    add(
+        "CreatePermissionRequest",
+        &["booking_id", "permission_type"],
+        json!({"booking_id":uuid(),"equipment_id":nullable_uuid(),"permission_type":{"type":"string"},"expires_at":{"type":["string","null"],"format":"date-time"}}),
+    );
+
+    add(
+        "ActivityLog",
+        &[
+            "id",
+            "user_id",
+            "action",
+            "entity_type",
+            "entity_id",
+            "details",
+            "created_at",
+        ],
+        json!({"id":uuid(),"user_id":nullable_uuid(),"action":{"type":"string"},"entity_type":{"type":"string"},"entity_id":nullable_uuid(),"details":{"type":["object","null"],"additionalProperties":true},"created_at":date_time()}),
+    );
+    add(
+        "QrCodeData",
+        &["equipment_id", "qr_code", "name", "description"],
+        json!({"equipment_id":uuid(),"qr_code":{"type":"string"},"name":nullable_string(),"description":nullable_string()}),
     );
 
     add(

@@ -21,7 +21,7 @@
 
 1. Добавить HTTP integration tests через `actix_web::test` для login, ролей, users, equipment и support.
 2. [Выполнено] JSON-ошибки унифицированы полями `code`, `message`, `details`, `request_id`; добавлен `X-Request-ID`, внутренние диагностические сообщения не выдаются клиенту, `401` и `403` разделены.
-3. [Частично выполнено] Добавлены OpenAPI 3.1 `/openapi.json`, Swagger UI `/docs`, перечень всех маршрутов, Bearer JWT, единая error schema и contract tests. Детальные request/response schemas готовы для auth, users, equipment, bookings, notifications, support, reports и push-регистрации. Остались categories, groups, squads, permissions, logs и QR; генерация клиентских типов имеет смысл после их описания.
+3. [Выполнено] Добавлены OpenAPI 3.1 `/openapi.json`, Swagger UI `/docs`, все маршруты, Bearer JWT, единая error schema, предметные request/response schemas, path/query-параметры, JSON и бинарные ответы. Contract tests проверяют ключевые операции и разрешение всех `$ref`. Генерация клиентских типов вынесена в отдельный следующий этап.
 4. [Выполнено] Добавлен `/ready` с `SELECT 1` в PostgreSQL и ответом `503` при недоступной БД; `/health` оставлен простой liveness-проверкой. Docker и Compose smoke ожидают readiness.
 5. Убрать подробное диагностическое логирование FCM-конфигурации и нормализовать пустые FCM env как `None`.
 
