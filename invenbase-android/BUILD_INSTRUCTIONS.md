@@ -25,7 +25,7 @@ $env:DEBUG_API_URL="http://10.0.2.2:8080"
 $env:RELEASE_API_URL="https://invenbase.example.com"
 ```
 
-Defaults — `http://10.0.2.2:8080` для debug и `https://invenbase.inkviz05.online` для release. `RELEASE_API_URL` обязан использовать HTTPS; пользовательского переключателя endpoint в приложении нет.
+Defaults — `http://10.0.2.2:8080` для debug и `https://invenbase.inkviz05.online` для release. `RELEASE_API_URL` обязан использовать HTTPS. На чистой установке приложение всё равно запрашивает сервер и одноразовый setup-код; build-time URL используется как подсказка debug-сборки и для миграции уже авторизованных установок старой версии.
 
 ## Debug APK
 

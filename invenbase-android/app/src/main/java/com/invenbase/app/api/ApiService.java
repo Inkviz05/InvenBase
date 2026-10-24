@@ -6,6 +6,9 @@ import com.invenbase.app.models.Category;
 import com.invenbase.app.models.Equipment;
 import com.invenbase.app.models.LoginRequest;
 import com.invenbase.app.models.LoginResponse;
+import com.invenbase.app.models.InstanceInfo;
+import com.invenbase.app.models.PairInstanceRequest;
+import com.invenbase.app.models.PairInstanceResponse;
 import com.invenbase.app.models.User;
 
 import java.util.List;
@@ -24,6 +27,12 @@ import retrofit2.http.Query;
 
 // ООП (абстракция): интерфейс описывает контракт API без привязки к конкретной реализации клиента.
 public interface ApiService {
+    @GET("/api/instance")
+    Call<InstanceInfo> getInstanceInfo();
+
+    @POST("/api/instance/pair")
+    Call<PairInstanceResponse> pairInstance(@Body PairInstanceRequest request);
+
     // Auth
     @POST("/api/auth/login")
     // ООП (контракт): авторизация как обязательная операция для любого API-клиента.

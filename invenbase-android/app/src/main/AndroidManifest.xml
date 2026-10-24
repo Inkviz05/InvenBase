@@ -54,6 +54,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ServerSetupActivity"
+            android:exported="false"
+            android:theme="@style/Theme.InvenBase" />
         
         <activity
             android:name=".MainActivity"

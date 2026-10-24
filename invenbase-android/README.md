@@ -20,16 +20,18 @@ APK: `app/build/outputs/apk/debug/app-debug.apk`.
 
 Release включает R8/minification и resource shrinking. Signing credentials читаются только из `ANDROID_KEYSTORE_*` env; без них CI собирает unsigned release для проверки, а при наличии GitHub secrets публикует подписанные APK/AAB. Инструкция находится в [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md).
 
-## API URL
+## Подключение к серверу
 
-URL задаётся на этапе сборки через `BuildConfig.API_BASE_URL`:
+Новая установка при первом запуске запрашивает адрес сервера и одноразовый setup-код администратора. Клиент проверяет `GET /api/instance`, поддерживаемую версию протокола и `instance_id`, затем выполняет `POST /api/instance/pair`. После успешного обмена URL и метаданные установки сохраняются в Keystore-backed `SecurePreferences`. Сменить сервер можно на экране входа или через боковое меню; текущая сессия при этом завершается.
+
+Release принимает только HTTPS URL без `/api`. Debug также разрешает HTTP для локальной разработки и предварительно подставляет `BuildConfig.API_BASE_URL`:
 
 ```text
 debug:   http://10.0.2.2:8080
 release: https://invenbase.inkviz05.online
 ```
 
-Переопределение передаётся Gradle property или одноимённой переменной окружения `DEBUG_API_URL`/`RELEASE_API_URL`. Release URL обязан использовать HTTPS. Сохранённое прежними версиями пользовательское значение `api_url` удаляется и больше не влияет на endpoint. Retrofit-методы содержат абсолютные пути `/api/...`, поэтому base URL указывается без `/api`.
+Переопределение передаётся Gradle property или одноимённой переменной окружения `DEBUG_API_URL`/`RELEASE_API_URL`. Эти значения служат debug-подсказкой и fallback только для миграции уже авторизованной установки старой версии; чистая release-установка всегда проходит привязку. Retrofit-методы содержат абсолютные пути `/api/...`, поэтому адрес вводится без `/api`.
 
 Debug manifest разрешает cleartext для локальной разработки; `10.0.2.2` направляет Android Emulator на localhost компьютера. Release manifest запрещает cleartext.
 
@@ -45,7 +47,7 @@ Debug manifest разрешает cleartext для локальной разра
 
 ## Авторизация и локальные данные
 
-JWT, сериализованный пользователь и push-токены шифруются AES-GCM; ключ создаётся и хранится в Android Keystore. При обновлении приложения прежние чувствительные значения однократно переносятся из обычных `SharedPreferences` и удаляются оттуда. Зашифрованный preference-файл исключён из Android backup. API URL в локальном хранилище не сохраняется.
+JWT, сериализованный пользователь, push-токены, выбранный URL и метаданные instance шифруются AES-GCM; ключ создаётся и хранится в Android Keystore. При обновлении приложения прежние чувствительные значения однократно переносятся из обычных `SharedPreferences` и удаляются оттуда. Зашифрованный preference-файл исключён из Android backup.
 
 ## Push
 

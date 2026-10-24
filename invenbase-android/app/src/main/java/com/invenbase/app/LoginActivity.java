@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import android.widget.TextView;
 
 
 import ru.rustore.sdk.pushclient.RuStorePushClient;
@@ -17,6 +18,7 @@ import com.invenbase.app.models.LoginRequest;
 import com.invenbase.app.models.LoginResponse;
 import com.invenbase.app.utils.ApiErrorParser;
 import com.invenbase.app.utils.AuthManager;
+import com.invenbase.app.utils.ServerConfiguration;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -37,6 +39,14 @@ public class LoginActivity extends BaseActivity {
         setContentView(R.layout.activity_login);
 
         authManager = AuthManager.getInstance(this);
+        ServerConfiguration serverConfiguration = new ServerConfiguration(this);
+        serverConfiguration.migrateLegacyAuthenticatedInstall(authManager);
+
+        if (!serverConfiguration.isConfigured()) {
+            startActivity(new Intent(this, ServerSetupActivity.class));
+            finish();
+            return;
+        }
 
         // Если уже авторизован, переходим в главное приложение
         if (authManager.isAuthenticated()) {
@@ -52,6 +62,16 @@ public class LoginActivity extends BaseActivity {
         editPassword = findViewById(R.id.edit_password);
         buttonLogin = findViewById(R.id.button_login);
         progressBar = findViewById(R.id.progress_bar);
+        TextView serverName = findViewById(R.id.text_server_name);
+        serverName.setText(getString(R.string.connected_server,
+                serverConfiguration.getInstanceName()));
+        findViewById(R.id.button_change_server).setOnClickListener(view -> {
+            authManager.logout();
+            serverConfiguration.clear();
+            Intent setup = new Intent(this, ServerSetupActivity.class);
+            setup.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(setup);
+        });
 
         buttonLogin.setOnClickListener(v -> performLogin());
     }

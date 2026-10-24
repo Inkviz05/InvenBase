@@ -61,6 +61,10 @@
             android:icon="@android:drawable/ic_menu_agenda"
             android:title="@string/cart_title" />
         <item
+            android:id="@+id/drawer_change_server"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:title="@string/change_server" />
+        <item
             android:id="@+id/drawer_logout"
             android:icon="@android:drawable/ic_lock_power_off"
             android:title="@string/logout" />

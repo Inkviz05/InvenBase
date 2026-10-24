@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="server_setup_title">Подключение к серверу</string>
+    <string name="server_setup_description">Введите HTTPS-адрес сервера вашей организации и одноразовый код, созданный администратором.</string>
+    <string name="server_url">Адрес сервера</string>
+    <string name="server_setup_code">Одноразовый код</string>
+    <string name="server_setup_code_required">Введите одноразовый код</string>
+    <string name="connect_server">Подключиться</string>
+    <string name="server_incompatible">Это не сервер InvenBase или версия API не поддерживается</string>
+    <string name="server_connected">Подключено: %1$s</string>
+    <string name="connected_server">Сервер: %1$s</string>
+    <string name="change_server">Сменить сервер</string>
     <string name="app_name">InvenBase</string>
     
     <!-- Auth -->

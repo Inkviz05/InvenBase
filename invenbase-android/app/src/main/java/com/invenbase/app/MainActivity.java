@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
+import com.invenbase.app.utils.ServerConfiguration;
 import com.invenbase.app.fragments.AdminFragment;
 import com.invenbase.app.fragments.BookingsFragment;
 import com.invenbase.app.fragments.DashboardFragment;
@@ -269,6 +270,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             startActivity(new Intent(this, SupportActivity.class));
         } else if (itemId == R.id.drawer_cart) {
             startActivity(new Intent(this, CartActivity.class));
+        } else if (itemId == R.id.drawer_change_server) {
+            authManager.logout();
+            new ServerConfiguration(this).clear();
+            Intent setup = new Intent(this, ServerSetupActivity.class);
+            setup.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(setup);
+            return true;
         } else if (itemId == R.id.drawer_logout) {
             authManager.logout();
             startActivity(new Intent(this, LoginActivity.class));

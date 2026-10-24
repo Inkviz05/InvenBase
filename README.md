@@ -71,7 +71,7 @@ cd invenbase-android
 .\gradlew.bat assembleDebug
 ```
 
-APK: `invenbase-android/app/build/outputs/apk/debug/app-debug.apk`. Текущий URL API по умолчанию задан в `invenbase-android/app/src/main/java/com/invenbase/app/Config.java` и может быть переопределён сохранённой настройкой приложения.
+APK: `invenbase-android/app/build/outputs/apk/debug/app-debug.apk`. При первом запуске чистой установки Android-клиент запрашивает URL сервера и одноразовый setup-код; release разрешает только HTTPS. Подтверждённая конфигурация instance хранится через Android Keystore.
 
 ## Реализованная функциональность
 

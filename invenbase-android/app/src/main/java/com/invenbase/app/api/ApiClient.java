@@ -5,6 +5,7 @@ import android.content.Context;
 import com.invenbase.app.BuildConfig;
 import com.invenbase.app.Config;
 import com.invenbase.app.utils.SecurePreferences;
+import com.invenbase.app.utils.ServerConfiguration;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,12 +23,11 @@ public class ApiClient {
 
     private ApiClient(Context context) {
         this.securePreferences = new SecurePreferences(context.getApplicationContext());
-        context.getApplicationContext()
-                .getSharedPreferences(Config.PREF_NAME, Context.MODE_PRIVATE)
-                .edit()
-                .remove("api_url")
-                .apply();
-        createApiService();
+        String baseUrl = new ServerConfiguration(context).getBaseUrl();
+        if (baseUrl == null) {
+            throw new IllegalStateException("InvenBase server is not configured");
+        }
+        createApiService(baseUrl);
     }
 
     public static synchronized ApiClient getInstance(Context context) {
@@ -37,7 +37,24 @@ public class ApiClient {
         return instance;
     }
 
-    private void createApiService() {
+    public static synchronized void reset() {
+        instance = null;
+    }
+
+    public static ApiService createUnauthenticatedService(String baseUrl) {
+        Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(normalizeBaseUrl(ServerConfiguration.validateAndNormalizeUrl(baseUrl)))
+            .client(new OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .build())
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
+        return retrofit.create(ApiService.class);
+    }
+
+    private void createApiService(String baseUrl) {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(BuildConfig.DEBUG
             ? HttpLoggingInterceptor.Level.BODY
@@ -63,14 +80,17 @@ public class ApiClient {
 
         httpClient.addInterceptor(chain -> {
             Response response = chain.proceed(chain.request());
-            if (response.code() == 401 && !chain.request().url().encodedPath().contains("/auth/login")) {
+            String path = chain.request().url().encodedPath();
+            if (response.code() == 401
+                    && !path.contains("/auth/login")
+                    && !path.contains("/instance/pair")) {
                 clearAuthState();
             }
             return response;
         });
 
         Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl(normalizeBaseUrl(BuildConfig.API_BASE_URL))
+            .baseUrl(normalizeBaseUrl(baseUrl))
             .client(httpClient.build())
             .addConverterFactory(GsonConverterFactory.create())
             .build();
@@ -82,7 +102,7 @@ public class ApiClient {
         return apiService;
     }
 
-    private String normalizeBaseUrl(String baseUrl) {
+    private static String normalizeBaseUrl(String baseUrl) {
         return baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
     }
 
