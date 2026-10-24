@@ -46,3 +46,14 @@
 -dontwarn okhttp3.**
 -dontwarn okio.**
 -keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+
+# HMS probes these optional Huawei/EMUI/HarmonyOS APIs only on devices where
+# they exist. They are intentionally absent from the standard Android SDK used
+# by R8 in CI.
+-dontwarn android.telephony.HwTelephonyManager
+-dontwarn com.huawei.android.**
+-dontwarn com.huawei.appgallery.log.**
+-dontwarn com.huawei.hianalytics.**
+-dontwarn com.huawei.libcore.io.**
+-dontwarn com.huawei.ohos.localability.**
+-dontwarn com.huawei.system.**

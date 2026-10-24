@@ -25,6 +25,7 @@
 11. [Отложено] End-to-end проверка уведомлений на реальных Android-устройствах: multi-device доставка, восстановление WorkManager после потери сети и `onDeletedMessages`, деактивация устройства после logout. Выполнить позже по решению пользователя.
 12. [Закрыто] Добавлен CI integration job с чистым PostgreSQL и HTTP-сценарий login → регистрация двух устройств → создание и чтение уведомления → outbox для обоих устройств.
 13. Добавить multi-instance onboarding Android: единый APK/AAB, QR/setup-ссылка с HTTPS URL и одноразовым кодом школы, проверка instance/protocol до сохранения и явный сброс привязки. Короткий код без URL возможен только через отдельный центральный discovery-каталог.
+14. Выбрать модель push для multi-instance: централизованный relay с аутентификацией instance либо автономный режим без provider credentials. Общие RuStore/Huawei secrets не должны передаваться школьным серверам.
 
 ## Средний приоритет
 
